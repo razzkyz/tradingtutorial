@@ -245,8 +245,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Right Column - Trading Status (compact on desktop, full height on mobile) */}
-          <div className={`border-2 rounded-2xl px-4 py-6 flex flex-col items-center justify-center min-w-[140px] sm:min-w-[160px] self-stretch ${
+          {/* Right Column - Trading Status (aligned with Balance 1 & 2, not exceeding them) */}
+          <div className={`border-2 rounded-2xl px-4 py-6 flex flex-col items-center justify-center min-w-[140px] sm:min-w-[160px] self-center ${
             isActive 
               ? 'border-emerald-500 bg-emerald-500/10' 
               : 'border-teal-700/80 bg-transparent'
@@ -270,53 +270,6 @@ export default function Dashboard() {
                 </p>
               </>
             )}
-          </div>
-        </div>
-
-        {/* Balance 3 & 4 - Grid Layout */}
-        <div className="grid grid-cols-2 sm:grid-cols-[auto,auto] gap-4 mb-6 sm:justify-start">
-          {/* Balance 3 */}
-          <div>
-            <label className="text-gray-300 text-sm font-medium mb-2 block">Balance 3</label>
-            <div className="bg-transparent border-2 border-teal-700/60 rounded-2xl px-4 py-3.5 sm:min-w-[200px]">
-              {loading ? (
-                <div className="h-6 w-20 bg-gray-700/50 rounded animate-pulse"></div>
-              ) : (
-                <div className="space-y-1">
-                  {groupedBalances['balance_3'] ? (
-                    Object.entries(groupedBalances['balance_3']).map(([currency, amount]) => (
-                      <p key={currency} className="text-white text-base font-bold">
-                        {currency} {amount.toFixed(2)}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="text-white text-base font-bold">No balance</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Balance 4 */}
-          <div>
-            <label className="text-gray-300 text-sm font-medium mb-2 block">Balance 4</label>
-            <div className="bg-transparent border-2 border-teal-700/60 rounded-2xl px-4 py-3.5 sm:min-w-[200px]">
-              {loading ? (
-                <div className="h-6 w-20 bg-gray-700/50 rounded animate-pulse"></div>
-              ) : (
-                <div className="space-y-1">
-                  {groupedBalances['balance_4'] ? (
-                    Object.entries(groupedBalances['balance_4']).map(([currency, amount]) => (
-                      <p key={currency} className="text-white text-base font-bold">
-                        {currency} {amount.toFixed(2)}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="text-white text-base font-bold">No balance</p>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
