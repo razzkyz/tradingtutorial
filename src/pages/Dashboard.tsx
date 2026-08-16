@@ -72,10 +72,10 @@ export default function Dashboard() {
         
         {/* User Profile Card */}
         <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-3xl border border-cyan/20 shadow-2xl p-6 mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            {/* User Info */}
-            <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center overflow-hidden shadow-xl flex-shrink-0">
+          <div className="flex items-end justify-between gap-3">
+            {/* User Info - Left */}
+            <div className="flex flex-col items-start">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center overflow-hidden shadow-xl mb-3">
                 {loading ? (
                   <div className="w-full h-full bg-text-muted/20 animate-pulse"></div>
                 ) : profile?.avatar_url ? (
@@ -85,31 +85,31 @@ export default function Dashboard() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-3xl">👤</span>
+                  <span className="text-2xl sm:text-3xl">👤</span>
                 )}
               </div>
               <div>
-                <p className="text-text-secondary text-sm mb-1">Name :</p>
+                <p className="text-text-secondary text-xs sm:text-sm mb-1">Name :</p>
                 {loading ? (
-                  <div className="h-7 w-32 bg-text-muted/20 rounded animate-pulse"></div>
+                  <div className="h-6 sm:h-7 w-24 sm:w-32 bg-text-muted/20 rounded animate-pulse"></div>
                 ) : (
-                  <p className="text-text-primary text-xl font-bold">
+                  <p className="text-text-primary text-base sm:text-xl font-bold leading-tight">
                     {profile?.full_name || 'User'}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Balance Badge */}
-            <div className="bg-gradient-to-br from-green-400 to-emerald-500 px-6 py-4 rounded-2xl shadow-xl">
-              <div className="flex items-center space-x-3">
-                <Wallet className="w-8 h-8 text-white" strokeWidth={2.5} />
+            {/* Balance Badge - Right (aligned to bottom) */}
+            <div className="bg-gradient-to-br from-green-400 to-emerald-500 px-4 py-6 sm:px-5 sm:py-8 rounded-xl sm:rounded-2xl shadow-xl flex-shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Wallet className="w-8 h-8 sm:w-9 sm:h-9 text-white" strokeWidth={2.5} />
                 <div>
-                  <p className="text-white text-xs font-semibold mb-0.5 uppercase tracking-wide">Balance</p>
+                  <p className="text-white text-[10px] sm:text-xs font-semibold uppercase tracking-wide leading-none mb-2 sm:mb-3">Balance</p>
                   {loading ? (
-                    <div className="h-6 w-24 bg-white/20 rounded animate-pulse"></div>
+                    <div className="h-5 sm:h-6 w-20 sm:w-24 bg-white/20 rounded animate-pulse"></div>
                   ) : (
-                    <p className="text-white text-xl font-bold leading-none">
+                    <p className="text-white text-base sm:text-xl font-bold leading-none">
                       USDT {totalBalance.toFixed(0)}
                     </p>
                   )}
@@ -154,24 +154,24 @@ export default function Dashboard() {
 
           {/* Right Column - Trading Status */}
           <div>
-            <div className={`h-full flex flex-col items-center justify-center border-4 rounded-2xl px-4 py-6 ${
+            <div className={`h-full min-h-[120px] sm:min-h-[140px] flex flex-col items-center justify-center border-2 sm:border-3 rounded-xl sm:rounded-2xl px-3 py-4 sm:px-4 sm:py-5 ${
               isActive 
                 ? 'border-green-500 bg-green-500/10' 
                 : 'border-emerald-500/80 bg-transparent'
             }`}>
               {loading ? (
                 <>
-                  <div className="h-4 w-16 bg-text-muted/20 rounded animate-pulse mb-2"></div>
-                  <div className="h-6 w-20 bg-text-muted/20 rounded animate-pulse"></div>
+                  <div className="h-3 sm:h-4 w-14 sm:w-16 bg-text-muted/20 rounded animate-pulse mb-1.5 sm:mb-2"></div>
+                  <div className="h-5 sm:h-6 w-16 sm:w-20 bg-text-muted/20 rounded animate-pulse"></div>
                 </>
               ) : (
                 <>
-                  <p className={`text-base font-semibold mb-1 ${
+                  <p className={`text-sm sm:text-base font-semibold mb-0.5 sm:mb-1 ${
                     isActive ? 'text-green-400' : 'text-white'
                   }`}>
                     {isActive ? 'Active' : 'Inactive'}
                   </p>
-                  <p className={`text-xl font-bold uppercase leading-none ${
+                  <p className={`text-lg sm:text-xl font-bold uppercase leading-none ${
                     isActive ? 'text-green-400' : 'text-white'
                   }`}>
                     TRADING
