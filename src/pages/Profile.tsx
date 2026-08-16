@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { getProfile } from '../services/profileService'
+import { Wallet } from 'lucide-react'
 import LoadingState from '../components/LoadingState'
 import ErrorState from '../components/ErrorState'
 
@@ -47,61 +48,73 @@ export default function Profile() {
   if (!profile) return <ErrorState message="Profile not found" />
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-gradient-to-br from-deep-navy/90 to-dark-teal/90 backdrop-blur-sm rounded-2xl border border-cyan/20 shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-card-gradient p-6 border-b border-cyan/30">
-          <h1 className="text-2xl font-bold text-text-primary">My Profile</h1>
-        </div>
-
-        {/* Avatar */}
-        <div className="p-8 flex justify-center">
-          <div className="w-32 h-32 rounded-full bg-button-gradient flex items-center justify-center text-5xl shadow-xl">
-            {profile.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={profile.full_name}
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              '👤'
-            )}
-          </div>
-        </div>
-
-        {/* Profile Info */}
-        <div className="p-8 space-y-6">
-          <div>
-            <label className="block text-text-secondary text-sm mb-2">Full Name</label>
-            <p className="text-text-primary text-lg font-medium">{profile.full_name}</p>
+    <div className="min-h-[calc(100vh-64px)] px-4 py-6">
+      <div className="max-w-xl mx-auto">
+        <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-3xl border border-cyan/20 shadow-2xl overflow-hidden p-6">
+          
+          {/* Header with underline */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-white inline-block border-b-4 border-white pb-1">
+              My Profile
+            </h1>
           </div>
 
-          <div>
-            <label className="block text-text-secondary text-sm mb-2">Address</label>
-            <p className="text-text-primary text-lg">{profile.address || 'Not provided'}</p>
+          {/* Avatar */}
+          <div className="flex justify-start mb-6">
+            <div className="w-28 h-28 rounded-full overflow-hidden shadow-xl">
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.full_name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-5xl">
+                  👤
+                </div>
+              )}
+            </div>
           </div>
 
-          <div>
-            <label className="block text-text-secondary text-sm mb-2">Phone Number</label>
-            <p className="text-text-primary text-lg">{profile.phone_number || 'Not provided'}</p>
-          </div>
-
-          <div>
-            <label className="block text-text-secondary text-sm mb-2">Email</label>
-            <p className="text-text-primary text-lg">{profile.email}</p>
-          </div>
-
-          <div>
-            <label className="block text-text-secondary text-sm mb-2">Country</label>
-            <p className="text-text-primary text-lg">{profile.country || 'Not provided'}</p>
-          </div>
-
-          <div className="bg-card-gradient p-6 rounded-xl border border-cyan/30">
-            <label className="block text-text-secondary text-sm mb-2">Investment Amount</label>
-            <p className="text-text-primary text-2xl font-bold">
-              USDT {profile.investment_amount.toFixed(2)}
+          {/* Profile Info - List Style */}
+          <div className="space-y-3 mb-6">
+            <p className="text-white text-base">
+              <span className="font-medium">Full Name :</span> {profile.full_name}
+            </p>
+            <p className="text-white text-base">
+              <span className="font-medium">Address :</span> {profile.address || 'Not provided'}
+            </p>
+            <p className="text-white text-base">
+              <span className="font-medium">Phone Number :</span> {profile.phone_number || 'Not provided'}
+            </p>
+            <p className="text-white text-base">
+              <span className="font-medium">Email :</span> {profile.email}
+            </p>
+            <p className="text-white text-base">
+              <span className="font-medium">Country :</span> {profile.country || 'Not provided'}
             </p>
           </div>
+
+          {/* Investment Amount with Wallet Icon */}
+          <div className="bg-white/95 rounded-2xl p-5 flex items-center justify-between shadow-xl">
+            {/* Left: Wallet Icon */}
+            <div className="bg-gradient-to-br from-emerald-600 to-green-700 p-4 rounded-xl">
+              <Wallet className="w-12 h-12 text-white" strokeWidth={2.5} />
+            </div>
+
+            {/* Right: Investment Amount */}
+            <div className="flex-1 ml-5">
+              <p className="text-gray-700 text-sm font-semibold mb-1 uppercase tracking-wide">
+                Investment Amount
+              </p>
+              <div className="bg-gradient-to-br from-deep-navy to-dark-teal px-6 py-3 rounded-xl">
+                <p className="text-white text-2xl font-bold">
+                  USDT {profile.investment_amount.toFixed(0)}
+                </p>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
