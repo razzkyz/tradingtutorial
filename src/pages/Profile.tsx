@@ -50,7 +50,7 @@ export default function Profile() {
   return (
     <div className="min-h-[calc(100vh-64px)] px-4 py-6">
       <div className="max-w-xl mx-auto">
-        <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-3xl border border-cyan/20 shadow-2xl overflow-hidden p-6">
+        <div className="bg-gradient-to-br from-gray-900 to-teal-900 backdrop-blur-sm rounded-3xl border border-teal-700/40 shadow-2xl overflow-hidden p-6">
           
           {/* Header with underline */}
           <div className="mb-6">
@@ -98,7 +98,7 @@ export default function Profile() {
           {/* Investment Amount with Wallet Icon */}
           <div className="bg-white/95 rounded-2xl p-5 flex items-center justify-between shadow-xl">
             {/* Left: Wallet Icon */}
-            <div className="bg-gradient-to-br from-emerald-600 to-green-700 p-4 rounded-xl">
+            <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-4 rounded-xl">
               <Wallet className="w-12 h-12 text-white" strokeWidth={2.5} />
             </div>
 
@@ -107,7 +107,7 @@ export default function Profile() {
               <p className="text-gray-700 text-sm font-semibold mb-1 uppercase tracking-wide">
                 Investment Amount
               </p>
-              <div className="bg-gradient-to-br from-deep-navy to-dark-teal px-6 py-3 rounded-xl">
+              <div className="bg-gradient-to-br from-teal-900 to-teal-800 px-6 py-3 rounded-xl">
                 <p className="text-white text-2xl font-bold">
                   USDT {profile.investment_amount.toFixed(0)}
                 </p>

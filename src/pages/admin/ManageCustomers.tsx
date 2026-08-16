@@ -227,10 +227,10 @@ export default function ManageCustomers() {
         </div>
 
         {/* Customers Table */}
-        <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-cyan/20 shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-teal-700/30 shadow-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-card-gradient border-b border-cyan/30">
+              <thead className="bg-gradient-to-r from-teal-900/50 to-teal-800/50 border-b border-teal-700/30">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
                     Customer
@@ -372,7 +372,7 @@ export default function ManageCustomers() {
                   <button
                     onClick={handleAddBalance}
                     disabled={updating || !balanceAmount}
-                    className="flex-1 px-4 py-3 bg-button-gradient hover:opacity-90 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:opacity-90 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {updating ? 'Adding...' : 'Add Balance'}
                   </button>

@@ -9,8 +9,8 @@ export default function ProfileCard({ label, value, highlight = false }: Profile
     <div
       className={`p-4 rounded-xl border ${
         highlight
-          ? 'bg-card-gradient border-cyan/30'
-          : 'bg-dark-teal/40 border-text-muted/20'
+          ? 'bg-gradient-to-r from-teal-900/50 to-teal-800/50 border-teal-700/30'
+          : 'bg-dark-teal/40 border-teal-700/30'
       }`}
     >
       <p className="text-text-secondary text-sm mb-1">{label}</p>

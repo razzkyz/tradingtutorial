@@ -18,7 +18,7 @@ export default function LogoutModal({ isOpen, onConfirm, onCancel }: LogoutModal
       />
       
       {/* Modal */}
-      <div className="relative card-premium max-w-md w-full animate-scale-in">
+      <div className="relative bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-2xl border border-teal-700/30 shadow-2xl max-w-md w-full animate-scale-in">
         {/* Icon Header */}
         <div className="flex justify-center pt-8 pb-4">
           <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 p-4 rounded-full border-2 border-red-500/30">
@@ -39,7 +39,7 @@ export default function LogoutModal({ isOpen, onConfirm, onCancel }: LogoutModal
           <div className="flex gap-3">
             <button
               onClick={onCancel}
-              className="flex-1 px-6 py-3 rounded-xl bg-dark-teal/40 hover:bg-dark-teal/60 text-text-primary font-medium border border-text-muted/20 hover:border-cyan/30 transition-all"
+              className="flex-1 px-6 py-3 rounded-xl bg-dark-teal/40 hover:bg-dark-teal/60 text-text-primary font-medium border border-teal-700/30 hover:border-cyan/50 transition-all"
             >
               Cancel
             </button>

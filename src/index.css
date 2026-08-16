@@ -4,16 +4,18 @@
 
 @layer base {
   * {
-    @apply border-text-muted;
+    @apply border-gray-700;
   }
   
   body {
-    @apply bg-main-gradient text-text-primary antialiased;
+    @apply text-white antialiased;
     min-height: 100vh;
+    background-color: #0A2F2F;
   }
   
   #root {
     @apply min-h-screen;
+    background-color: #0A2F2F;
   }
 
   /* Smooth scrolling */
@@ -34,7 +36,7 @@
     right: 0;
     width: 60%;
     height: 60%;
-    background: radial-gradient(circle at top right, rgba(32, 201, 216, 0.12), transparent 35%);
+    background: radial-gradient(circle at top right, rgba(20, 184, 166, 0.08), transparent 35%);
     pointer-events: none;
     z-index: 0;
   }
@@ -46,28 +48,28 @@
     left: 0;
     width: 50%;
     height: 50%;
-    background: radial-gradient(circle at bottom left, rgba(34, 197, 94, 0.08), transparent 30%);
+    background: radial-gradient(circle at bottom left, rgba(13, 148, 136, 0.06), transparent 30%);
     pointer-events: none;
     z-index: 0;
   }
 
   /* Card styles */
   .card-premium {
-    @apply bg-gradient-to-br from-deep-navy/90 to-dark-teal/90 backdrop-blur-sm rounded-2xl border border-cyan/20 shadow-2xl;
+    @apply bg-gray-900/90 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-2xl;
   }
 
   /* Button styles */
   .btn-primary {
-    @apply bg-button-gradient hover:opacity-90 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50;
+    @apply bg-gradient-to-r from-teal to-cyan hover:opacity-90 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/30;
   }
 
   .btn-secondary {
-    @apply bg-dark-teal/40 hover:bg-dark-teal/60 text-text-primary font-medium py-3 px-6 rounded-lg transition-all border border-text-muted/20 hover:border-cyan/30;
+    @apply bg-gray-800/80 hover:bg-gray-700/80 text-white font-medium py-3 px-6 rounded-lg transition-all border border-gray-700 hover:border-teal/50;
   }
 
   /* Input styles */
   .input-field {
-    @apply w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all;
+    @apply w-full px-4 py-3 bg-gray-900/70 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all;
   }
 
   /* Custom scrollbar */
@@ -76,17 +78,17 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(6, 25, 35, 0.5);
+    background: rgba(17, 24, 39, 0.5);
     border-radius: 4px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(8, 126, 139, 0.5);
+    background: rgba(20, 184, 166, 0.4);
     border-radius: 4px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(8, 126, 139, 0.8);
+    background: rgba(20, 184, 166, 0.6);
   }
 }
 

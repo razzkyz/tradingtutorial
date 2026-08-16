@@ -154,8 +154,8 @@ export default function AddCustomer() {
           Back to Admin Dashboard
         </button>
 
-        <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-3xl border border-cyan/20 shadow-2xl overflow-hidden">
-          <div className="bg-card-gradient p-6 border-b border-cyan/30">
+        <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-3xl border border-teal-700/30 shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-teal-900/50 to-teal-800/50 p-6 border-b border-teal-700/30">
             <h1 className="text-2xl font-bold text-text-primary">Add New Customer</h1>
             <p className="text-text-secondary text-sm mt-1">Create a new customer account</p>
           </div>
@@ -294,7 +294,7 @@ export default function AddCustomer() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-button-gradient hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Customer...' : 'Create Customer'}
             </button>

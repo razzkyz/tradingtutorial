@@ -84,25 +84,25 @@ export default function AdminDashboard() {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-cyan/20 p-6">
+          <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-teal-700/30 p-6">
             <div className="flex items-center justify-between mb-4">
-              <Users className="w-8 h-8 text-cyan" />
+              <Users className="w-8 h-8 text-cyan-400" />
               <span className="text-text-secondary text-sm">Total</span>
             </div>
             <p className="text-3xl font-bold text-text-primary mb-1">{stats.totalUsers}</p>
             <p className="text-text-secondary text-sm">Customers</p>
           </div>
 
-          <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-emerald/20 p-6">
+          <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-teal-700/30 p-6">
             <div className="flex items-center justify-between mb-4">
-              <TrendingUp className="w-8 h-8 text-emerald" />
+              <TrendingUp className="w-8 h-8 text-teal-400" />
               <span className="text-text-secondary text-sm">Active</span>
             </div>
             <p className="text-3xl font-bold text-text-primary mb-1">{stats.activeTraders}</p>
             <p className="text-text-secondary text-sm">Active Traders</p>
           </div>
 
-          <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-yellow-500/20 p-6">
+          <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-teal-700/30 p-6">
             <div className="flex items-center justify-between mb-4">
               <FileText className="w-8 h-8 text-yellow-400" />
               <span className="text-text-secondary text-sm">Pending</span>
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
             <p className="text-text-secondary text-sm">Withdrawals</p>
           </div>
 
-          <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-purple-500/20 p-6">
+          <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-teal-700/30 p-6">
             <div className="flex items-center justify-between mb-4">
               <FileText className="w-8 h-8 text-purple-400" />
               <span className="text-text-secondary text-sm">Total</span>
@@ -126,9 +126,9 @@ export default function AdminDashboard() {
           {/* Add Customer */}
           <button
             onClick={() => navigate('/admin/add-customer')}
-            className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-cyan/20 p-8 text-left hover:border-cyan/40 transition-all group"
+            className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-teal-700/30 p-8 text-left hover:border-cyan-500/50 transition-all group"
           >
-            <UserPlus className="w-12 h-12 text-cyan mb-4 group-hover:scale-110 transition-transform" />
+            <UserPlus className="w-12 h-12 text-cyan-400 mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="text-xl font-bold text-text-primary mb-2">Add Customer</h3>
             <p className="text-text-secondary text-sm">Register new customer accounts</p>
           </button>
@@ -136,9 +136,9 @@ export default function AdminDashboard() {
           {/* Manage Customers */}
           <button
             onClick={() => navigate('/admin/customers')}
-            className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-emerald/20 p-8 text-left hover:border-emerald/40 transition-all group"
+            className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-teal-700/30 p-8 text-left hover:border-teal-500/50 transition-all group"
           >
-            <Users className="w-12 h-12 text-emerald mb-4 group-hover:scale-110 transition-transform" />
+            <Users className="w-12 h-12 text-teal-400 mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="text-xl font-bold text-text-primary mb-2">Manage Customers</h3>
             <p className="text-text-secondary text-sm">View and edit customer data</p>
           </button>
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
           {/* Website Settings */}
           <button
             onClick={() => navigate('/admin/settings')}
-            className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-purple-500/20 p-8 text-left hover:border-purple-500/40 transition-all group"
+            className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-2xl border border-teal-700/30 p-8 text-left hover:border-purple-500/50 transition-all group"
           >
             <Settings className="w-12 h-12 text-purple-400 mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="text-xl font-bold text-text-primary mb-2">Website Settings</h3>

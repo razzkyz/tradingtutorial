@@ -49,42 +49,52 @@ export default function Login() {
           {/* Left Side - Branding (Hidden on mobile) */}
           <div className="hidden lg:block">
             <div className="space-y-6">
-              <div className="flex items-center space-x-4">
-                <div className="bg-button-gradient p-4 rounded-2xl shadow-2xl">
-                  <TrendingUp className="w-16 h-16 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold text-text-primary">
-                    TRADING
-                  </h1>
-                  <h2 className="text-3xl font-bold text-cyan">
-                    TUTORIALS
-                  </h2>
+              <div className="flex items-center justify-center lg:justify-start">
+                <img 
+                  src="/images/logo.png" 
+                  alt="Trading Tutorials" 
+                  className="h-20 w-auto max-w-[280px] object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                    const fallback = document.getElementById('login-logo-fallback')
+                    if (fallback) {
+                      fallback.style.display = 'flex'
+                    }
+                  }}
+                />
+                <div className="hidden items-center space-x-4" id="login-logo-fallback" style={{ display: 'none' }}>
+                  <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-4 rounded-2xl shadow-2xl">
+                    <TrendingUp className="w-16 h-16 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-4xl font-bold text-text-primary">Trading</h1>
+                    <h2 className="text-3xl font-bold text-cyan">Tutorials</h2>
+                  </div>
                 </div>
               </div>
               
               <div className="space-y-4 pl-2">
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-cyan rounded-full"></div>
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
                   <p className="text-text-secondary text-lg">Secure Trading Platform</p>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green rounded-full"></div>
+                  <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
                   <p className="text-text-secondary text-lg">Real-time Market Data</p>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-emerald rounded-full"></div>
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
                   <p className="text-text-secondary text-lg">Easy Withdrawals</p>
                 </div>
               </div>
 
-              <div className="card-premium p-8 animate-scale-in">
+              <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-2xl border border-teal-700/30 shadow-xl p-8 animate-scale-in">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-text-muted text-sm mb-1">Total Users</p>
                     <p className="text-text-primary text-3xl font-bold">10,000+</p>
                   </div>
-                  <div className="bg-active-gradient p-4 rounded-xl">
+                  <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-4 rounded-xl">
                     <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
@@ -98,20 +108,32 @@ export default function Login() {
           <div className="w-full">
             {/* Mobile Logo */}
             <div className="lg:hidden text-center mb-8">
-              <div className="inline-flex items-center space-x-3 mb-2">
-                <div className="bg-button-gradient p-3 rounded-xl shadow-lg">
+              <img 
+                src="/images/logo.png" 
+                alt="Trading Tutorials" 
+                className="h-16 w-auto max-w-[220px] mx-auto object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  const fallback = document.getElementById('mobile-logo-fallback')
+                  if (fallback) {
+                    fallback.style.display = 'inline-flex'
+                  }
+                }}
+              />
+              <div className="hidden items-center space-x-3 mb-2" id="mobile-logo-fallback" style={{ display: 'none' }}>
+                <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-3 rounded-xl shadow-lg">
                   <TrendingUp className="w-10 h-10 text-white" />
                 </div>
                 <div className="text-left">
-                  <h1 className="text-2xl font-bold text-text-primary">TRADING</h1>
-                  <h2 className="text-xl font-bold text-cyan">TUTORIALS</h2>
+                  <h1 className="text-2xl font-bold text-text-primary">Trading</h1>
+                  <h2 className="text-xl font-bold text-cyan">Tutorials</h2>
                 </div>
               </div>
             </div>
 
-            <div className="card-premium overflow-hidden">
+            <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-3xl border border-teal-700/30 shadow-2xl overflow-hidden">
               {/* Header */}
-              <div className="bg-card-gradient p-6 lg:p-8 text-center border-b border-cyan/30">
+              <div className="bg-gradient-to-r from-teal-900/50 to-teal-800/50 p-6 lg:p-8 text-center border-b border-teal-700/30">
                 <h3 className="text-2xl lg:text-3xl font-bold text-text-primary mb-2">
                   Welcome Back!
                 </h3>

@@ -7,21 +7,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        'deep-navy': '#061923',
-        'dark-teal': '#063B4C',
-        'teal': '#087E8B',
-        'emerald': '#16A085',
-        'cyan': '#20C9D8',
-        'green': '#22C55E',
+        'deep-navy': '#0A2F2F',
+        'dark-teal': '#0D4D4D',
+        'teal': '#14b8a6',
+        'emerald': '#10b981',
+        'cyan': '#06b6d4',
+        'green': '#10b981',
         'text-primary': '#FFFFFF',
-        'text-secondary': '#A7BBC4',
-        'text-muted': '#6F8791',
+        'text-secondary': '#9CA3AF',
+        'text-muted': '#6B7280',
       },
       backgroundImage: {
-        'main-gradient': 'linear-gradient(135deg, #061923 0%, #073B4C 45%, #075F65 100%)',
-        'card-gradient': 'linear-gradient(135deg, #063B4C, #087E8B)',
-        'button-gradient': 'linear-gradient(135deg, #087E8B, #20C9D8)',
-        'active-gradient': 'linear-gradient(135deg, #16A085, #22C55E)',
+        'main-gradient': 'linear-gradient(135deg, #0A2F2F 0%, #0D4D4D 100%)',
+        'card-gradient': 'linear-gradient(135deg, #0D4D4D, #14b8a6)',
+        'button-gradient': 'linear-gradient(135deg, #14b8a6, #10b981)',
+        'active-gradient': 'linear-gradient(135deg, #10b981, #06b6d4)',
       }
     },
   },

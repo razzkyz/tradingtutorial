@@ -47,7 +47,7 @@ export default function TradingAccess() {
     <div className="min-h-[calc(100vh-64px)] px-4 py-6">
       <div className="max-w-2xl mx-auto">
         {/* Main Card Container */}
-        <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-3xl border border-cyan/20 shadow-2xl p-6 md:p-8">
+        <div className="bg-gradient-to-br from-gray-900 to-teal-900 backdrop-blur-sm rounded-3xl border border-teal-700/40 shadow-2xl p-6 md:p-8">
           
           {/* Icon & Total Balance - Top Right */}
           <div className="mb-8">
@@ -102,7 +102,7 @@ export default function TradingAccess() {
           {/* Trading Access Button */}
           <button
             disabled={loading}
-            className="w-full bg-gradient-to-r from-teal via-cyan to-emerald hover:from-emerald hover:via-cyan hover:to-teal text-deep-navy font-bold text-lg py-4 px-6 rounded-2xl transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
+            className="w-full bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-500 hover:from-teal-500 hover:via-cyan-500 hover:to-teal-600 text-white font-bold text-lg py-4 px-6 rounded-2xl transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
           >
             Trading Access
           </button>

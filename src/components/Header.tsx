@@ -71,31 +71,39 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-gradient-to-r from-deep-navy to-dark-teal border-b border-text-muted/20 shadow-lg sticky top-0 z-30 backdrop-blur-sm">
+      <header className="bg-gradient-to-r from-teal-900 to-teal-800 border-b border-teal-700/50 shadow-lg sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo - Support for longer text */}
-            <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="flex items-center hover:opacity-80 transition-opacity">
-              {/* Custom Logo Image */}
+            {/* Logo - Icon + Text "TRADING TUTORIALS" (Horizontal) */}
+            <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity">
+              {/* Logo Icon (Bullish Market) */}
               <img 
-                src="/logo.png" 
-                alt="Trading Tutorials Logo" 
-                className="h-10 sm:h-12 w-auto max-w-[200px] sm:max-w-[280px] md:max-w-[320px] object-contain"
+                src="/images/logo.png" 
+                alt="Trading Tutorials" 
+                className="h-10 sm:h-12 md:h-14 w-auto object-contain"
                 onError={(e) => {
                   // Fallback to icon + text if image not found
                   e.currentTarget.style.display = 'none'
                   const fallback = document.getElementById('logo-fallback')
-                  if (fallback) fallback.classList.remove('hidden')
+                  if (fallback) {
+                    fallback.style.display = 'flex'
+                  }
                 }}
               />
+              {/* Text "TRADING TUTORIALS" - Show on all screen sizes */}
+              <div className="flex flex-col leading-tight">
+                <span className="text-sm sm:text-lg md:text-xl font-bold text-white tracking-wider uppercase">Trading</span>
+                <span className="text-sm sm:text-lg md:text-xl font-bold text-white tracking-wider uppercase -mt-0.5 sm:-mt-1">Tutorials</span>
+              </div>
               {/* Fallback: Icon + Text (hidden by default) */}
-              <div className="hidden items-center space-x-2 sm:space-x-3" id="logo-fallback">
-                <div className="bg-button-gradient p-2 rounded-lg shadow-lg">
+              <div className="hidden items-center gap-3" id="logo-fallback" style={{ display: 'none' }}>
+                <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-2 rounded-full shadow-lg">
                   <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
-                <h1 className="text-base sm:text-lg lg:text-xl font-bold text-text-primary">
-                  TRADING<span className="text-cyan"> TUTORIALS</span>
-                </h1>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-xl font-bold text-white tracking-wider uppercase">Trading</span>
+                  <span className="text-xl font-bold text-white tracking-wider uppercase -mt-1">Tutorials</span>
+                </div>
               </div>
             </Link>
 
@@ -109,8 +117,8 @@ export default function Header() {
                     to={item.path}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
                       isActive(item.path)
-                        ? 'bg-button-gradient text-white shadow-lg'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-dark-teal/50'
+                        ? 'bg-teal-700 text-white shadow-lg'
+                        : 'text-gray-300 hover:text-white hover:bg-teal-800/50'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -120,7 +128,7 @@ export default function Header() {
               })}
               <button
                 onClick={handleLogoutClick}
-                className="ml-2 px-4 py-2 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-red-500/20 transition-all flex items-center space-x-2"
+                className="ml-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-red-900/40 transition-all flex items-center space-x-2"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -130,14 +138,14 @@ export default function Header() {
             {/* Mobile Hamburger */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-dark-teal/50 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-teal-800/50 transition-colors"
               aria-label="Menu"
               aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? (
-                <X className="w-6 h-6 text-text-primary" />
+                <X className="w-6 h-6 text-white" />
               ) : (
-                <Menu className="w-6 h-6 text-text-primary" />
+                <Menu className="w-6 h-6 text-white" />
               )}
             </button>
           </div>
@@ -146,7 +154,7 @@ export default function Header() {
 
       {/* Mobile Sidebar - Navbar tetap visible */}
       <div
-        className={`lg:hidden fixed top-16 right-0 bottom-0 w-72 bg-gradient-to-b from-deep-navy via-dark-teal to-deep-navy border-l border-cyan/20 shadow-2xl z-40 transform transition-transform duration-300 ease-out ${
+        className={`lg:hidden fixed top-16 right-0 bottom-0 w-72 bg-gradient-to-b from-gray-900 via-teal-950 to-gray-900 border-l border-teal-800/40 shadow-2xl z-40 transform transition-transform duration-300 ease-out ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -161,8 +169,8 @@ export default function Header() {
                   onClick={() => setIsMenuOpen(false)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all ${
                     isActive(item.path)
-                      ? 'bg-button-gradient text-white shadow-lg'
-                      : 'text-text-primary hover:bg-card-gradient border border-transparent hover:border-cyan/30'
+                      ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-lg'
+                      : 'text-gray-300 hover:bg-gray-800/60 border border-transparent hover:border-teal-700/50'
                   }`}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
@@ -171,10 +179,10 @@ export default function Header() {
               )
             })}
 
-            <div className="pt-4 mt-4 border-t border-text-muted/30">
+            <div className="pt-4 mt-4 border-t border-teal-800/40">
               <button
                 onClick={handleLogoutClick}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-text-primary bg-red-500/20 hover:bg-red-500/30 transition-colors border border-red-500/30 font-medium"
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-300 bg-red-900/20 hover:bg-red-900/30 transition-colors border border-red-700/40 font-medium"
               >
                 <LogOut className="w-5 h-5 flex-shrink-0" />
                 <span>Logout</span>

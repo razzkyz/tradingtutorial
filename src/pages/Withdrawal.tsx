@@ -10,6 +10,7 @@ import ErrorState from '../components/ErrorState'
 export default function Withdrawal() {
   const { user } = useAuth()
   const [showForm, setShowForm] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -69,7 +70,6 @@ export default function Withdrawal() {
 
     setFormErrors({})
     setError('')
-    setSubmitting(true)
 
     try {
       // Validate input
@@ -82,19 +82,11 @@ export default function Withdrawal() {
       // Check if amount exceeds available balance
       if (parsedData.amount > availableBalance) {
         setFormErrors({ amount: 'Amount exceeds available balance' })
-        setSubmitting(false)
         return
       }
 
-      // Create withdrawal request
-      await createWithdrawal(user.id, parsedData)
-
-      setSuccess(true)
-      setShowForm(false)
-      setFormData({ amount: '', wallet_address: '', network: '' })
-
-      // Reset success message after 5 seconds
-      setTimeout(() => setSuccess(false), 5000)
+      // Show confirmation modal instead of submitting directly
+      setShowConfirmModal(true)
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'errors' in err) {
         const zodErrors = err as { errors: Array<{ path: string[]; message: string }> }
@@ -106,8 +98,36 @@ export default function Withdrawal() {
         })
         setFormErrors(errors)
       } else {
-        setError('Failed to submit withdrawal request')
+        setError('Failed to validate withdrawal request')
       }
+    }
+  }
+
+  const handleConfirmWithdrawal = async () => {
+    if (!user) return
+
+    setSubmitting(true)
+
+    try {
+      const parsedData = withdrawalSchema.parse({
+        amount: parseFloat(formData.amount),
+        wallet_address: formData.wallet_address,
+        network: formData.network,
+      })
+
+      // Create withdrawal request
+      await createWithdrawal(user.id, parsedData)
+
+      setSuccess(true)
+      setShowForm(false)
+      setShowConfirmModal(false)
+      setFormData({ amount: '', wallet_address: '', network: '' })
+
+      // Reset success message after 5 seconds
+      setTimeout(() => setSuccess(false), 5000)
+    } catch (err) {
+      setError('Failed to submit withdrawal request')
+      setShowConfirmModal(false)
     } finally {
       setSubmitting(false)
     }
@@ -125,55 +145,77 @@ export default function Withdrawal() {
           </div>
         )}
 
-        <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-3xl border border-cyan/20 shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-br from-gray-900 to-teal-900 backdrop-blur-sm rounded-3xl border border-teal-700/40 shadow-2xl overflow-hidden">
           {!showForm ? (
             <>
               {/* Wallet Illustration Section */}
               <div className="p-8 text-center">
-                {/* Wallet with Money Illustration */}
+                {/* Wallet Image */}
                 <div className="relative inline-block mb-6">
-                  {/* Sparkle Left */}
-                  <div className="absolute -left-8 top-1/2 transform -translate-y-1/2">
-                    <svg className="w-8 h-8 text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                  </div>
+                  <img 
+                    src="/images/dompet.png" 
+                    alt="Wallet" 
+                    className="w-64 h-auto mx-auto object-contain drop-shadow-2xl"
+                    onError={(e) => {
+                      // Fallback to jpeg if png not found
+                      const imgElement = e.currentTarget
+                      if (imgElement.src.includes('dompet.png')) {
+                        imgElement.src = '/images/dompet.jpeg'
+                      } else {
+                        imgElement.style.display = 'none'
+                        const fallback = document.getElementById('wallet-fallback')
+                        if (fallback) {
+                          fallback.style.display = 'block'
+                        }
+                      }
+                    }}
+                  />
+                  
+                  {/* Fallback SVG Wallet (hidden by default) */}
+                  <div id="wallet-fallback" className="hidden" style={{ display: 'none' }}>
+                    {/* Sparkle Left */}
+                    <div className="absolute -left-8 top-1/2 transform -translate-y-1/2">
+                      <svg className="w-8 h-8 text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                      </svg>
+                    </div>
 
-                  {/* Main Wallet */}
-                  <div className="relative">
-                    {/* Money Bills - Green */}
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-6 z-10">
-                      <div className="flex gap-1">
-                        <div className="w-20 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg shadow-xl rotate-[-8deg] border-2 border-green-600"></div>
-                        <div className="w-20 h-14 bg-gradient-to-br from-green-300 to-emerald-400 rounded-lg shadow-xl rotate-[5deg] border-2 border-green-500"></div>
+                    {/* Main Wallet */}
+                    <div className="relative">
+                      {/* Money Bills - Green */}
+                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-6 z-10">
+                        <div className="flex gap-1">
+                          <div className="w-20 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg shadow-xl rotate-[-8deg] border-2 border-green-600"></div>
+                          <div className="w-20 h-14 bg-gradient-to-br from-green-300 to-emerald-400 rounded-lg shadow-xl rotate-[5deg] border-2 border-green-500"></div>
+                        </div>
+                      </div>
+
+                      {/* Wallet Body - Brown/Orange */}
+                      <div className="relative w-52 h-32 bg-gradient-to-br from-orange-600 via-orange-700 to-orange-800 rounded-2xl shadow-2xl overflow-hidden mt-6">
+                        {/* Wallet Stitching Lines */}
+                        <div className="absolute bottom-4 left-4 right-4 border-t-2 border-dashed border-orange-400/40"></div>
+                        <div className="absolute bottom-7 left-4 right-4 border-t-2 border-dashed border-orange-400/40"></div>
+                        
+                        {/* Card Holder - Blue */}
+                        <div className="absolute right-8 top-1/2 transform -translate-y-1/2 w-16 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg">
+                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-yellow-400 rounded-full"></div>
+                        </div>
+
+                        {/* User Name on Wallet */}
+                        <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
+                          <p className="text-white font-bold text-base drop-shadow-lg">
+                            {userName || 'User'}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Wallet Body - Brown/Orange */}
-                    <div className="relative w-52 h-32 bg-gradient-to-br from-orange-600 via-orange-700 to-orange-800 rounded-2xl shadow-2xl overflow-hidden mt-6">
-                      {/* Wallet Stitching Lines */}
-                      <div className="absolute bottom-4 left-4 right-4 border-t-2 border-dashed border-orange-400/40"></div>
-                      <div className="absolute bottom-7 left-4 right-4 border-t-2 border-dashed border-orange-400/40"></div>
-                      
-                      {/* Card Holder - Blue */}
-                      <div className="absolute right-8 top-1/2 transform -translate-y-1/2 w-16 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg">
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-yellow-400 rounded-full"></div>
-                      </div>
-
-                      {/* User Name on Wallet */}
-                      <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
-                        <p className="text-white font-bold text-base drop-shadow-lg">
-                          {userName || 'User'}
-                        </p>
-                      </div>
+                    {/* Sparkle Right */}
+                    <div className="absolute -right-8 bottom-8">
+                      <svg className="w-10 h-10 text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                      </svg>
                     </div>
-                  </div>
-
-                  {/* Sparkle Right */}
-                  <div className="absolute -right-8 bottom-8">
-                    <svg className="w-10 h-10 text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
                   </div>
                 </div>
 
@@ -187,7 +229,7 @@ export default function Withdrawal() {
                 {/* Withdrawal Button */}
                 <button
                   onClick={() => setShowForm(true)}
-                  className="w-full max-w-md mx-auto block bg-gradient-to-r from-teal via-cyan to-emerald hover:from-emerald hover:via-cyan hover:to-teal text-deep-navy font-bold text-lg py-4 px-6 rounded-2xl transition-all shadow-lg hover:shadow-cyan/50 uppercase tracking-wide"
+                  className="w-full max-w-md mx-auto block bg-gradient-to-r from-orange-600 via-orange-500 to-yellow-500 hover:from-orange-500 hover:via-orange-400 hover:to-yellow-400 text-white font-bold text-lg py-4 px-6 rounded-2xl transition-all shadow-lg hover:shadow-orange-500/50 uppercase tracking-wide"
                 >
                   Withdrawal
                 </button>
@@ -196,7 +238,7 @@ export default function Withdrawal() {
           ) : (
             <>
               {/* Withdrawal Form */}
-              <div className="bg-card-gradient p-6 border-b border-cyan/30">
+              <div className="bg-gradient-to-r from-teal-900/50 to-teal-800/50 p-6 border-b border-teal-700/30">
                 <h1 className="text-2xl font-bold text-text-primary">Withdrawal Request</h1>
               </div>
 
@@ -297,7 +339,7 @@ export default function Withdrawal() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 bg-button-gradient hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? 'Submitting...' : 'Submit Withdrawal'}
                   </button>
@@ -306,6 +348,51 @@ export default function Withdrawal() {
             </>
           )}
         </div>
+
+        {/* Confirmation Modal */}
+        {showConfirmModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-gray-900 to-teal-900 rounded-2xl border border-teal-700/40 shadow-2xl max-w-md w-full p-6">
+              <h3 className="text-xl font-bold text-white mb-4">Confirm Withdrawal</h3>
+              
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Amount:</span>
+                  <span className="text-white font-bold">USDT {formData.amount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Network:</span>
+                  <span className="text-white font-bold">{formData.network}</span>
+                </div>
+                <div className="bg-cyan/10 rounded-lg p-3 mt-4">
+                  <p className="text-text-secondary text-sm">Wallet Address:</p>
+                  <p className="text-white text-xs font-mono break-all mt-1">{formData.wallet_address}</p>
+                </div>
+              </div>
+
+              <p className="text-text-secondary text-sm mb-6">
+                Are you sure you want to proceed with this withdrawal? This action cannot be undone.
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  disabled={submitting}
+                  className="flex-1 bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold py-3 px-6 rounded-lg transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmWithdrawal}
+                  disabled={submitting}
+                  className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? 'Processing...' : 'Confirm'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
