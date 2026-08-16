@@ -1,14 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { Home, User, Globe, Briefcase, Wallet, LogOut, TrendingUp, Menu, X } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
+import { Home, User, Globe, Briefcase, Wallet, LogOut, TrendingUp, Menu, X, Users, UserPlus, Settings } from 'lucide-react'
 import LogoutModal from './LogoutModal'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (user) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('user_id', user.id)
+            .single() as any
+
+          setIsAdmin(profile?.role === 'admin')
+        } catch (error) {
+          console.error('Error checking admin:', error)
+          setIsAdmin(false)
+        }
+      } else {
+        setIsAdmin(false)
+      }
+    }
+
+    checkAdmin()
+  }, [user])
 
   const handleLogoutClick = () => {
     setShowLogoutModal(true)
@@ -25,13 +52,20 @@ export default function Header() {
     setShowLogoutModal(false)
   }
 
-  const menuItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: Home },
-    { label: 'My Profile', path: '/profile', icon: User },
-    { label: 'Market Global', path: '/market-global', icon: Globe },
-    { label: 'Trading Access', path: '/trading-access', icon: Briefcase },
-    { label: 'Withdrawal', path: '/withdrawal', icon: Wallet },
-  ]
+  const menuItems = isAdmin
+    ? [
+        { label: 'Admin Dashboard', path: '/admin/dashboard', icon: Home },
+        { label: 'Manage Customers', path: '/admin/customers', icon: Users },
+        { label: 'Add Customer', path: '/admin/add-customer', icon: UserPlus },
+        { label: 'Settings', path: '/admin/settings', icon: Settings },
+      ]
+    : [
+        { label: 'Dashboard', path: '/dashboard', icon: Home },
+        { label: 'My Profile', path: '/profile', icon: User },
+        { label: 'Market Global', path: '/market-global', icon: Globe },
+        { label: 'Trading Access', path: '/trading-access', icon: Briefcase },
+        { label: 'Withdrawal', path: '/withdrawal', icon: Wallet },
+      ]
 
   const isActive = (path: string) => location.pathname === path
 
@@ -40,14 +74,29 @@ export default function Header() {
       <header className="bg-gradient-to-r from-deep-navy to-dark-teal border-b border-text-muted/20 shadow-lg sticky top-0 z-30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link to="/dashboard" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <div className="bg-button-gradient p-2 rounded-lg shadow-lg">
-                <TrendingUp className="w-7 h-7 text-white" />
+            {/* Logo - Support for longer text */}
+            <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="flex items-center hover:opacity-80 transition-opacity">
+              {/* Custom Logo Image */}
+              <img 
+                src="/logo.png" 
+                alt="Trading Tutorials Logo" 
+                className="h-10 sm:h-12 w-auto max-w-[200px] sm:max-w-[280px] md:max-w-[320px] object-contain"
+                onError={(e) => {
+                  // Fallback to icon + text if image not found
+                  e.currentTarget.style.display = 'none'
+                  const fallback = document.getElementById('logo-fallback')
+                  if (fallback) fallback.classList.remove('hidden')
+                }}
+              />
+              {/* Fallback: Icon + Text (hidden by default) */}
+              <div className="hidden items-center space-x-2 sm:space-x-3" id="logo-fallback">
+                <div className="bg-button-gradient p-2 rounded-lg shadow-lg">
+                  <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                </div>
+                <h1 className="text-base sm:text-lg lg:text-xl font-bold text-text-primary">
+                  TRADING<span className="text-cyan"> TUTORIALS</span>
+                </h1>
               </div>
-              <h1 className="text-lg lg:text-xl font-bold text-text-primary">
-                TRADING<span className="text-cyan"> TUTORIALS</span>
-              </h1>
             </Link>
 
             {/* Desktop Navigation */}

@@ -1,7 +1,5 @@
 import { useState, FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../hooks/useAuth'
 import { TrendingUp, Mail, Lock, LogIn } from 'lucide-react'
 
 export default function Login() {
@@ -9,14 +7,6 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const navigate = useNavigate()
-  const { user } = useAuth()
-
-  // Redirect if already logged in
-  if (user) {
-    navigate('/dashboard', { replace: true })
-    return null
-  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -24,18 +14,30 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) throw error
 
-      // Smooth navigation without reload
-      navigate('/dashboard', { replace: true })
+      // Check user role from database
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single() as any
+
+        // Redirect based on role
+        if (profile?.role === 'admin') {
+          window.location.href = '/admin/dashboard'
+        } else {
+          window.location.href = '/dashboard'
+        }
+      }
     } catch (err: unknown) {
       setError('Invalid email or password.')
-    } finally {
       setLoading(false)
     }
   }

@@ -12,6 +12,11 @@ const MarketGlobal = lazy(() => import('./pages/MarketGlobal'))
 const TradingAccess = lazy(() => import('./pages/TradingAccess'))
 const Withdrawal = lazy(() => import('./pages/Withdrawal'))
 
+// Admin pages
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const AddCustomer = lazy(() => import('./pages/admin/AddCustomer'))
+const ManageCustomers = lazy(() => import('./pages/admin/ManageCustomers'))
+
 function App() {
   return (
     <BrowserRouter>
@@ -20,6 +25,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           
           <Route element={<AppLayout />}>
+            {/* User Routes */}
             <Route
               path="/dashboard"
               element={
@@ -57,6 +63,32 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Withdrawal />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin Routes */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/add-customer"
+              element={
+                <ProtectedRoute>
+                  <AddCustomer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/customers"
+              element={
+                <ProtectedRoute>
+                  <ManageCustomers />
                 </ProtectedRoute>
               }
             />
