@@ -1,0 +1,204 @@
+import { useState, FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
+import { TrendingUp, Mail, Lock, LogIn } from 'lucide-react'
+
+export default function Login() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
+  const { user } = useAuth()
+
+  // Redirect if already logged in
+  if (user) {
+    navigate('/dashboard', { replace: true })
+    return null
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) throw error
+
+      // Smooth navigation without reload
+      navigate('/dashboard', { replace: true })
+    } catch (err: unknown) {
+      setError('Invalid email or password.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen gradient-overlay flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-6xl">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
+          {/* Left Side - Branding (Hidden on mobile) */}
+          <div className="hidden lg:block">
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <div className="bg-button-gradient p-4 rounded-2xl shadow-2xl">
+                  <TrendingUp className="w-16 h-16 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold text-text-primary">
+                    TRADING
+                  </h1>
+                  <h2 className="text-3xl font-bold text-cyan">
+                    TUTORIALS
+                  </h2>
+                </div>
+              </div>
+              
+              <div className="space-y-4 pl-2">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-cyan rounded-full"></div>
+                  <p className="text-text-secondary text-lg">Secure Trading Platform</p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green rounded-full"></div>
+                  <p className="text-text-secondary text-lg">Real-time Market Data</p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-emerald rounded-full"></div>
+                  <p className="text-text-secondary text-lg">Easy Withdrawals</p>
+                </div>
+              </div>
+
+              <div className="card-premium p-8 animate-scale-in">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-text-muted text-sm mb-1">Total Users</p>
+                    <p className="text-text-primary text-3xl font-bold">10,000+</p>
+                  </div>
+                  <div className="bg-active-gradient p-4 rounded-xl">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Login Form */}
+          <div className="w-full">
+            {/* Mobile Logo */}
+            <div className="lg:hidden text-center mb-8">
+              <div className="inline-flex items-center space-x-3 mb-2">
+                <div className="bg-button-gradient p-3 rounded-xl shadow-lg">
+                  <TrendingUp className="w-10 h-10 text-white" />
+                </div>
+                <div className="text-left">
+                  <h1 className="text-2xl font-bold text-text-primary">TRADING</h1>
+                  <h2 className="text-xl font-bold text-cyan">TUTORIALS</h2>
+                </div>
+              </div>
+            </div>
+
+            <div className="card-premium overflow-hidden">
+              {/* Header */}
+              <div className="bg-card-gradient p-6 lg:p-8 text-center border-b border-cyan/30">
+                <h3 className="text-2xl lg:text-3xl font-bold text-text-primary mb-2">
+                  Welcome Back!
+                </h3>
+                <p className="text-text-secondary">Sign in to your account to continue</p>
+              </div>
+
+              {/* Form */}
+              <div className="p-6 lg:p-8">
+                {error && (
+                  <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center space-x-2 animate-scale-in">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-2">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Mail className="w-5 h-5 text-text-muted" />
+                      </div>
+                      <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="input-field pl-12"
+                        placeholder="Enter your email"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Lock className="w-5 h-5 text-text-muted" />
+                      </div>
+                      <input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="input-field pl-12"
+                        placeholder="Enter your password"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full btn-primary flex items-center justify-center space-x-2 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <span>Signing in...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="w-5 h-5" />
+                        <span>Sign In</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                <div className="mt-6 text-center">
+                  <p className="text-text-muted text-sm">
+                    Demo Account: demo@tradingtutorials.com
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

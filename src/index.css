@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-text-muted;
+  }
+  
+  body {
+    @apply bg-main-gradient text-text-primary antialiased;
+    min-height: 100vh;
+  }
+  
+  #root {
+    @apply min-h-screen;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .gradient-overlay {
+    position: relative;
+  }
+  
+  .gradient-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle at top right, rgba(32, 201, 216, 0.12), transparent 35%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .gradient-overlay::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(circle at bottom left, rgba(34, 197, 94, 0.08), transparent 30%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Card styles */
+  .card-premium {
+    @apply bg-gradient-to-br from-deep-navy/90 to-dark-teal/90 backdrop-blur-sm rounded-2xl border border-cyan/20 shadow-2xl;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-button-gradient hover:opacity-90 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50;
+  }
+
+  .btn-secondary {
+    @apply bg-dark-teal/40 hover:bg-dark-teal/60 text-text-primary font-medium py-3 px-6 rounded-lg transition-all border border-text-muted/20 hover:border-cyan/30;
+  }
+
+  /* Input styles */
+  .input-field {
+    @apply w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all;
+  }
+
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(6, 25, 35, 0.5);
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(8, 126, 139, 0.5);
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(8, 126, 139, 0.8);
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
