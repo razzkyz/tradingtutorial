@@ -43,7 +43,11 @@ export default function Dashboard() {
     const script = document.createElement('script')
     script.src = 'https://s3.tradingview.com/tv.js'
     script.async = true
-    script.onload = () => initChart()
+    script.onload = () => {
+      if (user) {
+        initChart()
+      }
+    }
     document.head.appendChild(script)
 
     return () => {
@@ -52,65 +56,86 @@ export default function Dashboard() {
         document.head.removeChild(scriptElement)
       }
     }
-  }, [])
+  }, [user])
 
   const initChart = () => {
     if (!chartContainerRef.current || !window.TradingView) return
+    if (!user) return
 
     chartContainerRef.current.innerHTML = ''
 
-    new window.TradingView.widget({
-      container_id: 'tradingview_chart_dashboard',
-      autosize: true,
-      symbol: 'BINANCE:BTCUSDT',
-      interval: '5',
-      timezone: 'Etc/UTC',
-      theme: 'dark',
-      style: '1',
-      locale: 'en',
-      toolbar_bg: '#1F2937',
-      enable_publishing: false,
-      hide_top_toolbar: false,
-      hide_legend: false,
-      hide_side_toolbar: false,
-      save_image: false,
-      backgroundColor: '#000000',
-      gridColor: '#1F2937',
-      allow_symbol_change: true,
-      details: true,
-      hotlist: true,
-      calendar: false,
-      studies: ['MASimple@tv-basicstudies'],
-      show_popup_button: true,
-      popup_width: '1000',
-      popup_height: '650',
-      enabled_features: [
-        'study_templates',
-        'side_toolbar_in_fullscreen_mode',
-        'header_chart_type',
-        'header_compare',
-        'timeframes_toolbar',
-        'create_volume_indicator_by_default',
-        'left_toolbar',
-        'control_bar',
-        'main_series_scale_menu',
-        'drawing_templates',
-        'show_chart_property_page',
-      ],
-      disabled_features: [],
-      overrides: {
-        'paneProperties.background': '#000000',
-        'paneProperties.backgroundType': 'solid',
-        'paneProperties.gridProperties.color': '#1F2937',
-        'scalesProperties.textColor': '#9CA3AF',
-        'mainSeriesProperties.candleStyle.upColor': '#10B981',
-        'mainSeriesProperties.candleStyle.downColor': '#EF4444',
-        'mainSeriesProperties.candleStyle.borderUpColor': '#10B981',
-        'mainSeriesProperties.candleStyle.borderDownColor': '#EF4444',
-        'mainSeriesProperties.candleStyle.wickUpColor': '#10B981',
-        'mainSeriesProperties.candleStyle.wickDownColor': '#EF4444',
-      },
-    })
+    try {
+      new window.TradingView.widget({
+        container_id: 'tradingview_chart_dashboard',
+        autosize: true,
+        symbol: 'BINANCE:BTCUSDT',
+        interval: '5',
+        timezone: 'Etc/UTC',
+        theme: 'dark',
+        style: '1',
+        locale: 'en',
+        toolbar_bg: '#1F2937',
+        enable_publishing: false,
+        withdateranges: true,
+        range: '12M',
+        hide_top_toolbar: false,
+        hide_legend: false,
+        hide_side_toolbar: false,
+        save_image: true,
+        backgroundColor: '#000000',
+        allow_symbol_change: true,
+        details: true,
+        hotlist: true,
+        calendar: true,
+        studies: ['MASimple@tv-basicstudies'],
+        show_popup_button: true,
+        popup_width: '1000',
+        popup_height: '650',
+        client_id: 'tradingview_' + user.id,
+        user_id: user.id,
+        loading_screen: { backgroundColor: '#000000', foregroundColor: '#10B981' },
+        enabled_features: [
+          'study_templates',
+          'side_toolbar_in_fullscreen_mode',
+          'header_widget',
+          'header_symbol_search',
+          'header_resolutions',
+          'header_interval_dialog_button',
+          'show_interval_dialog_on_key_press',
+          'header_chart_type',
+          'header_compare',
+          'left_toolbar',
+          'control_bar',
+          'drawing_templates',
+          'use_localstorage_for_settings',
+          'save_chart_properties_to_local_storage',
+          'header_saveload',
+          'header_screenshot',
+          'header_fullscreen_button',
+          'header_indicators',
+          'header_settings',
+          'header_undo_redo',
+          'compare_symbol',
+          'display_market_status',
+        ],
+        disabled_features: [
+          'widget_logo',
+        ],
+        overrides: {
+          'paneProperties.background': '#000000',
+          'paneProperties.backgroundType': 'solid',
+          'scalesProperties.textColor': '#9CA3AF',
+          'mainSeriesProperties.candleStyle.upColor': '#10B981',
+          'mainSeriesProperties.candleStyle.downColor': '#EF4444',
+          'mainSeriesProperties.candleStyle.borderUpColor': '#10B981',
+          'mainSeriesProperties.candleStyle.borderDownColor': '#EF4444',
+          'mainSeriesProperties.candleStyle.wickUpColor': '#10B981',
+          'mainSeriesProperties.candleStyle.wickDownColor': '#EF4444',
+        },
+      })
+    } catch (error) {
+      console.error('TradingView widget error:', error)
+    }
   }
 
   const loadData = async () => {
@@ -279,7 +304,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* TradingView Chart - Clean Full Widget */}
+        {/* TradingView Chart - Widget with Maximum Features */}
         <div className="bg-black rounded-lg border border-gray-700 shadow-2xl overflow-hidden">
           <div className="h-[500px] sm:h-[600px] md:h-[700px] bg-black">
             <div 
@@ -287,6 +312,20 @@ export default function Dashboard() {
               ref={chartContainerRef} 
               className="w-full h-full"
             />
+          </div>
+          {/* Info badge */}
+          <div className="bg-gray-900 px-4 py-2 border-t border-gray-700 flex items-center justify-between">
+            <p className="text-gray-400 text-xs">
+              💾 Chart settings auto-saved | 🎨 Full drawing tools available on left sidebar
+            </p>
+            <a
+              href="https://www.tradingview.com/chart/?symbol=BINANCE:BTCUSDT"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 text-xs font-medium"
+            >
+              Open Full Version →
+            </a>
           </div>
         </div>
 
