@@ -23,7 +23,7 @@ export default function MarketGlobal() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false) // Changed default to false
   const [sidebarWidth, setSidebarWidth] = useState(288)
   const [isResizing, setIsResizing] = useState(false)
   const [selectedTimeframe, setSelectedTimeframe] = useState('5')

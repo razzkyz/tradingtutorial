@@ -70,7 +70,7 @@ export default function TradingAccess() {
                   </div>
                   {/* Total Balance */}
                   <h2 className="text-3xl md:text-4xl font-bold text-white">
-                    USDT {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    USDT {totalBalance.toFixed(0).replace(/,/g, '')}
                   </h2>
                 </div>
               )}
