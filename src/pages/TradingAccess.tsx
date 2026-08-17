@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { getBalances, calculateTotalBalance } from '../services/balanceService'
-import { Wallet, TrendingUp, TrendingDown, Activity, Search, Star, X, Maximize2, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react'
+import { Wallet, TrendingUp, TrendingDown, Activity, Search, Star, X, Maximize2, ChevronRight, GripVertical } from 'lucide-react'
 import { SkeletonBalanceCard } from '../components/Skeleton'
 import ErrorState from '../components/ErrorState'
 
@@ -296,10 +296,10 @@ export default function TradingAccess() {
   const totalBalance = calculateTotalBalance(balances)
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-black flex flex-col">
-      {/* Balance Card Section */}
-      <div className="px-4 py-6">
-        <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-black">
+      {/* Balance Card Section - Full Height on Mobile */}
+      <div className="min-h-screen sm:min-h-0 px-4 py-6 flex items-center">
+        <div className="w-full max-w-2xl mx-auto">
           {/* Main Card Container */}
           <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] p-6 md:p-8 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
             
@@ -365,10 +365,10 @@ export default function TradingAccess() {
         </div>
       </div>
 
-      {/* Trading Chart Section - Full Copy from Market Global */}
-      <div className="flex-1 flex flex-col">
-        {/* Timeframe Toolbar - TOP ROW */}
-        <div className="bg-black border-b border-gray-800 px-4 py-2">
+      {/* Trading Chart Section - Below Balance Cards */}
+      <div className="min-h-screen flex flex-col">
+        {/* Timeframe Toolbar - TOP ROW - Hidden on Mobile */}
+        <div className="hidden sm:block bg-black border-b border-gray-800 px-4 py-2">
           <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar">
             <span className="text-gray-400 text-sm font-medium whitespace-nowrap mr-2">
               Timeframe:
@@ -389,20 +389,20 @@ export default function TradingAccess() {
           </div>
         </div>
 
-        {/* Symbol & Controls Toolbar - SECOND ROW */}
-        <div className="bg-black border-b border-gray-800 px-4 py-3">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-2 sm:gap-4">
+        {/* Symbol & Controls Toolbar - SECOND ROW - Compact Mobile */}
+        <div className="bg-black border-b border-gray-800 px-2 sm:px-4 py-2 sm:py-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowSearch(!showSearch)}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-900 hover:bg-gray-800 rounded-lg border border-gray-800 transition-all"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-900 hover:bg-gray-800 rounded-lg border border-gray-800 transition-all"
               >
-                <span className="text-white font-bold text-sm sm:text-base">{selectedCoin}</span>
-                <Search className="w-4 h-4 text-emerald-400" />
+                <span className="text-white font-bold text-xs sm:text-base">{selectedCoin}</span>
+                <Search className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
               </button>
 
               {getCurrentCoin() && getCurrentCoin()!.price !== '0' && (
-                <div className="flex items-center gap-2 sm:gap-3">
+                <div className="hidden sm:flex items-center gap-2 sm:gap-3">
                   <span className="text-white font-bold text-lg sm:text-xl">
                     ${getCurrentCoin()!.price}
                   </span>
@@ -420,31 +420,22 @@ export default function TradingAccess() {
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Desktop: Show/Hide Sidebar */}
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="hidden md:flex p-2 bg-gray-900 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-all"
-                title={sidebarOpen ? 'Hide Watchlist' : 'Show Watchlist'}
-              >
-                {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-              </button>
-
+            <div className="flex items-center gap-1 sm:gap-2">
               {/* Mobile: Toggle Sidebar Overlay */}
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden p-2 bg-gray-900 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-all"
+                className="p-1.5 sm:p-2 bg-gray-900 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-all"
                 title="Markets"
               >
-                <Activity className="w-5 h-5" />
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
 
               <button
-                className="p-2 bg-gray-900 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-all"
+                className="p-1.5 sm:p-2 bg-gray-900 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-all"
                 title="Fullscreen"
                 onClick={() => document.documentElement.requestFullscreen()}
               >
-                <Maximize2 className="w-5 h-5" />
+                <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
