@@ -208,7 +208,7 @@ export default function Dashboard() {
           <div className="flex items-end justify-between gap-3 sm:gap-6">
             {/* User Info - Left */}
             <div className="flex flex-col items-start gap-2 sm:gap-3">
-              <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center overflow-hidden flex-shrink-0 border-2 border-cyan-400/40 transition-all duration-300">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center overflow-hidden flex-shrink-0 border-2 border-cyan-400/40 transition-all duration-300">
                 {loading ? (
                   <div className="w-full h-full bg-cyan-900/50 animate-pulse"></div>
                 ) : profile?.avatar_url ? (
@@ -219,7 +219,7 @@ export default function Dashboard() {
                   />
                 ) : (
                   <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-cyan-600 to-teal-700">
-                    <svg className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                     </svg>
                   </div>
@@ -238,9 +238,9 @@ export default function Dashboard() {
             </div>
 
             {/* Balance Badge - Right */}
-            <div className="bg-gradient-to-br from-emerald-500/90 to-teal-500/90 backdrop-blur-sm px-3 py-3 sm:px-5 sm:py-5 md:px-6 md:py-6 rounded-xl sm:rounded-2xl flex-shrink-0 border-2 border-emerald-400/40 transition-all duration-300">
+            <div className="bg-gradient-to-br from-emerald-500/90 to-teal-500/90 backdrop-blur-sm px-8 py-4 sm:px-12 sm:py-5 md:px-16 md:py-6 rounded-xl sm:rounded-2xl flex-shrink-0 border-2 border-emerald-400/40 transition-all duration-300">
               <div className="flex flex-col items-center justify-center gap-2 sm:gap-3">
-                <Wallet className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white flex-shrink-0" strokeWidth={2} />
+                <Wallet className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-white flex-shrink-0" strokeWidth={2} />
                 <div className="text-center min-w-0 mt-4">
                   <p className="text-white text-xs sm:text-base font-semibold uppercase tracking-wider mb-1">BALANCE</p>
                   {loading ? (
