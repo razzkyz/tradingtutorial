@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './routes/ProtectedRoute'
+import { AdminRoute } from './routes/AdminRoute'
 import AppLayout from './layouts/AppLayout'
 import LoadingState from './components/LoadingState'
 
@@ -11,6 +12,7 @@ const Profile = lazy(() => import('./pages/Profile'))
 const MarketGlobal = lazy(() => import('./pages/MarketGlobal'))
 const TradingAccess = lazy(() => import('./pages/TradingAccess'))
 const Withdrawal = lazy(() => import('./pages/Withdrawal'))
+const Settings = lazy(() => import('./pages/Settings'))
 
 // Admin pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
@@ -66,30 +68,38 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
 
-            {/* Admin Routes */}
+            {/* Admin Routes - Protected with AdminRoute */}
             <Route
               path="/admin/dashboard"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <AdminDashboard />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route
               path="/admin/add-customer"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <AddCustomer />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route
               path="/admin/customers"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <ManageCustomers />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
           </Route>

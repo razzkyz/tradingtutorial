@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
-import { ArrowLeft, Search, CheckCircle, XCircle, DollarSign } from 'lucide-react'
+import { ArrowLeft, Search, CheckCircle, XCircle, DollarSign, Edit, Trash2 } from 'lucide-react'
 import LoadingState from '../../components/LoadingState'
+import Toast from '../../components/Toast'
 
 interface Customer {
   user_id: string
@@ -25,9 +26,18 @@ export default function ManageCustomers() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [showBalanceModal, setShowBalanceModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [balanceAmount, setBalanceAmount] = useState('')
   const [balanceType, setBalanceType] = useState('balance_1')
   const [updating, setUpdating] = useState(false)
+  const [editForm, setEditForm] = useState({
+    full_name: '',
+    phone_number: '',
+    country: '',
+    investment_amount: '0'
+  })
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null)
 
   useEffect(() => {
     checkAdminAndLoadCustomers()
@@ -70,13 +80,23 @@ export default function ManageCustomers() {
   const loadCustomers = async () => {
     try {
       // Get all profiles
-      const { data: profiles } = await supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .eq('role', 'user')
         .order('created_at', { ascending: false }) as any
 
-      if (!profiles) return
+      // Debug: Log error if any
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError)
+      }
+
+      if (!profiles) {
+        console.warn('No profiles data returned')
+        return
+      }
+
+      console.log('Fetched profiles:', profiles)
 
       // Get balances and trading status for each user
       const customersData = await Promise.all(
@@ -130,10 +150,10 @@ export default function ManageCustomers() {
 
       // Reload customers
       await loadCustomers()
-      alert(`Trading status changed to ${newStatus} for ${customer.full_name}`)
+      setToast({ message: `Trading status changed to ${newStatus}`, type: 'success' })
     } catch (error) {
       console.error('Error toggling trading status:', error)
-      alert('Failed to update trading status')
+      setToast({ message: 'Failed to update trading status', type: 'error' })
     } finally {
       setUpdating(false)
     }
@@ -146,6 +166,22 @@ export default function ManageCustomers() {
     setShowBalanceModal(true)
   }
 
+  const openEditModal = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setEditForm({
+      full_name: customer.full_name,
+      phone_number: customer.phone_number || '',
+      country: customer.country || '',
+      investment_amount: customer.investment_amount.toString()
+    })
+    setShowEditModal(true)
+  }
+
+  const openDeleteModal = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowDeleteModal(true)
+  }
+
   const handleAddBalance = async () => {
     if (!selectedCustomer || !balanceAmount) return
 
@@ -153,7 +189,8 @@ export default function ManageCustomers() {
     try {
       const amount = parseFloat(balanceAmount)
       if (amount <= 0) {
-        alert('Amount must be greater than 0')
+        setToast({ message: 'Amount must be greater than 0', type: 'warning' })
+        setUpdating(false)
         return
       }
 
@@ -178,10 +215,59 @@ export default function ManageCustomers() {
 
       setShowBalanceModal(false)
       await loadCustomers()
-      alert(`Added ${amount} USDT to ${balanceType} for ${selectedCustomer.full_name}`)
+      setToast({ message: `Added ${amount} USDT to ${balanceType}`, type: 'success' })
     } catch (error) {
       console.error('Error adding balance:', error)
-      alert('Failed to add balance')
+      setToast({ message: 'Failed to add balance', type: 'error' })
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const handleEditCustomer = async () => {
+    if (!selectedCustomer) return
+
+    setUpdating(true)
+    try {
+      const result = await (supabase
+        .from('profiles') as any)
+        .update({
+          full_name: editForm.full_name,
+          phone_number: editForm.phone_number || null,
+          country: editForm.country || null,
+          investment_amount: parseFloat(editForm.investment_amount)
+        })
+        .eq('user_id', selectedCustomer.user_id)
+
+      if (result.error) throw result.error
+
+      setShowEditModal(false)
+      await loadCustomers()
+      setToast({ message: `Customer ${editForm.full_name} updated successfully`, type: 'success' })
+    } catch (error) {
+      console.error('Error updating customer:', error)
+      setToast({ message: 'Failed to update customer', type: 'error' })
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const handleDeleteCustomer = async () => {
+    if (!selectedCustomer) return
+
+    setUpdating(true)
+    try {
+      // Delete user from auth.users (cascade will delete related data)
+      const { error } = await supabase.auth.admin.deleteUser(selectedCustomer.user_id)
+
+      if (error) throw error
+
+      setShowDeleteModal(false)
+      await loadCustomers()
+      setToast({ message: `Customer ${selectedCustomer.full_name} deleted successfully`, type: 'success' })
+    } catch (error) {
+      console.error('Error deleting customer:', error)
+      setToast({ message: 'Failed to delete customer', type: 'error' })
     } finally {
       setUpdating(false)
     }
@@ -197,6 +283,15 @@ export default function ManageCustomers() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] px-4 py-6 bg-black">
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <button
@@ -314,6 +409,22 @@ export default function ManageCustomers() {
                           >
                             <DollarSign className="w-4 h-4" />
                           </button>
+                          <button
+                            onClick={() => openEditModal(customer)}
+                            disabled={updating}
+                            className="px-3 py-2 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                            title="Edit Customer"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(customer)}
+                            disabled={updating}
+                            className="px-3 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                            title="Delete Customer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -377,6 +488,125 @@ export default function ManageCustomers() {
                     {updating ? 'Adding...' : 'Add Balance'}
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Customer Modal */}
+        {showEditModal && selectedCustomer && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-black/95 border-2 border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.6)] rounded-lg max-w-md w-full p-6">
+              <h3 className="text-xl font-bold text-white mb-4">
+                Edit Customer: {selectedCustomer.full_name}
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-text-secondary text-sm mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    value={editForm.full_name}
+                    onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    disabled={updating}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-text-secondary text-sm mb-2">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={editForm.phone_number}
+                    onChange={(e) => setEditForm({ ...editForm, phone_number: e.target.value })}
+                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    disabled={updating}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-text-secondary text-sm mb-2">Country</label>
+                  <input
+                    type="text"
+                    value={editForm.country}
+                    onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    disabled={updating}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-text-secondary text-sm mb-2">Investment Amount (USDT)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editForm.investment_amount}
+                    onChange={(e) => setEditForm({ ...editForm, investment_amount: e.target.value })}
+                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    disabled={updating}
+                  />
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => setShowEditModal(false)}
+                    disabled={updating}
+                    className="flex-1 px-4 py-3 bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold rounded-lg transition-all disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleEditCustomer}
+                    disabled={updating || !editForm.full_name}
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.5)] hover:shadow-[0_0_30px_rgba(59,130,246,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {updating ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Customer Modal */}
+        {showDeleteModal && selectedCustomer && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-black/95 border-2 border-red-500/50 shadow-[0_0_40px_rgba(239,68,68,0.6)] rounded-lg max-w-md w-full p-6">
+              <h3 className="text-xl font-bold text-red-400 mb-4">
+                Delete Customer?
+              </h3>
+
+              <p className="text-white mb-2">
+                Are you sure you want to delete <strong>{selectedCustomer.full_name}</strong>?
+              </p>
+              <p className="text-text-secondary text-sm mb-6">
+                This will permanently delete:
+              </p>
+              <ul className="text-text-secondary text-sm mb-6 space-y-1 list-disc list-inside">
+                <li>User account and profile</li>
+                <li>All balances (USDT {selectedCustomer.total_balance.toFixed(2)})</li>
+                <li>Trading access records</li>
+                <li>Withdrawal history</li>
+              </ul>
+              <p className="text-red-400 text-sm font-semibold mb-6">
+                ⚠️ This action cannot be undone!
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={updating}
+                  className="flex-1 px-4 py-3 bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold rounded-lg transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteCustomer}
+                  disabled={updating}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(239,68,68,0.5)] hover:shadow-[0_0_30px_rgba(239,68,68,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {updating ? 'Deleting...' : 'Yes, Delete'}
+                </button>
               </div>
             </div>
           </div>

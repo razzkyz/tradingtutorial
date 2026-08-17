@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { getBalances, groupBalancesByCurrency, calculateTotalByCurrency } from '../services/balanceService'
 import { getProfile } from '../services/profileService'
 import { supabase } from '../lib/supabase'
 import { Wallet } from 'lucide-react'
 import ErrorState from '../components/ErrorState'
+import BinanceTrading from '../components/BinanceTrading'
 
 interface Balance {
   id: string
@@ -32,6 +33,18 @@ export default function Dashboard() {
   const [tradingStatus, setTradingStatus] = useState('inactive')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [hasApiKeys, setHasApiKeys] = useState(false)
+  const [showTradePanel, setShowTradePanel] = useState(false)
+  
+  // Draggable state - use refs for better performance
+  const panelRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [panelPosition, setPanelPosition] = useState({ x: 16, y: 16 })
+  const [buttonPosition, setButtonPosition] = useState({ x: 16, y: 16 })
+  const isDraggingRef = useRef(false)
+  const isDraggingButtonRef = useRef(false)
+  const dragOffsetRef = useRef({ x: 0, y: 0 })
+  const buttonDragOffsetRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     if (!user) return
@@ -170,12 +183,17 @@ export default function Dashboard() {
       setLoading(true)
       setError('')
 
-      const [balancesData, profileData, tradingData] = await Promise.all([
+      const [balancesData, profileData, tradingData, apiKeysData] = await Promise.all([
         getBalances(user.id),
         getProfile(user.id),
         supabase
           .from('trading_access')
           .select('status')
+          .eq('user_id', user.id)
+          .single(),
+        supabase
+          .from('user_binance_keys')
+          .select('api_key')
           .eq('user_id', user.id)
           .single(),
       ])
@@ -185,6 +203,9 @@ export default function Dashboard() {
       
       const tradingResult = tradingData as any
       setTradingStatus(tradingResult.data?.status || 'inactive')
+
+      const apiKeysResult = apiKeysData as any
+      setHasApiKeys(!!apiKeysResult.data?.api_key)
     } catch (err) {
       console.error('Error loading dashboard data:', err)
       setError('Failed to load dashboard data')
@@ -198,6 +219,123 @@ export default function Dashboard() {
   const groupedBalances = groupBalancesByCurrency(balances)
   const totalsByCurrency = calculateTotalByCurrency(balances)
   const isActive = tradingStatus === 'active'
+
+  // Drag handlers for panel - optimized with useCallback
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    isDraggingRef.current = true
+    dragOffsetRef.current = {
+      x: e.clientX - panelPosition.x,
+      y: e.clientY - panelPosition.y
+    }
+  }, [panelPosition])
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    isDraggingRef.current = true
+    dragOffsetRef.current = {
+      x: touch.clientX - panelPosition.x,
+      y: touch.clientY - panelPosition.y
+    }
+  }, [panelPosition])
+
+  // Drag handlers for button - optimized with useCallback
+  const handleButtonMouseDown = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    isDraggingButtonRef.current = true
+    buttonDragOffsetRef.current = {
+      x: e.clientX - buttonPosition.x,
+      y: e.clientY - buttonPosition.y
+    }
+  }, [buttonPosition])
+
+  const handleButtonTouchStart = useCallback((e: React.TouchEvent) => {
+    e.stopPropagation()
+    const touch = e.touches[0]
+    isDraggingButtonRef.current = true
+    buttonDragOffsetRef.current = {
+      x: touch.clientX - buttonPosition.x,
+      y: touch.clientY - buttonPosition.y
+    }
+  }, [buttonPosition])
+
+  // Add/remove event listeners for dragging - optimized
+  useEffect(() => {
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      let clientX: number, clientY: number
+      
+      if (e instanceof MouseEvent) {
+        clientX = e.clientX
+        clientY = e.clientY
+      } else {
+        clientX = e.touches[0].clientX
+        clientY = e.touches[0].clientY
+      }
+      
+      // Handle panel dragging using refs for better performance
+      if (isDraggingRef.current && panelRef.current) {
+        const newX = clientX - dragOffsetRef.current.x
+        const newY = clientY - dragOffsetRef.current.y
+        
+        const maxX = window.innerWidth - 220
+        const maxY = window.innerHeight - 300
+        
+        const boundedX = Math.max(0, Math.min(newX, maxX))
+        const boundedY = Math.max(0, Math.min(newY, maxY))
+        
+        // Direct DOM manipulation for smooth performance
+        panelRef.current.style.transform = `translate(${boundedX}px, ${boundedY}px)`
+      }
+      
+      // Handle button dragging using refs
+      if (isDraggingButtonRef.current && buttonRef.current) {
+        const newX = clientX - buttonDragOffsetRef.current.x
+        const newY = clientY - buttonDragOffsetRef.current.y
+        
+        const maxX = window.innerWidth - 100
+        const maxY = window.innerHeight - 50
+        
+        const boundedX = Math.max(0, Math.min(newX, maxX))
+        const boundedY = Math.max(0, Math.min(newY, maxY))
+        
+        // Direct DOM manipulation
+        buttonRef.current.style.transform = `translate(${boundedX}px, ${boundedY}px)`
+      }
+    }
+
+    const handleEnd = () => {
+      // Save final positions to state when drag ends
+      if (isDraggingRef.current && panelRef.current) {
+        const transform = panelRef.current.style.transform
+        const match = transform.match(/translate\((\d+)px, (\d+)px\)/)
+        if (match) {
+          setPanelPosition({ x: parseInt(match[1]), y: parseInt(match[2]) })
+        }
+      }
+      
+      if (isDraggingButtonRef.current && buttonRef.current) {
+        const transform = buttonRef.current.style.transform
+        const match = transform.match(/translate\((\d+)px, (\d+)px\)/)
+        if (match) {
+          setButtonPosition({ x: parseInt(match[1]), y: parseInt(match[2]) })
+        }
+      }
+      
+      isDraggingRef.current = false
+      isDraggingButtonRef.current = false
+    }
+
+    window.addEventListener('mousemove', handleMove, { passive: true })
+    window.addEventListener('mouseup', handleEnd)
+    window.addEventListener('touchmove', handleMove, { passive: true })
+    window.addEventListener('touchend', handleEnd)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('mouseup', handleEnd)
+      window.removeEventListener('touchmove', handleMove)
+      window.removeEventListener('touchend', handleEnd)
+    }
+  }, [])
 
   return (
     <div className="min-h-[calc(100vh-64px)] px-4 py-6 bg-black">
@@ -226,11 +364,11 @@ export default function Dashboard() {
                 )}
               </div>
               <div className="text-left min-w-0">
-                <p className="text-cyan-300 text-xs sm:text-sm font-medium mb-1">Name :</p>
+                <p className="text-cyan-300 text-xs sm:text-sm font-medium mb-1 font-inter">Name :</p>
                 {loading ? (
                   <div className="h-5 sm:h-7 w-20 sm:w-32 md:w-40 bg-gray-700/50 rounded animate-pulse"></div>
                 ) : (
-                  <p className="text-white text-sm sm:text-xl md:text-2xl font-bold leading-tight">
+                  <p className="text-white text-sm sm:text-xl md:text-2xl font-bold leading-tight font-manrope">
                     {profile?.full_name || 'User'}
                   </p>
                 )}
@@ -333,43 +471,140 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* TradingView Advanced Chart with Title Inside */}
-        <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_45px_rgba(6,182,212,0.5)] hover:border-cyan-400/60 transition-all duration-300 overflow-hidden">
-          {/* Title Bar Inside Chart Container */}
-          <div className="bg-gradient-to-r from-emerald-900/40 via-green-900/40 to-emerald-900/40 backdrop-blur-sm border-b border-emerald-500/30 px-4 sm:px-6 py-3 sm:py-4">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center">
-              <span className="text-white">Trade Smarter.</span>
-              <span className="text-emerald-400 ml-2">Move Faster.</span>
-            </h2>
+        {/* TradingView Chart with Integrated Trading Panel */}
+        <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_45px_rgba(6,182,212,0.5)] hover:border-cyan-400/60 transition-all duration-300 overflow-hidden mb-6">
+          {/* Title Bar with Running Text */}
+          <div className="bg-gradient-to-r from-emerald-900/40 via-green-900/40 to-emerald-900/40 backdrop-blur-sm border-b border-emerald-500/30 py-3 sm:py-4 overflow-hidden">
+            <div className="whitespace-nowrap animate-marquee">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold inline-block italic font-archivo-black">
+                <span className="text-white">Trade Smarter.</span>
+                <span className="text-emerald-400 ml-2 mr-12">Move Faster.</span>
+                <span className="text-white">Trade Smarter.</span>
+                <span className="text-emerald-400 ml-2 mr-12">Move Faster.</span>
+                <span className="text-white">Trade Smarter.</span>
+                <span className="text-emerald-400 ml-2 mr-12">Move Faster.</span>
+                <span className="text-white">Trade Smarter.</span>
+                <span className="text-emerald-400 ml-2 mr-12">Move Faster.</span>
+              </h2>
+            </div>
           </div>
           
-          <div className="h-[500px] sm:h-[600px] md:h-[700px] bg-black">
+          {/* Chart Container with Trading Panel Overlay */}
+          <div className="relative h-[500px] sm:h-[600px] md:h-[700px] bg-black">
+            {/* TradingView Chart */}
             <div 
               id="tradingview_chart_dashboard" 
               ref={chartContainerRef} 
               className="w-full h-full"
             />
+            
+            {/* Toggle Trade Panel Button - Draggable */}
+            {hasApiKeys && (
+              <button
+                ref={buttonRef}
+                className="absolute z-20 bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg shadow-[0_0_20px_rgba(234,179,8,0.6)] transition-colors text-sm sm:text-base select-none touch-none"
+                style={{ 
+                  left: 0,
+                  top: 0,
+                  transform: `translate(${buttonPosition.x}px, ${buttonPosition.y}px)`,
+                  cursor: 'grab',
+                  willChange: 'transform'
+                }}
+                onMouseDown={handleButtonMouseDown}
+                onTouchStart={handleButtonTouchStart}
+                onClick={() => {
+                  if (!isDraggingButtonRef.current) {
+                    setShowTradePanel(!showTradePanel)
+                  }
+                }}
+                title={showTradePanel ? 'Hide Trading Panel' : 'Show Trading Panel'}
+              >
+                Trade
+              </button>
+            )}
+
+            {/* Quick Trade Panel Overlay - Draggable */}
+            {hasApiKeys && showTradePanel && (
+              <div 
+                ref={panelRef}
+                className="absolute z-10 w-[180px] sm:w-[220px] touch-none"
+                style={{ 
+                  left: 0,
+                  top: 0,
+                  transform: `translate(${panelPosition.x}px, ${panelPosition.y}px)`,
+                  willChange: 'transform'
+                }}
+              >
+                <div className="bg-gradient-to-br from-gray-900/98 to-gray-800/98 backdrop-blur-xl border border-yellow-500/40 shadow-[0_0_40px_rgba(234,179,8,0.3)] rounded-lg overflow-hidden">
+                  {/* Panel Header with Close Button - Draggable Handle */}
+                  <div 
+                    className="bg-gradient-to-r from-yellow-600/20 to-yellow-500/20 px-3 py-2 border-b border-yellow-500/30 flex items-center justify-between cursor-grab active:cursor-grabbing select-none"
+                    onMouseDown={handleMouseDown}
+                    onTouchStart={handleTouchStart}
+                  >
+                    <h3 className="text-yellow-400 font-bold text-sm">Trade</h3>
+                    <button
+                      onClick={() => setShowTradePanel(false)}
+                      className="text-gray-400 hover:text-white transition-colors"
+                      title="Close"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {/* Panel Content - Compact */}
+                  <div className="p-3">
+                    <BinanceTrading symbol="BTCUSDT" compact={true} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* No API Keys Warning - Only show if panel is toggled */}
+            {!hasApiKeys && (
+              <div className="absolute top-4 left-4 z-10 w-full max-w-[calc(100%-2rem)] sm:w-auto">
+                <div className="bg-gradient-to-br from-red-900/95 to-gray-900/95 backdrop-blur-xl border border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.6)] rounded-lg p-3 sm:p-4 max-w-xs">
+                  <h3 className="text-white font-bold text-sm mb-1.5">🔒 Trading Disabled</h3>
+                  <p className="text-red-200 text-xs mb-2">
+                    Setup API keys to enable live trading.
+                  </p>
+                  <a
+                    href="/settings"
+                    className="block w-full text-center bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-3 rounded text-xs transition-all"
+                  >
+                    Go to Settings →
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
           
-          {/* Info badge with TradingView link */}
+          {/* Info Footer */}
           <div className="bg-gradient-to-r from-gray-900/95 to-teal-900/40 backdrop-blur-sm px-4 py-3 border-t border-cyan-500/30 flex items-center justify-between flex-wrap gap-3">
             <p className="text-cyan-300 text-xs font-medium">
-              📈 Interactive TradingView chart with full features
+              📈 TradingView chart with integrated Binance trading
             </p>
-            <a
-              href="https://www.tradingview.com/chart/?symbol=BINANCE:BTCUSDT"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs sm:text-sm font-medium px-4 py-2 rounded-lg transition-all hover:scale-105 shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)]"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 6h12v2H6V6zm0 4h12v2H6v-2zm0 4h12v2H6v-2z"/>
-              </svg>
-              <span>Full TradingView</span>
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
+            <div className="flex items-center gap-2">
+              {hasApiKeys && (
+                <span className="text-emerald-400 text-xs font-semibold flex items-center gap-1">
+                  <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                  Live Trading Enabled
+                </span>
+              )}
+              <a
+                href="https://www.tradingview.com/chart/?symbol=BINANCE:BTCUSDT"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-all hover:scale-105 shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+              >
+                <span>Full Chart</span>
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
 

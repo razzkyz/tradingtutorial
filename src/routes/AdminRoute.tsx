@@ -3,24 +3,24 @@ import { useAuth } from '../hooks/useAuth'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-interface ProtectedRouteProps {
+interface AdminRouteProps {
   children: React.ReactNode
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function AdminRoute({ children }: AdminRouteProps) {
   const { user, loading: authLoading } = useAuth()
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    checkRole()
+    checkAdminRole()
   }, [user])
 
-  const checkRole = async () => {
+  const checkAdminRole = async () => {
     if (authLoading) return
 
     if (!user) {
-      setIsAdmin(null)
+      setIsAdmin(false)
       setChecking(false)
       return
     }
@@ -34,7 +34,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
       setIsAdmin(profile?.role === 'admin')
     } catch (error) {
-      console.error('Error checking role:', error)
+      console.error('Error checking admin role:', error)
       setIsAdmin(false)
     } finally {
       setChecking(false)
@@ -45,7 +45,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (authLoading || checking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
+          <p className="text-cyan-300">Verifying access...</p>
+        </div>
       </div>
     )
   }
@@ -55,12 +58,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />
   }
 
-  // Admin trying to access user routes - redirect to admin dashboard
-  if (isAdmin === true) {
-    return <Navigate to="/admin/dashboard" replace />
+  // Not admin - redirect to user dashboard
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />
   }
 
-  // Regular user - allow access
+  // Is admin - allow access
   return <>{children}</>
 }
-

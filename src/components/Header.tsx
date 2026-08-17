@@ -80,7 +80,7 @@ export default function Header() {
               <img 
                 src="/images/logo.png" 
                 alt="Trading Tutorials" 
-                className="h-12 sm:h-14 md:h-16 w-auto object-contain"
+                className="h-8 sm:h-10 md:h-11 w-auto object-contain"
                 loading="eager"
                 decoding="async"
                 onError={(e) => {
@@ -93,8 +93,8 @@ export default function Header() {
               />
               {/* Text "TRADING TUTORIALS" - Vertical Box Layout */}
               <div className="flex flex-col leading-none">
-                <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white tracking-wide uppercase">TRADING</span>
-                <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-emerald-400 tracking-wide uppercase -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
+                <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-white tracking-wide uppercase">TRADING</span>
+                <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-emerald-400 tracking-wide uppercase -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
               </div>
               {/* Fallback: Icon + Text */}
               <div className="hidden items-center gap-2" id="logo-fallback" style={{ display: 'none' }}>
@@ -102,8 +102,8 @@ export default function Header() {
                   <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <div className="flex flex-col leading-none">
-                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white tracking-wide uppercase">TRADING</span>
-                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-emerald-400 tracking-wide uppercase -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
+                  <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-white tracking-wide uppercase">TRADING</span>
+                  <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-emerald-400 tracking-wide uppercase -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
                 </div>
               </div>
             </Link>
