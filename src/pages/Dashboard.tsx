@@ -207,7 +207,7 @@ export default function Dashboard() {
         <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] p-4 sm:p-6 mb-6 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
           <div className="flex items-start justify-between gap-3 sm:gap-6">
             {/* User Info - Left */}
-            <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex flex-col items-start gap-2 sm:gap-3">
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center overflow-hidden flex-shrink-0 border-2 border-cyan-400/40 transition-all duration-300">
                 {loading ? (
                   <div className="w-full h-full bg-cyan-900/50 animate-pulse"></div>
@@ -225,31 +225,31 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-              <div className="min-w-0">
-                <p className="text-cyan-300 text-xs sm:text-sm mb-1 font-medium">Name :</p>
+              <div className="text-left min-w-0">
+                <p className="text-cyan-300 text-xs sm:text-sm font-medium">Name :</p>
                 {loading ? (
                   <div className="h-5 sm:h-7 w-20 sm:w-32 md:w-40 bg-gray-700/50 rounded animate-pulse"></div>
                 ) : (
-                  <p className="text-white text-sm sm:text-xl md:text-2xl font-bold leading-tight truncate">
+                  <p className="text-white text-sm sm:text-xl md:text-2xl font-bold leading-tight">
                     {profile?.full_name || 'User'}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Balance Badge - Right (no glow on inner) */}
-            <div className="bg-gradient-to-br from-emerald-500/90 to-teal-500/90 backdrop-blur-sm px-3 py-2 sm:px-5 sm:py-4 md:px-6 md:py-5 rounded-xl sm:rounded-2xl flex-shrink-0 border-2 border-emerald-400/40 transition-all duration-300">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Wallet className="w-7 h-7 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white flex-shrink-0" strokeWidth={2} />
-                <div className="min-w-0">
-                  <p className="text-white text-[10px] sm:text-sm font-semibold uppercase tracking-wider mb-1">BALANCE</p>
+            {/* Balance Badge - Right */}
+            <div className="bg-gradient-to-br from-emerald-500/90 to-teal-500/90 backdrop-blur-sm px-3 py-3 sm:px-5 sm:py-5 md:px-6 md:py-6 rounded-xl sm:rounded-2xl flex-shrink-0 border-2 border-emerald-400/40 transition-all duration-300">
+              <div className="flex flex-col items-center justify-center gap-2 sm:gap-3">
+                <Wallet className="w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 text-white flex-shrink-0" strokeWidth={2} />
+                <div className="text-center min-w-0">
+                  <p className="text-white text-xs sm:text-base font-semibold uppercase tracking-wider">BALANCE</p>
                   {loading ? (
-                    <div className="h-5 sm:h-7 w-16 sm:w-24 bg-white/20 rounded animate-pulse"></div>
+                    <div className="h-5 sm:h-7 w-16 sm:w-24 bg-white/20 rounded animate-pulse mx-auto"></div>
                   ) : (
                     <div className="space-y-0.5">
                       {Object.entries(totalsByCurrency).map(([currency, total]) => (
-                        <p key={currency} className="text-white text-xs sm:text-lg md:text-xl font-bold leading-tight">
-                          {currency} {total.toFixed(2)}
+                        <p key={currency} className="text-white text-xs sm:text-base font-bold leading-tight">
+                          {currency} {total.toFixed(0)}
                         </p>
                       ))}
                     </div>
@@ -261,9 +261,9 @@ export default function Dashboard() {
         </div>
 
         {/* Balance 1, Balance 2 & Trading Status - Side by Side */}
-        <div className="flex flex-row gap-8 sm:gap-12 mb-6">
+        <div className="flex flex-row gap-8 sm:gap-12 mb-6 items-stretch">
           {/* Left Column - Balance 1 & 2 Stacked */}
-          <div className="flex-1 space-y-3">
+          <div className="flex-1 space-y-3 flex flex-col">
             {/* Balance 1 - no inner glow */}
             <div className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg px-4 py-2 h-[70px] hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
               <p className="text-cyan-300 text-xs sm:text-sm font-medium mb-1">Balance 1</p>
@@ -274,11 +274,11 @@ export default function Dashboard() {
                   {groupedBalances['balance_1'] ? (
                     Object.entries(groupedBalances['balance_1']).map(([currency, amount]) => (
                       <p key={currency} className="text-white text-base sm:text-xl font-bold">
-                        {currency} {amount.toFixed(2)}
+                        {currency} {amount.toFixed(0)}
                       </p>
                     ))
                   ) : (
-                    <p className="text-white text-base sm:text-xl font-bold">USDT 0.00</p>
+                    <p className="text-white text-base sm:text-xl font-bold">USDT 0</p>
                   )}
                 </div>
               )}
@@ -294,7 +294,7 @@ export default function Dashboard() {
                   {groupedBalances['balance_2'] ? (
                     Object.entries(groupedBalances['balance_2']).map(([currency, amount]) => (
                       <p key={currency} className="text-white text-base sm:text-xl font-bold">
-                        {currency} {amount.toFixed(2)}
+                        {currency} {amount.toFixed(0)}
                       </p>
                     ))
                   ) : (
@@ -306,7 +306,7 @@ export default function Dashboard() {
           </div>
 
           {/* Right Column - Trading Status with Elegant Glow */}
-          <div className={`flex-1 border-2 rounded-lg px-4 flex flex-col items-center justify-center min-h-[155px] backdrop-blur-sm transition-all duration-300 ${
+          <div className={`flex-1 border-2 rounded-lg px-4 flex flex-col items-center justify-center backdrop-blur-sm transition-all duration-300 ${
             isActive 
               ? 'border-emerald-400/70 bg-black/95 shadow-[0_0_35px_rgba(16,185,129,0.5)] hover:shadow-[0_0_50px_rgba(16,185,129,0.7)]' 
               : 'border-white/70 bg-black/95 shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:shadow-[0_0_35px_rgba(255,255,255,0.4)]'

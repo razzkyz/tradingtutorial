@@ -59,18 +59,18 @@ export default function TradingAccess() {
             <div className="flex justify-end">
               {loading ? (
                 <div className="flex flex-col items-end">
-                  <div className="w-20 h-20 bg-text-muted/20 rounded-2xl animate-pulse mb-3"></div>
+                  <div className="w-24 h-24 bg-text-muted/20 rounded-2xl animate-pulse mb-3"></div>
                   <div className="h-10 w-40 bg-text-muted/20 rounded animate-pulse"></div>
                 </div>
               ) : (
                 <div className="flex flex-col items-end">
                   {/* Wallet Icon - no glow */}
-                  <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-5 rounded-lg mb-3">
-                    <Wallet className="w-10 h-10 text-white" strokeWidth={2} />
+                  <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-6 rounded-lg mb-3">
+                    <Wallet className="w-16 h-16 text-white" strokeWidth={2} />
                   </div>
                   {/* Total Balance */}
                   <h2 className="text-3xl md:text-4xl font-bold text-white">
-                    USDT {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    USDT {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </h2>
                 </div>
               )}
