@@ -72,11 +72,18 @@ export default function Dashboard() {
       enable_publishing: false,
       hide_top_toolbar: false,
       hide_legend: false,
+      hide_side_toolbar: false,
       save_image: false,
       backgroundColor: '#000000',
       gridColor: '#1F2937',
       allow_symbol_change: true,
-      studies: ['MASimple@tv-basicstudies', 'RSI@tv-basicstudies'],
+      details: true,
+      hotlist: true,
+      calendar: false,
+      studies: ['MASimple@tv-basicstudies'],
+      show_popup_button: true,
+      popup_width: '1000',
+      popup_height: '650',
       enabled_features: [
         'study_templates',
         'side_toolbar_in_fullscreen_mode',
@@ -87,7 +94,10 @@ export default function Dashboard() {
         'left_toolbar',
         'control_bar',
         'main_series_scale_menu',
+        'drawing_templates',
+        'show_chart_property_page',
       ],
+      disabled_features: [],
       overrides: {
         'paneProperties.background': '#000000',
         'paneProperties.backgroundType': 'solid',
@@ -143,12 +153,12 @@ export default function Dashboard() {
     <div className="min-h-[calc(100vh-64px)] px-4 py-6">
       <div className="max-w-7xl mx-auto">
         
-        {/* User Profile Card */}
+        {/* User Profile & Balance Card - Unified */}
         <div className="bg-gradient-to-br from-gray-900 to-teal-900 backdrop-blur-sm rounded-3xl border border-teal-700/40 shadow-2xl p-6 mb-6">
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex items-center justify-between gap-6">
             {/* User Info - Left */}
-            <div className="flex flex-col items-start">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center overflow-hidden shadow-xl mb-3">
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center overflow-hidden shadow-xl flex-shrink-0">
                 {loading ? (
                   <div className="w-full h-full bg-text-muted/20 animate-pulse"></div>
                 ) : profile?.avatar_url ? (
@@ -158,33 +168,33 @@ export default function Dashboard() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-2xl sm:text-3xl">👤</span>
+                  <span className="text-3xl sm:text-4xl">👤</span>
                 )}
               </div>
               <div>
                 <p className="text-gray-400 text-xs sm:text-sm mb-1">Name :</p>
                 {loading ? (
-                  <div className="h-6 sm:h-7 w-24 sm:w-32 bg-gray-700/50 rounded animate-pulse"></div>
+                  <div className="h-7 w-32 sm:w-40 bg-gray-700/50 rounded animate-pulse"></div>
                 ) : (
-                  <p className="text-white text-base sm:text-xl font-bold leading-tight">
+                  <p className="text-white text-xl sm:text-2xl font-bold leading-tight">
                     {profile?.full_name || 'User'}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Balance Badge - Right - Now showing all currencies */}
-            <div className="bg-gradient-to-br from-teal-700 to-cyan-600 px-4 py-4 sm:px-5 sm:py-6 rounded-xl sm:rounded-2xl shadow-xl flex-shrink-0">
-              <div className="flex items-start gap-2 sm:gap-3">
-                <Wallet className="w-8 h-8 sm:w-9 sm:h-9 text-white" strokeWidth={2.5} />
+            {/* Balance Badge - Right - Single unified display */}
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-500 px-6 py-5 sm:px-8 sm:py-6 rounded-2xl shadow-xl flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <Wallet className="w-12 h-12 sm:w-14 sm:h-14 text-white" strokeWidth={2} />
                 <div>
-                  <p className="text-white text-[10px] sm:text-xs font-semibold uppercase tracking-wide leading-none mb-2">Total Balance</p>
+                  <p className="text-white text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2">BALANCE</p>
                   {loading ? (
-                    <div className="h-5 sm:h-6 w-20 sm:w-24 bg-white/20 rounded animate-pulse"></div>
+                    <div className="h-7 w-28 bg-white/20 rounded animate-pulse"></div>
                   ) : (
-                    <div className="space-y-1">
+                    <div>
                       {Object.entries(totalsByCurrency).map(([currency, total]) => (
-                        <p key={currency} className="text-white text-sm sm:text-base font-bold leading-none">
+                        <p key={currency} className="text-white text-xl sm:text-2xl font-bold leading-tight">
                           {currency} {total.toFixed(2)}
                         </p>
                       ))}
@@ -196,74 +206,70 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Balance 1, 2 (Left) & Trading Status (Right) */}
-        <div className="grid grid-cols-[1fr,auto] sm:grid-cols-[auto,auto,1fr] gap-4 mb-4 sm:justify-start">
+        {/* Balance 1, Balance 2 & Trading Status - Side by Side */}
+        <div className="flex flex-row gap-4 mb-6">
           {/* Left Column - Balance 1 & 2 Stacked */}
-          <div className="space-y-4">
+          <div className="flex-1 space-y-3">
             {/* Balance 1 */}
-            <div>
-              <label className="text-gray-300 text-sm font-medium mb-2 block">Balance 1</label>
-              <div className="bg-transparent border-2 border-teal-700/60 rounded-2xl px-4 py-3.5 sm:min-w-[200px]">
-                {loading ? (
-                  <div className="h-6 w-20 bg-gray-700/50 rounded animate-pulse"></div>
-                ) : (
-                  <div className="space-y-1">
-                    {groupedBalances['balance_1'] ? (
-                      Object.entries(groupedBalances['balance_1']).map(([currency, amount]) => (
-                        <p key={currency} className="text-white text-base font-bold">
-                          {currency} {amount.toFixed(2)}
-                        </p>
-                      ))
-                    ) : (
-                      <p className="text-white text-base font-bold">No balance</p>
-                    )}
-                  </div>
-                )}
-              </div>
+            <div className="bg-transparent border-2 border-teal-700/60 rounded-lg px-4 py-2 h-[70px]">
+              <p className="text-gray-300 text-xs sm:text-sm font-medium mb-1">Balance 1</p>
+              {loading ? (
+                <div className="h-6 w-24 bg-gray-700/50 rounded animate-pulse"></div>
+              ) : (
+                <div className="space-y-1">
+                  {groupedBalances['balance_1'] ? (
+                    Object.entries(groupedBalances['balance_1']).map(([currency, amount]) => (
+                      <p key={currency} className="text-white text-base sm:text-xl font-bold">
+                        {currency} {amount.toFixed(2)}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-white text-base sm:text-xl font-bold">USDT 0.00</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Balance 2 */}
-            <div>
-              <label className="text-gray-300 text-sm font-medium mb-2 block">Balance 2</label>
-              <div className="bg-transparent border-2 border-teal-700/60 rounded-2xl px-4 py-3.5 sm:min-w-[200px]">
-                {loading ? (
-                  <div className="h-6 w-20 bg-gray-700/50 rounded animate-pulse"></div>
-                ) : (
-                  <div className="space-y-1">
-                    {groupedBalances['balance_2'] ? (
-                      Object.entries(groupedBalances['balance_2']).map(([currency, amount]) => (
-                        <p key={currency} className="text-white text-base font-bold">
-                          {currency} {amount.toFixed(2)}
-                        </p>
-                      ))
-                    ) : (
-                      <p className="text-white text-base font-bold">No balance</p>
-                    )}
-                  </div>
-                )}
-              </div>
+            <div className="bg-transparent border-2 border-teal-700/60 rounded-lg px-4 py-2 h-[70px]">
+              <p className="text-gray-300 text-xs sm:text-sm font-medium mb-1">Balance 2</p>
+              {loading ? (
+                <div className="h-6 w-24 bg-gray-700/50 rounded animate-pulse"></div>
+              ) : (
+                <div className="space-y-1">
+                  {groupedBalances['balance_2'] ? (
+                    Object.entries(groupedBalances['balance_2']).map(([currency, amount]) => (
+                      <p key={currency} className="text-white text-base sm:text-xl font-bold">
+                        {currency} {amount.toFixed(2)}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-white text-base sm:text-xl font-bold">USDT...</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right Column - Trading Status (aligned with Balance 1 & 2, not exceeding them) */}
-          <div className={`border-2 rounded-2xl px-4 py-6 flex flex-col items-center justify-center min-w-[140px] sm:min-w-[160px] self-center ${
+          {/* Right Column - Trading Status (same height as Balance 1 & 2 combined) */}
+          <div className={`flex-1 border-2 rounded-lg px-4 flex flex-col items-center justify-center min-h-[155px] ${
             isActive 
               ? 'border-emerald-500 bg-emerald-500/10' 
-              : 'border-teal-700/80 bg-transparent'
+              : 'border-white bg-transparent'
           }`}>
             {loading ? (
               <>
-                <div className="h-5 w-20 bg-gray-700/50 rounded animate-pulse mb-3"></div>
-                <div className="h-6 w-24 bg-gray-700/50 rounded animate-pulse"></div>
+                <div className="h-6 w-24 bg-gray-700/50 rounded animate-pulse mb-3"></div>
+                <div className="h-8 w-32 bg-gray-700/50 rounded animate-pulse"></div>
               </>
             ) : (
               <>
-                <p className={`text-base font-semibold mb-2 ${
+                <p className={`text-base sm:text-xl font-semibold mb-2 ${
                   isActive ? 'text-emerald-400' : 'text-white'
                 }`}>
                   {isActive ? 'Active' : 'Inactive'}
                 </p>
-                <p className={`text-lg font-bold uppercase leading-tight text-center ${
+                <p className={`text-xl sm:text-3xl font-bold uppercase ${
                   isActive ? 'text-emerald-400' : 'text-white'
                 }`}>
                   TRADING
@@ -273,12 +279,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* TradingView Chart - Full Width */}
-        <div className="bg-black rounded-2xl border border-gray-700 shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-4 py-3 border-b border-gray-700">
-            <h2 className="text-white text-base sm:text-lg font-bold">Market Chart - BTC/USDT</h2>
-          </div>
-          <div className="h-[400px] sm:h-[500px] md:h-[600px] bg-black">
+        {/* TradingView Chart - Clean Full Widget */}
+        <div className="bg-black rounded-lg border border-gray-700 shadow-2xl overflow-hidden">
+          <div className="h-[500px] sm:h-[600px] md:h-[700px] bg-black">
             <div 
               id="tradingview_chart_dashboard" 
               ref={chartContainerRef} 
