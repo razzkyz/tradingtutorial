@@ -205,10 +205,10 @@ export default function Dashboard() {
         
         {/* User Profile & Balance Card - Unified with Elegant Glow */}
         <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] p-4 sm:p-6 mb-6 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
-          <div className="flex items-start justify-between gap-3 sm:gap-6">
+          <div className="flex items-end justify-between gap-3 sm:gap-6">
             {/* User Info - Left */}
             <div className="flex flex-col items-start gap-2 sm:gap-3">
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center overflow-hidden flex-shrink-0 border-2 border-cyan-400/40 transition-all duration-300">
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center overflow-hidden flex-shrink-0 border-2 border-cyan-400/40 transition-all duration-300">
                 {loading ? (
                   <div className="w-full h-full bg-cyan-900/50 animate-pulse"></div>
                 ) : profile?.avatar_url ? (
@@ -219,14 +219,14 @@ export default function Dashboard() {
                   />
                 ) : (
                   <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-cyan-600 to-teal-700">
-                    <svg className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                     </svg>
                   </div>
                 )}
               </div>
               <div className="text-left min-w-0">
-                <p className="text-cyan-300 text-xs sm:text-sm font-medium">Name :</p>
+                <p className="text-cyan-300 text-xs sm:text-sm font-medium mb-1">Name :</p>
                 {loading ? (
                   <div className="h-5 sm:h-7 w-20 sm:w-32 md:w-40 bg-gray-700/50 rounded animate-pulse"></div>
                 ) : (
@@ -240,9 +240,9 @@ export default function Dashboard() {
             {/* Balance Badge - Right */}
             <div className="bg-gradient-to-br from-emerald-500/90 to-teal-500/90 backdrop-blur-sm px-3 py-3 sm:px-5 sm:py-5 md:px-6 md:py-6 rounded-xl sm:rounded-2xl flex-shrink-0 border-2 border-emerald-400/40 transition-all duration-300">
               <div className="flex flex-col items-center justify-center gap-2 sm:gap-3">
-                <Wallet className="w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 text-white flex-shrink-0" strokeWidth={2} />
-                <div className="text-center min-w-0">
-                  <p className="text-white text-xs sm:text-base font-semibold uppercase tracking-wider">BALANCE</p>
+                <Wallet className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white flex-shrink-0" strokeWidth={2} />
+                <div className="text-center min-w-0 mt-4">
+                  <p className="text-white text-xs sm:text-base font-semibold uppercase tracking-wider mb-1">BALANCE</p>
                   {loading ? (
                     <div className="h-5 sm:h-7 w-16 sm:w-24 bg-white/20 rounded animate-pulse mx-auto"></div>
                   ) : (
