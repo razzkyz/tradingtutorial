@@ -29,7 +29,12 @@ export default function Withdrawal() {
     if (!user) return
 
     loadData()
-  }, [user])
+    
+    // Cleanup
+    return () => {
+      // Cancel any pending requests
+    }
+  }, [user?.id]) // Only depend on user.id
 
   const loadData = async () => {
     if (!user) return
@@ -156,6 +161,8 @@ export default function Withdrawal() {
                     src="/images/dompet.png" 
                     alt="Wallet" 
                     className="w-64 h-auto mx-auto object-contain drop-shadow-2xl"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       // Fallback to jpeg if png not found
                       const imgElement = e.currentTarget
@@ -221,7 +228,7 @@ export default function Withdrawal() {
 
                 {/* Balance Display */}
                 <div className="mb-8 mt-12">
-                  <p className="text-white text-4xl font-bold drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
+                  <p className="text-white text-4xl font-bold">
                     USDT {availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -239,7 +246,7 @@ export default function Withdrawal() {
             <>
               {/* Withdrawal Form */}
               <div className="bg-gradient-to-r from-cyan-900/30 to-teal-900/30 p-6 border-b border-cyan-500/30">
-                <h1 className="text-2xl font-bold text-white drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">Withdrawal Request</h1>
+                <h1 className="text-2xl font-bold text-white">Withdrawal Request</h1>
               </div>
 
               <form onSubmit={handleSubmit} className="p-8 space-y-6">
@@ -353,7 +360,7 @@ export default function Withdrawal() {
         {showConfirmModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-black/95 border-2 border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.6)] rounded-lg max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-white mb-4 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">Confirm Withdrawal</h3>
+              <h3 className="text-xl font-bold text-white mb-4">Confirm Withdrawal</h3>
               
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">

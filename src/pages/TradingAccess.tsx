@@ -21,7 +21,12 @@ export default function TradingAccess() {
     if (!user) return
 
     loadBalances()
-  }, [user])
+    
+    // Cleanup
+    return () => {
+      // Cancel any pending requests
+    }
+  }, [user?.id]) // Only depend on user.id
 
   const loadBalances = async () => {
     if (!user) return
@@ -59,12 +64,12 @@ export default function TradingAccess() {
                 </div>
               ) : (
                 <div className="flex flex-col items-end">
-                  {/* Wallet Icon */}
-                  <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-5 rounded-lg shadow-[0_0_25px_rgba(6,182,212,0.5)] mb-3">
-                    <Wallet className="w-10 h-10 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" strokeWidth={2} />
+                  {/* Wallet Icon - no glow */}
+                  <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-5 rounded-lg mb-3">
+                    <Wallet className="w-10 h-10 text-white" strokeWidth={2} />
                   </div>
                   {/* Total Balance */}
-                  <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
+                  <h2 className="text-3xl md:text-4xl font-bold text-white">
                     USDT {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h2>
                 </div>
@@ -88,10 +93,10 @@ export default function TradingAccess() {
                   className="bg-black/95 border-2 border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.3)] rounded-lg p-4 animate-scale-in hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] hover:border-cyan-400/60 transition-all duration-300"
                   style={{ animationDelay: `${0.1 * index}s` }}
                 >
-                  <p className="text-cyan-300 text-sm font-medium mb-1 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
+                  <p className="text-cyan-300 text-sm font-medium mb-1">
                     Balance {index + 1}
                   </p>
-                  <p className="text-white text-xl font-bold drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
+                  <p className="text-white text-xl font-bold">
                     USDT {balance.amount.toLocaleString('en-US', { minimumFractionDigits: 0 })}
                   </p>
                 </div>

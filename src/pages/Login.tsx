@@ -92,10 +92,10 @@ export default function Login() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-cyan-300 text-sm mb-1">Total Users</p>
-                    <p className="text-white text-3xl font-bold drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">10,000+</p>
+                    <p className="text-white text-3xl font-bold">10,000+</p>
                   </div>
-                  <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-4 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.5)]">
-                    <svg className="w-10 h-10 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-4 rounded-xl">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                   </div>
@@ -134,10 +134,10 @@ export default function Login() {
             <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] overflow-hidden hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
               {/* Header */}
               <div className="bg-gradient-to-r from-cyan-900/30 to-teal-900/30 p-6 lg:p-8 text-center border-b border-cyan-500/30">
-                <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
+                <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">
                   Welcome Back!
                 </h3>
-                <p className="text-cyan-200 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Sign in to your account to continue</p>
+                <p className="text-cyan-200">Sign in to your account to continue</p>
               </div>
 
               {/* Form */}

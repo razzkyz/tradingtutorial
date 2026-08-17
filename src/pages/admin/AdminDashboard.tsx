@@ -19,7 +19,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     checkAdminAndLoadStats()
-  }, [user, authLoading])
+  }, [user?.id, authLoading]) // Only depend on user.id and authLoading
 
   const checkAdminAndLoadStats = async () => {
     // Wait for auth to finish loading
@@ -78,45 +78,45 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">Admin Dashboard</h1>
-          <p className="text-cyan-200 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Manage customers, settings, and view analytics</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-cyan-200">Manage customers, settings, and view analytics</p>
         </div>
 
-        {/* Statistics Cards */}
+        {/* Statistics Cards - outer cards glow only */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg p-6 hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <Users className="w-8 h-8 text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+              <Users className="w-8 h-8 text-cyan-400" />
               <span className="text-cyan-300 text-sm">Total</span>
             </div>
-            <p className="text-3xl font-bold text-white mb-1 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">{stats.totalUsers}</p>
+            <p className="text-3xl font-bold text-white mb-1">{stats.totalUsers}</p>
             <p className="text-cyan-200 text-sm">Customers</p>
           </div>
 
           <div className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg p-6 hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <TrendingUp className="w-8 h-8 text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+              <TrendingUp className="w-8 h-8 text-emerald-400" />
               <span className="text-cyan-300 text-sm">Active</span>
             </div>
-            <p className="text-3xl font-bold text-white mb-1 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">{stats.activeTraders}</p>
+            <p className="text-3xl font-bold text-white mb-1">{stats.activeTraders}</p>
             <p className="text-cyan-200 text-sm">Active Traders</p>
           </div>
 
           <div className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg p-6 hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <FileText className="w-8 h-8 text-yellow-400 drop-shadow-[0_0_10px_rgba(234,179,8,0.8)]" />
+              <FileText className="w-8 h-8 text-yellow-400" />
               <span className="text-cyan-300 text-sm">Pending</span>
             </div>
-            <p className="text-3xl font-bold text-white mb-1 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">{stats.pendingWithdrawals}</p>
+            <p className="text-3xl font-bold text-white mb-1">{stats.pendingWithdrawals}</p>
             <p className="text-cyan-200 text-sm">Withdrawals</p>
           </div>
 
           <div className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg p-6 hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <FileText className="w-8 h-8 text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+              <FileText className="w-8 h-8 text-purple-400" />
               <span className="text-cyan-300 text-sm">Total</span>
             </div>
-            <p className="text-3xl font-bold text-white mb-1 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">{stats.totalWithdrawals}</p>
+            <p className="text-3xl font-bold text-white mb-1">{stats.totalWithdrawals}</p>
             <p className="text-cyan-200 text-sm">All Withdrawals</p>
           </div>
         </div>
@@ -128,8 +128,8 @@ export default function AdminDashboard() {
             onClick={() => navigate('/admin/add-customer')}
             className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg p-8 text-left hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] hover:border-cyan-400/70 transition-all duration-300 group"
           >
-            <UserPlus className="w-12 h-12 text-cyan-400 mb-4 group-hover:scale-110 transition-transform drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]" />
-            <h3 className="text-xl font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">Add Customer</h3>
+            <UserPlus className="w-12 h-12 text-cyan-400 mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl font-bold text-white mb-2">Add Customer</h3>
             <p className="text-cyan-200 text-sm">Register new customer accounts</p>
           </button>
 
@@ -138,8 +138,8 @@ export default function AdminDashboard() {
             onClick={() => navigate('/admin/customers')}
             className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg p-8 text-left hover:shadow-[0_0_40px_rgba(16,185,129,0.7)] hover:border-emerald-400/70 transition-all duration-300 group"
           >
-            <Users className="w-12 h-12 text-emerald-400 mb-4 group-hover:scale-110 transition-transform drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
-            <h3 className="text-xl font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">Manage Customers</h3>
+            <Users className="w-12 h-12 text-emerald-400 mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl font-bold text-white mb-2">Manage Customers</h3>
             <p className="text-cyan-200 text-sm">View and edit customer data</p>
           </button>
 
@@ -148,8 +148,8 @@ export default function AdminDashboard() {
             onClick={() => navigate('/admin/settings')}
             className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg p-8 text-left hover:shadow-[0_0_40px_rgba(168,85,247,0.7)] hover:border-purple-400/70 transition-all duration-300 group"
           >
-            <Settings className="w-12 h-12 text-purple-400 mb-4 group-hover:scale-110 transition-transform drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]" />
-            <h3 className="text-xl font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">Website Settings</h3>
+            <Settings className="w-12 h-12 text-purple-400 mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl font-bold text-white mb-2">Website Settings</h3>
             <p className="text-cyan-200 text-sm">Update logo, images, and content</p>
           </button>
         </div>

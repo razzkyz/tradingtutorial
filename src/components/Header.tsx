@@ -35,7 +35,7 @@ export default function Header() {
     }
 
     checkAdmin()
-  }, [user])
+  }, [user?.id]) // Only depend on user.id
 
   const handleLogoutClick = () => {
     setShowLogoutModal(true)
@@ -80,7 +80,9 @@ export default function Header() {
               <img 
                 src="/images/logo.png" 
                 alt="Trading Tutorials" 
-                className="h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+                className="h-12 sm:h-14 md:h-16 w-auto object-contain"
+                loading="eager"
+                decoding="async"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none'
                   const fallback = document.getElementById('logo-fallback')
@@ -91,17 +93,17 @@ export default function Header() {
               />
               {/* Text "TRADING TUTORIALS" - Vertical Box Layout */}
               <div className="flex flex-col leading-none">
-                <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white tracking-wide uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]">TRADING</span>
-                <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-emerald-400 tracking-wide uppercase drop-shadow-[0_0_15px_rgba(16,185,129,0.9)] -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
+                <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white tracking-wide uppercase">TRADING</span>
+                <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-emerald-400 tracking-wide uppercase -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
               </div>
               {/* Fallback: Icon + Text */}
               <div className="hidden items-center gap-2" id="logo-fallback" style={{ display: 'none' }}>
                 <div className="bg-gradient-to-br from-emerald-600 to-green-600 p-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.6)]">
-                  <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+                  <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <div className="flex flex-col leading-none">
-                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white tracking-wide uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]">TRADING</span>
-                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-emerald-400 tracking-wide uppercase drop-shadow-[0_0_15px_rgba(16,185,129,0.9)] -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
+                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white tracking-wide uppercase">TRADING</span>
+                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-emerald-400 tracking-wide uppercase -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
                 </div>
               </div>
             </Link>

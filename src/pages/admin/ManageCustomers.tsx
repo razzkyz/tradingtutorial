@@ -31,7 +31,7 @@ export default function ManageCustomers() {
 
   useEffect(() => {
     checkAdminAndLoadCustomers()
-  }, [user, authLoading])
+  }, [user?.id, authLoading]) // Only depend on user.id and authLoading
 
   const checkAdminAndLoadCustomers = async () => {
     // Wait for auth to finish loading
@@ -209,8 +209,8 @@ export default function ManageCustomers() {
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">Manage Customers</h1>
-            <p className="text-cyan-200 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">View and manage customer accounts</p>
+            <h1 className="text-3xl font-bold text-white mb-2">Manage Customers</h1>
+            <p className="text-cyan-200">View and manage customer accounts</p>
           </div>
 
           {/* Search */}
@@ -261,7 +261,7 @@ export default function ManageCustomers() {
                     <tr key={customer.user_id} className="hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4">
                         <div>
-                          <p className="text-white font-medium drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">{customer.full_name}</p>
+                          <p className="text-white font-medium">{customer.full_name}</p>
                           <p className="text-cyan-200 text-sm">{customer.email}</p>
                         </div>
                       </td>
@@ -272,7 +272,7 @@ export default function ManageCustomers() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <p className="text-white font-bold text-lg drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">
+                        <p className="text-white font-bold text-lg">
                           USDT {customer.total_balance.toFixed(2)}
                         </p>
                       </td>
@@ -328,7 +328,7 @@ export default function ManageCustomers() {
         {showBalanceModal && selectedCustomer && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-black/95 border-2 border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.6)] rounded-lg max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-white mb-4 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
+              <h3 className="text-xl font-bold text-white mb-4">
                 Add Balance for {selectedCustomer.full_name}
               </h3>
 

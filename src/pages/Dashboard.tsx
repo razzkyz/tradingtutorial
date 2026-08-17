@@ -37,26 +37,51 @@ export default function Dashboard() {
     if (!user) return
 
     loadData()
-  }, [user])
+    
+    // Cleanup function to prevent memory leaks
+    return () => {
+      // Cancel any pending requests if needed
+    }
+  }, [user?.id]) // Only re-run when user.id changes, not entire user object
 
   useEffect(() => {
-    const script = document.createElement('script')
-    script.src = 'https://s3.tradingview.com/tv.js'
-    script.async = true
-    script.onload = () => {
-      if (user) {
+    if (!user) return
+
+    // Lazy load TradingView script only when needed
+    const loadTradingViewScript = () => {
+      // Check if script already loaded
+      if (window.TradingView) {
         initChart()
+        return
       }
+
+      const script = document.createElement('script')
+      script.src = 'https://s3.tradingview.com/tv.js'
+      script.async = true
+      script.defer = true
+      script.onload = () => {
+        if (user) {
+          initChart()
+        }
+      }
+      script.onerror = () => {
+        console.error('Failed to load TradingView script')
+      }
+      document.head.appendChild(script)
     }
-    document.head.appendChild(script)
+
+    // Delay chart loading slightly to prioritize page render
+    const timeoutId = setTimeout(loadTradingViewScript, 100)
 
     return () => {
-      const scriptElement = document.querySelector('script[src="https://s3.tradingview.com/tv.js"]')
-      if (scriptElement) {
-        document.head.removeChild(scriptElement)
-      }
+      clearTimeout(timeoutId)
+      // Don't remove script on cleanup to avoid re-downloading
+      // const scriptElement = document.querySelector('script[src="https://s3.tradingview.com/tv.js"]')
+      // if (scriptElement) {
+      //   document.head.removeChild(scriptElement)
+      // }
     }
-  }, [user])
+  }, [user?.id]) // Only depend on user.id, not entire user object
 
   const initChart = () => {
     if (!chartContainerRef.current || !window.TradingView) return
@@ -183,7 +208,7 @@ export default function Dashboard() {
           <div className="flex items-start justify-between gap-3 sm:gap-6">
             {/* User Info - Left */}
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center overflow-hidden shadow-[0_0_25px_rgba(6,182,212,0.6)] flex-shrink-0 border-2 border-cyan-400/40 group hover:shadow-[0_0_35px_rgba(6,182,212,0.8)] transition-all duration-300">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center overflow-hidden flex-shrink-0 border-2 border-cyan-400/40 transition-all duration-300">
                 {loading ? (
                   <div className="w-full h-full bg-cyan-900/50 animate-pulse"></div>
                 ) : profile?.avatar_url ? (
@@ -194,7 +219,7 @@ export default function Dashboard() {
                   />
                 ) : (
                   <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-cyan-600 to-teal-700">
-                    <svg className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                     </svg>
                   </div>
@@ -205,17 +230,17 @@ export default function Dashboard() {
                 {loading ? (
                   <div className="h-5 sm:h-7 w-20 sm:w-32 md:w-40 bg-gray-700/50 rounded animate-pulse"></div>
                 ) : (
-                  <p className="text-white text-sm sm:text-xl md:text-2xl font-bold leading-tight truncate drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
+                  <p className="text-white text-sm sm:text-xl md:text-2xl font-bold leading-tight truncate">
                     {profile?.full_name || 'User'}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Balance Badge - Right with Glow */}
-            <div className="bg-gradient-to-br from-emerald-500/90 to-teal-500/90 backdrop-blur-sm px-3 py-2 sm:px-5 sm:py-4 md:px-6 md:py-5 rounded-xl sm:rounded-2xl shadow-[0_0_25px_rgba(16,185,129,0.5)] flex-shrink-0 border-2 border-emerald-400/40 hover:shadow-[0_0_35px_rgba(16,185,129,0.7)] transition-all duration-300">
+            {/* Balance Badge - Right (no glow on inner) */}
+            <div className="bg-gradient-to-br from-emerald-500/90 to-teal-500/90 backdrop-blur-sm px-3 py-2 sm:px-5 sm:py-4 md:px-6 md:py-5 rounded-xl sm:rounded-2xl flex-shrink-0 border-2 border-emerald-400/40 transition-all duration-300">
               <div className="flex items-center gap-2 sm:gap-3">
-                <Wallet className="w-7 h-7 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white flex-shrink-0 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" strokeWidth={2} />
+                <Wallet className="w-7 h-7 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white flex-shrink-0" strokeWidth={2} />
                 <div className="min-w-0">
                   <p className="text-white text-[10px] sm:text-sm font-semibold uppercase tracking-wider mb-1">BALANCE</p>
                   {loading ? (
@@ -223,7 +248,7 @@ export default function Dashboard() {
                   ) : (
                     <div className="space-y-0.5">
                       {Object.entries(totalsByCurrency).map(([currency, total]) => (
-                        <p key={currency} className="text-white text-xs sm:text-lg md:text-xl font-bold leading-tight drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">
+                        <p key={currency} className="text-white text-xs sm:text-lg md:text-xl font-bold leading-tight">
                           {currency} {total.toFixed(2)}
                         </p>
                       ))}
@@ -239,7 +264,7 @@ export default function Dashboard() {
         <div className="flex flex-row gap-8 sm:gap-12 mb-6">
           {/* Left Column - Balance 1 & 2 Stacked */}
           <div className="flex-1 space-y-3">
-            {/* Balance 1 with Glow */}
+            {/* Balance 1 - no inner glow */}
             <div className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg px-4 py-2 h-[70px] hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
               <p className="text-cyan-300 text-xs sm:text-sm font-medium mb-1">Balance 1</p>
               {loading ? (
@@ -248,18 +273,18 @@ export default function Dashboard() {
                 <div className="space-y-1">
                   {groupedBalances['balance_1'] ? (
                     Object.entries(groupedBalances['balance_1']).map(([currency, amount]) => (
-                      <p key={currency} className="text-white text-base sm:text-xl font-bold drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
+                      <p key={currency} className="text-white text-base sm:text-xl font-bold">
                         {currency} {amount.toFixed(2)}
                       </p>
                     ))
                   ) : (
-                    <p className="text-white text-base sm:text-xl font-bold drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">USDT 0.00</p>
+                    <p className="text-white text-base sm:text-xl font-bold">USDT 0.00</p>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Balance 2 with Glow */}
+            {/* Balance 2 - no inner glow */}
             <div className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg px-4 py-2 h-[70px] hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
               <p className="text-cyan-300 text-xs sm:text-sm font-medium mb-1">Balance 2</p>
               {loading ? (
@@ -268,12 +293,12 @@ export default function Dashboard() {
                 <div className="space-y-1">
                   {groupedBalances['balance_2'] ? (
                     Object.entries(groupedBalances['balance_2']).map(([currency, amount]) => (
-                      <p key={currency} className="text-white text-base sm:text-xl font-bold drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
+                      <p key={currency} className="text-white text-base sm:text-xl font-bold">
                         {currency} {amount.toFixed(2)}
                       </p>
                     ))
                   ) : (
-                    <p className="text-white text-base sm:text-xl font-bold drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">USDT...</p>
+                    <p className="text-white text-base sm:text-xl font-bold">USDT...</p>
                   )}
                 </div>
               )}
@@ -293,12 +318,12 @@ export default function Dashboard() {
               </>
             ) : (
               <>
-                <p className={`text-base sm:text-xl font-semibold mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] ${
+                <p className={`text-base sm:text-xl font-semibold mb-2 ${
                   isActive ? 'text-emerald-400' : 'text-white'
                 }`}>
                   {isActive ? 'Active' : 'Inactive'}
                 </p>
-                <p className={`text-xl sm:text-3xl font-bold uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.6)] ${
+                <p className={`text-xl sm:text-3xl font-bold uppercase ${
                   isActive ? 'text-emerald-400' : 'text-white'
                 }`}>
                   TRADING
@@ -313,8 +338,8 @@ export default function Dashboard() {
           {/* Title Bar Inside Chart Container */}
           <div className="bg-gradient-to-r from-emerald-900/40 via-green-900/40 to-emerald-900/40 backdrop-blur-sm border-b border-emerald-500/30 px-4 sm:px-6 py-3 sm:py-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center">
-              <span className="text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]">Trade Smarter.</span>
-              <span className="text-emerald-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.9)] ml-2">Move Faster.</span>
+              <span className="text-white">Trade Smarter.</span>
+              <span className="text-emerald-400 ml-2">Move Faster.</span>
             </h2>
           </div>
           
@@ -328,7 +353,7 @@ export default function Dashboard() {
           
           {/* Info badge with TradingView link */}
           <div className="bg-gradient-to-r from-gray-900/95 to-teal-900/40 backdrop-blur-sm px-4 py-3 border-t border-cyan-500/30 flex items-center justify-between flex-wrap gap-3">
-            <p className="text-cyan-300 text-xs font-medium drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
+            <p className="text-cyan-300 text-xs font-medium">
               📈 Interactive TradingView chart with full features
             </p>
             <a

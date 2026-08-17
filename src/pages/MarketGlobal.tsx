@@ -82,6 +82,12 @@ export default function MarketGlobal() {
   }
 
   useEffect(() => {
+    // Load TradingView script once
+    if (window.TradingView) {
+      initChart()
+      return
+    }
+
     const script = document.createElement('script')
     script.src = 'https://s3.tradingview.com/tv.js'
     script.async = true
@@ -89,18 +95,19 @@ export default function MarketGlobal() {
     document.head.appendChild(script)
 
     return () => {
-      const scriptElement = document.querySelector('script[src="https://s3.tradingview.com/tv.js"]')
-      if (scriptElement) {
-        document.head.removeChild(scriptElement)
-      }
+      // Don't remove script to avoid re-downloading
+      // const scriptElement = document.querySelector('script[src="https://s3.tradingview.com/tv.js"]')
+      // if (scriptElement) {
+      //   document.head.removeChild(scriptElement)
+      // }
     }
-  }, [])
+  }, []) // Empty dependency - run only once
 
   useEffect(() => {
     if (window.TradingView) {
       initChart()
     }
-  }, [selectedCoin, selectedTimeframe])
+  }, [selectedCoin, selectedTimeframe]) // Only when coin or timeframe changes
 
   const initChart = () => {
     if (!chartContainerRef.current || !window.TradingView) return

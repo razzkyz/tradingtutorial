@@ -26,7 +26,7 @@ export default function AddCustomer() {
 
   useEffect(() => {
     checkAdmin()
-  }, [user, authLoading])
+  }, [user?.id, authLoading]) // Only depend on user.id and authLoading
 
   const checkAdmin = async () => {
     // Wait for auth to finish loading
@@ -156,8 +156,8 @@ export default function AddCustomer() {
 
         <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] overflow-hidden hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
           <div className="bg-gradient-to-r from-cyan-900/30 to-teal-900/30 p-6 border-b border-cyan-500/30">
-            <h1 className="text-2xl font-bold text-white drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">Add New Customer</h1>
-            <p className="text-cyan-200 text-sm mt-1 drop-shadow-[0_0_5px_rgba(6,182,212,0.4)]">Create a new customer account</p>
+            <h1 className="text-2xl font-bold text-white">Add New Customer</h1>
+            <p className="text-cyan-200 text-sm mt-1">Create a new customer account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
