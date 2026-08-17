@@ -10,17 +10,18 @@
   body {
     @apply text-white antialiased;
     min-height: 100vh;
-    background-color: #0A2F2F;
+    background-color: #000000;
   }
   
   #root {
     @apply min-h-screen;
-    background-color: #0A2F2F;
+    background-color: #000000;
   }
 
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
+    background-color: #000000;
   }
 }
 

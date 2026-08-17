@@ -143,7 +143,7 @@ export default function AddCustomer() {
   if (!isAdmin) return null
 
   return (
-    <div className="min-h-[calc(100vh-64px)] px-4 py-6">
+    <div className="min-h-[calc(100vh-64px)] px-4 py-6 bg-black">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <button
@@ -154,10 +154,10 @@ export default function AddCustomer() {
           Back to Admin Dashboard
         </button>
 
-        <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 rounded-3xl border border-teal-700/30 shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-teal-900/50 to-teal-800/50 p-6 border-b border-teal-700/30">
-            <h1 className="text-2xl font-bold text-text-primary">Add New Customer</h1>
-            <p className="text-text-secondary text-sm mt-1">Create a new customer account</p>
+        <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] overflow-hidden hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
+          <div className="bg-gradient-to-r from-cyan-900/30 to-teal-900/30 p-6 border-b border-cyan-500/30">
+            <h1 className="text-2xl font-bold text-white drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">Add New Customer</h1>
+            <p className="text-cyan-200 text-sm mt-1 drop-shadow-[0_0_5px_rgba(6,182,212,0.4)]">Create a new customer account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
@@ -294,7 +294,7 @@ export default function AddCustomer() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Customer...' : 'Create Customer'}
             </button>

@@ -71,18 +71,17 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-gradient-to-r from-teal-900 to-teal-800 border-b border-teal-700/50 shadow-lg sticky top-0 z-30">
+      <header className="bg-gradient-to-r from-black via-gray-900 to-black backdrop-blur-xl border-b-2 border-emerald-500/20 shadow-[0_4px_30px_rgba(16,185,129,0.2)] sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo - Icon + Text "TRADING TUTORIALS" (Horizontal) */}
-            <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity">
-              {/* Logo Icon (Bullish Market) */}
+          <div className="flex justify-between items-center h-16 sm:h-18">
+            {/* Logo - Icon + Text "TRADING TUTORIALS" in Box Layout */}
+            <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="flex items-center gap-2 sm:gap-3 hover:scale-105 transition-transform duration-300 group">
+              {/* Logo Icon */}
               <img 
                 src="/images/logo.png" 
                 alt="Trading Tutorials" 
-                className="h-10 sm:h-12 md:h-14 w-auto object-contain"
+                className="h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]"
                 onError={(e) => {
-                  // Fallback to icon + text if image not found
                   e.currentTarget.style.display = 'none'
                   const fallback = document.getElementById('logo-fallback')
                   if (fallback) {
@@ -90,35 +89,35 @@ export default function Header() {
                   }
                 }}
               />
-              {/* Text "TRADING TUTORIALS" - Show on all screen sizes */}
-              <div className="flex flex-col leading-tight">
-                <span className="text-sm sm:text-lg md:text-xl font-bold text-white tracking-wider uppercase">Trading</span>
-                <span className="text-sm sm:text-lg md:text-xl font-bold text-white tracking-wider uppercase -mt-0.5 sm:-mt-1">Tutorials</span>
+              {/* Text "TRADING TUTORIALS" - Vertical Box Layout */}
+              <div className="flex flex-col leading-none">
+                <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white tracking-wide uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]">TRADING</span>
+                <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-emerald-400 tracking-wide uppercase drop-shadow-[0_0_15px_rgba(16,185,129,0.9)] -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
               </div>
-              {/* Fallback: Icon + Text (hidden by default) */}
-              <div className="hidden items-center gap-3" id="logo-fallback" style={{ display: 'none' }}>
-                <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-2 rounded-full shadow-lg">
-                  <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+              {/* Fallback: Icon + Text */}
+              <div className="hidden items-center gap-2" id="logo-fallback" style={{ display: 'none' }}>
+                <div className="bg-gradient-to-br from-emerald-600 to-green-600 p-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.6)]">
+                  <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
                 </div>
-                <div className="flex flex-col leading-tight">
-                  <span className="text-xl font-bold text-white tracking-wider uppercase">Trading</span>
-                  <span className="text-xl font-bold text-white tracking-wider uppercase -mt-1">Tutorials</span>
+                <div className="flex flex-col leading-none">
+                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white tracking-wide uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]">TRADING</span>
+                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-emerald-400 tracking-wide uppercase drop-shadow-[0_0_15px_rgba(16,185,129,0.9)] -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
                 </div>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            <nav className="hidden lg:flex items-center space-x-2">
               {menuItems.map((item) => {
                 const Icon = item.icon
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center space-x-2 ${
                       isActive(item.path)
-                        ? 'bg-teal-700 text-white shadow-lg'
-                        : 'text-gray-300 hover:text-white hover:bg-teal-800/50'
+                        ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] scale-105'
+                        : 'text-gray-300 hover:text-white hover:bg-emerald-900/20 border border-transparent hover:border-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -128,7 +127,7 @@ export default function Header() {
               })}
               <button
                 onClick={handleLogoutClick}
-                className="ml-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-red-900/40 transition-all flex items-center space-x-2"
+                className="ml-2 px-4 py-2 rounded-lg text-sm font-semibold text-red-300 hover:text-white hover:bg-red-900/30 border border-transparent hover:border-red-500/40 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all duration-300 flex items-center space-x-2"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -138,14 +137,14 @@ export default function Header() {
             {/* Mobile Hamburger */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-teal-800/50 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-emerald-900/20 border border-transparent hover:border-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all duration-300"
               aria-label="Menu"
               aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? (
-                <X className="w-6 h-6 text-white" />
+                <X className="w-6 h-6 text-emerald-400" />
               ) : (
-                <Menu className="w-6 h-6 text-white" />
+                <Menu className="w-6 h-6 text-emerald-400" />
               )}
             </button>
           </div>
@@ -154,7 +153,7 @@ export default function Header() {
 
       {/* Mobile Sidebar - Navbar tetap visible */}
       <div
-        className={`lg:hidden fixed top-16 right-0 bottom-0 w-72 bg-gradient-to-b from-gray-900 via-teal-950 to-gray-900 border-l border-teal-800/40 shadow-2xl z-40 transform transition-transform duration-300 ease-out ${
+        className={`lg:hidden fixed top-16 right-0 bottom-0 w-72 bg-gradient-to-b from-black via-gray-900 to-black backdrop-blur-xl border-l-2 border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.3)] z-40 transform transition-transform duration-300 ease-out ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -167,10 +166,10 @@ export default function Header() {
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all ${
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
                     isActive(item.path)
-                      ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-lg'
-                      : 'text-gray-300 hover:bg-gray-800/60 border border-transparent hover:border-teal-700/50'
+                      ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)]'
+                      : 'text-gray-300 hover:text-white hover:bg-emerald-900/20 border border-transparent hover:border-emerald-500/30'
                   }`}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
@@ -179,10 +178,10 @@ export default function Header() {
               )
             })}
 
-            <div className="pt-4 mt-4 border-t border-teal-800/40">
+            <div className="pt-4 mt-4 border-t border-emerald-500/20">
               <button
                 onClick={handleLogoutClick}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-300 bg-red-900/20 hover:bg-red-900/30 transition-colors border border-red-700/40 font-medium"
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-300 hover:text-white bg-red-900/20 hover:bg-red-900/30 transition-all duration-300 border border-red-700/40 hover:border-red-500/50 font-semibold hover:shadow-[0_0_15px_rgba(239,68,68,0.3)]"
               >
                 <LogOut className="w-5 h-5 flex-shrink-0" />
                 <span>Logout</span>

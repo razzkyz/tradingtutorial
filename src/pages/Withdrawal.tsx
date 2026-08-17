@@ -137,7 +137,7 @@ export default function Withdrawal() {
   if (error && !showForm) return <ErrorState message={error} />
 
   return (
-    <div className="min-h-[calc(100vh-64px)] px-4 py-6">
+    <div className="min-h-[calc(100vh-64px)] px-4 py-6 bg-black">
       <div className="max-w-xl mx-auto">
         {success && (
           <div className="mb-6 p-4 bg-green/20 border border-green/50 rounded-xl text-green-200 text-center">
@@ -145,7 +145,7 @@ export default function Withdrawal() {
           </div>
         )}
 
-        <div className="bg-gradient-to-br from-gray-900 to-teal-900 backdrop-blur-sm rounded-3xl border border-teal-700/40 shadow-2xl overflow-hidden">
+        <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] overflow-hidden hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
           {!showForm ? (
             <>
               {/* Wallet Illustration Section */}
@@ -221,7 +221,7 @@ export default function Withdrawal() {
 
                 {/* Balance Display */}
                 <div className="mb-8 mt-12">
-                  <p className="text-white text-4xl font-bold">
+                  <p className="text-white text-4xl font-bold drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
                     USDT {availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -229,7 +229,7 @@ export default function Withdrawal() {
                 {/* Withdrawal Button */}
                 <button
                   onClick={() => setShowForm(true)}
-                  className="w-full max-w-md mx-auto block bg-gradient-to-r from-orange-600 via-orange-500 to-yellow-500 hover:from-orange-500 hover:via-orange-400 hover:to-yellow-400 text-white font-bold text-lg py-4 px-6 rounded-2xl transition-all shadow-lg hover:shadow-orange-500/50 uppercase tracking-wide"
+                  className="w-full max-w-md mx-auto block bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-lg py-4 px-6 rounded-lg transition-all shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] uppercase tracking-wide"
                 >
                   Withdrawal
                 </button>
@@ -238,8 +238,8 @@ export default function Withdrawal() {
           ) : (
             <>
               {/* Withdrawal Form */}
-              <div className="bg-gradient-to-r from-teal-900/50 to-teal-800/50 p-6 border-b border-teal-700/30">
-                <h1 className="text-2xl font-bold text-text-primary">Withdrawal Request</h1>
+              <div className="bg-gradient-to-r from-cyan-900/30 to-teal-900/30 p-6 border-b border-cyan-500/30">
+                <h1 className="text-2xl font-bold text-white drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">Withdrawal Request</h1>
               </div>
 
               <form onSubmit={handleSubmit} className="p-8 space-y-6">
@@ -339,7 +339,7 @@ export default function Withdrawal() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? 'Submitting...' : 'Submit Withdrawal'}
                   </button>
@@ -352,8 +352,8 @@ export default function Withdrawal() {
         {/* Confirmation Modal */}
         {showConfirmModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gradient-to-br from-gray-900 to-teal-900 rounded-2xl border border-teal-700/40 shadow-2xl max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Confirm Withdrawal</h3>
+            <div className="bg-black/95 border-2 border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.6)] rounded-lg max-w-md w-full p-6">
+              <h3 className="text-xl font-bold text-white mb-4 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">Confirm Withdrawal</h3>
               
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
@@ -385,7 +385,7 @@ export default function Withdrawal() {
                 <button
                   onClick={handleConfirmWithdrawal}
                   disabled={submitting}
-                  className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Processing...' : 'Confirm'}
                 </button>

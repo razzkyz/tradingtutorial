@@ -43,7 +43,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen gradient-overlay flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-6xl">
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Left Side - Branding (Hidden on mobile) */}
@@ -88,14 +88,14 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-2xl border border-teal-700/30 shadow-xl p-8 animate-scale-in">
+              <div className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] rounded-lg p-8 animate-scale-in hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-text-muted text-sm mb-1">Total Users</p>
-                    <p className="text-text-primary text-3xl font-bold">10,000+</p>
+                    <p className="text-cyan-300 text-sm mb-1">Total Users</p>
+                    <p className="text-white text-3xl font-bold drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">10,000+</p>
                   </div>
-                  <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-4 rounded-xl">
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-4 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+                    <svg className="w-10 h-10 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                   </div>
@@ -131,13 +131,13 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-3xl border border-teal-700/30 shadow-2xl overflow-hidden">
+            <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] overflow-hidden hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
               {/* Header */}
-              <div className="bg-gradient-to-r from-teal-900/50 to-teal-800/50 p-6 lg:p-8 text-center border-b border-teal-700/30">
-                <h3 className="text-2xl lg:text-3xl font-bold text-text-primary mb-2">
+              <div className="bg-gradient-to-r from-cyan-900/30 to-teal-900/30 p-6 lg:p-8 text-center border-b border-cyan-500/30">
+                <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
                   Welcome Back!
                 </h3>
-                <p className="text-text-secondary">Sign in to your account to continue</p>
+                <p className="text-cyan-200 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Sign in to your account to continue</p>
               </div>
 
               {/* Form */}
@@ -197,7 +197,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full btn-primary flex items-center justify-center space-x-2 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold py-4 px-6 rounded-lg transition-all shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] flex items-center justify-center space-x-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <>

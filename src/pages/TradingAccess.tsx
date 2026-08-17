@@ -44,10 +44,10 @@ export default function TradingAccess() {
   const totalBalance = calculateTotalBalance(balances)
 
   return (
-    <div className="min-h-[calc(100vh-64px)] px-4 py-6">
+    <div className="min-h-[calc(100vh-64px)] px-4 py-6 bg-black">
       <div className="max-w-2xl mx-auto">
         {/* Main Card Container */}
-        <div className="bg-gradient-to-br from-gray-900 to-teal-900 backdrop-blur-sm rounded-3xl border border-teal-700/40 shadow-2xl p-6 md:p-8">
+        <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] p-6 md:p-8 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
           
           {/* Icon & Total Balance - Top Right */}
           <div className="mb-8">
@@ -60,11 +60,11 @@ export default function TradingAccess() {
               ) : (
                 <div className="flex flex-col items-end">
                   {/* Wallet Icon */}
-                  <div className="bg-gradient-to-br from-gray-200 to-gray-300 p-5 rounded-2xl shadow-xl mb-3">
-                    <Wallet className="w-10 h-10 text-deep-navy" strokeWidth={2} />
+                  <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-5 rounded-lg shadow-[0_0_25px_rgba(6,182,212,0.5)] mb-3">
+                    <Wallet className="w-10 h-10 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" strokeWidth={2} />
                   </div>
                   {/* Total Balance */}
-                  <h2 className="text-3xl md:text-4xl font-bold text-text-primary">
+                  <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
                     USDT {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h2>
                 </div>
@@ -85,13 +85,13 @@ export default function TradingAccess() {
               balances.map((balance, index) => (
                 <div
                   key={balance.id}
-                  className="bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl p-4 shadow-lg animate-scale-in"
+                  className="bg-black/95 border-2 border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.3)] rounded-lg p-4 animate-scale-in hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] hover:border-cyan-400/60 transition-all duration-300"
                   style={{ animationDelay: `${0.1 * index}s` }}
                 >
-                  <p className="text-deep-navy text-sm font-medium mb-1">
+                  <p className="text-cyan-300 text-sm font-medium mb-1 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
                     Balance {index + 1}
                   </p>
-                  <p className="text-deep-navy text-xl font-bold">
+                  <p className="text-white text-xl font-bold drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
                     USDT {balance.amount.toLocaleString('en-US', { minimumFractionDigits: 0 })}
                   </p>
                 </div>
@@ -102,7 +102,7 @@ export default function TradingAccess() {
           {/* Trading Access Button */}
           <button
             disabled={loading}
-            className="w-full bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-500 hover:from-teal-500 hover:via-cyan-500 hover:to-teal-600 text-white font-bold text-lg py-4 px-6 rounded-2xl transition-all shadow-lg hover:shadow-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
+            className="w-full bg-gradient-to-r from-cyan-600 via-teal-600 to-cyan-600 hover:from-cyan-500 hover:via-teal-500 hover:to-cyan-500 text-white font-bold text-lg py-4 px-6 rounded-lg transition-all shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
           >
             Trading Access
           </button>
