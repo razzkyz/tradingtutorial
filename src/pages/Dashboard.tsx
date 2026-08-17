@@ -207,7 +207,7 @@ export default function Dashboard() {
         </div>
 
         {/* Balance 1, Balance 2 & Trading Status - Side by Side */}
-        <div className="flex flex-row gap-4 mb-6">
+        <div className="flex flex-row gap-8 sm:gap-12 mb-6">
           {/* Left Column - Balance 1 & 2 Stacked */}
           <div className="flex-1 space-y-3">
             {/* Balance 1 */}
