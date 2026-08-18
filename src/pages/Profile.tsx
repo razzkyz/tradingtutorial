@@ -332,21 +332,21 @@ export default function Profile() {
             
             {/* Horizontal Row: Centered with gap between wallet and content */}
             <div className="flex items-center justify-center gap-8 sm:gap-12 md:gap-16 lg:gap-20">
-              {/* Wallet Icon - Left side of center */}
+              {/* Wallet Icon - Bigger size */}
               <div className="flex-shrink-0">
-                <Wallet className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white" strokeWidth={1.5} />
+                <Wallet className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-white" strokeWidth={1.5} />
               </div>
 
-              {/* Right Side: Title + Blue Box - Right side of center */}
+              {/* Right Side: Title + Blue Box - Bigger */}
               <div className="flex flex-col items-center gap-2 sm:gap-3">
-                {/* Title - responsive sizing */}
-                <h3 className="text-white text-[10px] sm:text-xs md:text-sm lg:text-base font-semibold tracking-wide uppercase whitespace-nowrap">
+                {/* Title - Bigger text */}
+                <h3 className="text-white text-xs sm:text-sm md:text-base lg:text-lg font-semibold tracking-wide uppercase whitespace-nowrap">
                   Investment Amount
                 </h3>
                 
-                {/* Value Box - responsive sizing */}
-                <div className="w-full bg-gradient-to-br from-cyan-600 to-blue-700 border border-cyan-400/60 rounded-lg px-4 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-6 md:py-7 lg:py-8 shadow-[0_0_25px_rgba(6,182,212,0.5)]">
-                  <p className="text-white text-sm sm:text-base md:text-lg lg:text-xl font-medium text-center whitespace-nowrap">
+                {/* Value Box - Bigger padding and text */}
+                <div className="w-full bg-gradient-to-br from-cyan-600 to-blue-700 border border-cyan-400/60 rounded-lg px-6 sm:px-8 md:px-10 lg:px-12 py-6 sm:py-8 md:py-10 lg:py-12 shadow-[0_0_25px_rgba(6,182,212,0.5)]">
+                  <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-center whitespace-nowrap">
                     {profile.investment_amount.toFixed(0)} USDT
                   </p>
                 </div>
