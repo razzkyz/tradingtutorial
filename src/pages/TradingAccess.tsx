@@ -302,25 +302,25 @@ export default function TradingAccess() {
       <div className="px-4 py-6 flex items-center">
         <div className="w-full max-w-2xl mx-auto">
           {/* Main Card Container */}
-          <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] p-6 md:p-8 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
+          <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] p-4 md:p-8 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
             
             {/* Icon & Total Balance - Top Right */}
-            <div className="mb-8">
+            <div className="mb-5">
               <div className="flex justify-end">
                 {loading ? (
                   <div className="flex flex-col items-end">
-                    <div className="w-24 h-24 bg-text-muted/20 rounded-2xl animate-pulse mb-3"></div>
-                    <div className="h-10 w-40 bg-text-muted/20 rounded animate-pulse"></div>
+                    <div className="w-14 h-14 md:w-24 md:h-24 bg-text-muted/20 rounded-2xl animate-pulse mb-2"></div>
+                    <div className="h-7 w-32 bg-text-muted/20 rounded animate-pulse"></div>
                   </div>
                 ) : (
                   <div className="flex flex-col items-end">
-                    {/* Wallet Icon - no glow */}
-                    <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-6 rounded-lg mb-3">
-                      <Wallet className="w-16 h-16 text-white" strokeWidth={2} />
+                    {/* Wallet Icon */}
+                    <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-3 md:p-5 rounded-lg mb-2">
+                      <Wallet className="w-8 h-8 md:w-12 md:h-12 text-white" strokeWidth={2} />
                     </div>
                     {/* Total Balance */}
-                    <h2 className="text-3xl md:text-4xl font-bold text-white">
-                      USDT {totalBalance.toFixed(0).replace(/,/g, '')}
+                    <h2 className="text-xl md:text-3xl font-bold text-white">
+                      {totalBalance.toFixed(0).replace(/,/g, '')} <span className="text-cyan-400">USDT</span>
                     </h2>
                   </div>
                 )}
@@ -328,7 +328,7 @@ export default function TradingAccess() {
             </div>
 
             {/* Balance Cards Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-2 md:gap-4 mb-4">
               {loading ? (
                 <>
                   <SkeletonBalanceCard />
@@ -340,14 +340,14 @@ export default function TradingAccess() {
                 balances.map((balance, index) => (
                   <div
                     key={balance.id}
-                    className="bg-black/95 border-2 border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.3)] rounded-lg p-4 animate-scale-in hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] hover:border-cyan-400/60 transition-all duration-300"
+                    className="bg-black/95 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)] rounded-lg p-2.5 md:p-4 animate-scale-in hover:shadow-[0_0_18px_rgba(6,182,212,0.35)] hover:border-cyan-400/50 transition-all duration-300"
                     style={{ animationDelay: `${0.1 * index}s` }}
                   >
-                    <p className="text-cyan-300 text-sm font-medium mb-1">
+                    <p className="text-cyan-300 text-xs font-medium mb-0.5">
                       Balance {index + 1}
                     </p>
-                    <p className="text-white text-xl font-bold">
-                      USDT {balance.amount.toLocaleString('en-US', { minimumFractionDigits: 0 })}
+                    <p className="text-white text-sm md:text-lg font-bold">
+                      {balance.amount.toLocaleString('en-US', { minimumFractionDigits: 0 })} <span className="text-cyan-400 font-normal text-xs md:text-sm">USDT</span>
                     </p>
                   </div>
                 ))
