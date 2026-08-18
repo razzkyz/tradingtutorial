@@ -1,5 +1,5 @@
 import { MarketData, CRYPTO_ASSETS } from './marketTypes';
-import { BINANCE_WS_URL, fetchUsMarketData } from './marketApi';
+import { fetchUsMarketData } from './marketApi';
 
 class MarketService {
   private cryptoWs: WebSocket | null = null;
@@ -72,25 +72,17 @@ class MarketService {
 
   private connectCryptoWs() {
     if (this.cryptoWs) return;
+    const streams = CRYPTO_ASSETS.map(asset => `${asset.symbol.toLowerCase()}@miniTicker`).join('/');
+    const ws = new WebSocket(`wss://stream.binance.com/stream?streams=${streams}`);
+    this.cryptoWs = ws;
 
-    this.cryptoWs = new WebSocket(BINANCE_WS_URL);
-
-    this.cryptoWs.onopen = () => {
-      const streams = CRYPTO_ASSETS.map(asset => `${asset.symbol.toLowerCase()}@miniTicker`);
-      const subscribeMsg = {
-        method: 'SUBSCRIBE',
-        params: streams,
-        id: 1
-      };
-      this.cryptoWs?.send(JSON.stringify(subscribeMsg));
-    };
-
-    this.cryptoWs.onmessage = (event) => {
+    ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
+        const message = JSON.parse(event.data);
         
-        // Ignore ping/pong or subscription responses
-        if (!data.s) return;
+        // Combined streams wrap the payload in a 'data' object
+        const data = message.data;
+        if (!data || !data.s) return;
 
         const symbolInfo = CRYPTO_ASSETS.find(a => a.symbol === data.s);
         
@@ -131,15 +123,16 @@ class MarketService {
       }
     };
 
-    this.cryptoWs.onerror = (error) => {
+    ws.onerror = (error) => {
       console.error('Crypto WebSocket Error:', error);
     };
 
-    this.cryptoWs.onclose = () => {
-      this.cryptoWs = null;
-      if (this.cryptoSubscribers.size > 0) {
-
-        setTimeout(() => this.connectCryptoWs(), 5000); // Reconnect after 5s
+    ws.onclose = () => {
+      if (this.cryptoWs === ws) {
+        this.cryptoWs = null;
+        if (this.cryptoSubscribers.size > 0) {
+          setTimeout(() => this.connectCryptoWs(), 5000); // Reconnect after 5s
+        }
       }
     };
   }

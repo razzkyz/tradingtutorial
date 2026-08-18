@@ -73,7 +73,7 @@ export const MarketSection: React.FC<MarketSectionProps> = ({ onCoinSelect, sele
             </div>
           ) : (
             <MarketCarousel 
-              data={cryptoData}
+              data={cryptoData.filter(c => ['BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'ADA', 'DOGE'].includes(c.symbol))}
               isLoading={isLoadingCrypto}
               onCardClick={onCoinSelect}
               activeSymbol={selectedCoin}

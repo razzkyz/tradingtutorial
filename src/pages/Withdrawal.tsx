@@ -74,7 +74,7 @@ export default function Withdrawal() {
   const handleUseDemoWallet = () => {
     setFormData(prev => ({
       ...prev,
-      wallet_address: 'DEMO123'
+      wallet_address: 'TRXDEMO0001'
     }))
     setFormErrors(prev => ({ ...prev, wallet_address: '' }))
   }
@@ -203,14 +203,26 @@ export default function Withdrawal() {
                   </div>
                 </div>
 
+                {/* Balance is 0 alert */}
+                {availableBalance <= 0 && (
+                  <div className="mb-6 flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/40 rounded-xl px-5 py-4 animate-fade-in">
+                    <AlertCircle className="w-6 h-6 text-yellow-400 flex-shrink-0" />
+                    <div>
+                      <p className="text-yellow-300 font-semibold">Saldo tidak cukup</p>
+                      <p className="text-yellow-500 text-sm mt-0.5">Harap isi saldo terlebih dahulu sebelum melakukan penarikan.</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Withdrawal Button */}
                 <button
-                  onClick={handleWithdrawClick}
+                  onClick={availableBalance <= 0 ? undefined : handleWithdrawClick}
                   disabled={availableBalance <= 0}
-                  className="w-full max-w-md mx-auto flex items-center justify-center bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-xl py-5 px-8 rounded-xl transition-all shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full max-w-md mx-auto flex items-center justify-center bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-xl py-5 px-8 rounded-xl transition-all shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
                 >
                   Withdraw
                 </button>
+
               </div>
             </>
           ) : (

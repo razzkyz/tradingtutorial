@@ -509,16 +509,19 @@ export default function MarketGlobal() {
                 >
                   <div className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-6 flex items-center gap-2">
-                      <button
+                      <div
+                        role="button"
+                        tabIndex={0}
                         onClick={(e) => toggleFavorite(coin.symbol, e)}
-                        className="flex-shrink-0"
+                        onKeyDown={(e) => e.key === 'Enter' && toggleFavorite(coin.symbol, e as any)}
+                        className="flex-shrink-0 cursor-pointer"
                       >
                         <Star
                           className={`w-3.5 h-3.5 ${
                             coin.favorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'
                           }`}
                         />
-                      </button>
+                      </div>
                       <div className="min-w-0">
                         <p className="text-white font-semibold text-sm truncate">
                           {coin.symbol}
