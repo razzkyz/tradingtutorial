@@ -148,8 +148,8 @@ export default function Withdrawal() {
   if (error && !showForm) return <ErrorState message={error} />
 
   return (
-    <div className="min-h-[calc(100vh-64px)] px-4 py-8 bg-black flex items-center justify-center">
-      <div className="w-full max-w-2xl mx-auto">
+    <div className="min-h-[calc(100vh-64px)] px-4 py-4 bg-black">
+      <div className="w-full max-w-md mx-auto">
         {success && (
           <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/50 rounded-xl text-emerald-300 text-center flex items-center justify-center gap-3 animate-fade-in shadow-[0_0_20px_rgba(16,185,129,0.2)]">
             <CheckCircle2 className="w-6 h-6" /> 
