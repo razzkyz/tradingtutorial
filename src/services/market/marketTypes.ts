@@ -29,7 +29,17 @@ export const CRYPTO_ASSETS = [
   { symbol: 'DOGEUSDT', name: 'Dogecoin', displaySymbol: 'DOGE' },
   { symbol: 'TRXUSDT', name: 'TRON', displaySymbol: 'TRX' },
   { symbol: 'SHIBUSDT', name: 'Shiba Inu', displaySymbol: 'SHIB' },
-  { symbol: 'LTCUSDT', name: 'Litecoin', displaySymbol: 'LTC' }
+  { symbol: 'LTCUSDT', name: 'Litecoin', displaySymbol: 'LTC' },
+  { symbol: 'AVAXUSDT', name: 'Avalanche', displaySymbol: 'AVAX' },
+  { symbol: 'DOTUSDT', name: 'Polkadot', displaySymbol: 'DOT' },
+  { symbol: 'LINKUSDT', name: 'Chainlink', displaySymbol: 'LINK' },
+  { symbol: 'TONUSDT', name: 'Toncoin', displaySymbol: 'TON' },
+  { symbol: 'BCHUSDT', name: 'Bitcoin Cash', displaySymbol: 'BCH' },
+  { symbol: 'UNIUSDT', name: 'Uniswap', displaySymbol: 'UNI' },
+  { symbol: 'NEARUSDT', name: 'NEAR Protocol', displaySymbol: 'NEAR' },
+  { symbol: 'APTUSDT', name: 'Aptos', displaySymbol: 'APT' },
+  { symbol: 'SUIUSDT', name: 'Sui', displaySymbol: 'SUI' },
+  { symbol: 'ATOMUSDT', name: 'Cosmos', displaySymbol: 'ATOM' },
 ];
 
 export const US_MARKET_INDICES = [

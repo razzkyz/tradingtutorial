@@ -26,6 +26,29 @@ class MarketService {
         market: 'crypto',
       });
     });
+
+    // Handle mobile browser sleep/wake and network disconnects
+    if (typeof window !== 'undefined') {
+      const handleWakeUp = () => {
+        if (document.visibilityState === 'visible' || navigator.onLine) {
+          // Reconnect Crypto WS if dead
+          if (this.cryptoSubscribers.size > 0) {
+            if (!this.cryptoWs || this.cryptoWs.readyState !== WebSocket.OPEN) {
+              this.disconnectCryptoWs();
+              this.connectCryptoWs();
+            }
+          }
+          // Force immediate US market update
+          if (this.usMarketSubscribers.size > 0) {
+            this.stopUsMarketPolling();
+            this.startUsMarketPolling();
+          }
+        }
+      };
+
+      window.addEventListener('visibilitychange', handleWakeUp);
+      window.addEventListener('online', handleWakeUp);
+    }
   }
 
   // CRYPTO: WebSocket Implementation

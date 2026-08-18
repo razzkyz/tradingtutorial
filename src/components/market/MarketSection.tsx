@@ -113,6 +113,27 @@ export const MarketSection: React.FC<MarketSectionProps> = ({ onCoinSelect, sele
             />
           )}
         </div>
+        
+        {/* ALTCOINS SECTION (Vertical Scroll) */}
+        <div className="pt-8 border-t border-gray-800/50">
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-white text-lg font-bold flex items-center gap-2">
+              💎 Altcoins <span className="text-xs font-normal text-gray-500 ml-2">SPOT</span>
+            </h2>
+          </div>
+          
+          <div className="border border-gray-800/80 rounded-xl overflow-hidden max-h-[400px] overflow-y-auto custom-scrollbar">
+            <MarketTable 
+              data={cryptoData.filter(c => [
+                'ADA', 'DOGE', 'AVAX', 'DOT', 'LINK', 
+                'TRX', 'TON', 'SHIB', 'LTC', 'BCH', 
+                'UNI', 'NEAR', 'APT', 'SUI', 'ATOM'
+              ].includes(c.symbol))} 
+              onRowClick={onCoinSelect} 
+              activeSymbol={selectedCoin} 
+            />
+          </div>
+        </div>
 
       </div>
     </div>

@@ -298,8 +298,8 @@ export default function TradingAccess() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Balance Card Section - Full Height on Mobile */}
-      <div className="min-h-screen sm:min-h-0 px-4 py-6 flex items-center">
+      {/* Balance Card Section */}
+      <div className="px-4 py-6 flex items-center">
         <div className="w-full max-w-2xl mx-auto">
           {/* Main Card Container */}
           <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] p-6 md:p-8 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
@@ -367,7 +367,7 @@ export default function TradingAccess() {
       </div>
 
       {/* Trading Chart Section - Below Balance Cards */}
-      <div className="min-h-screen flex flex-col">
+      <div className="flex flex-col">
         {/* Timeframe Toolbar - TOP ROW - Hidden on Mobile */}
         <div className="hidden sm:block bg-black border-b border-gray-800 px-4 py-2">
           <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar">
