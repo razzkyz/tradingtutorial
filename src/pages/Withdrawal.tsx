@@ -163,13 +163,13 @@ export default function Withdrawal() {
           {!showForm ? (
             <>
               {/* Wallet Illustration Section */}
-              <div className="p-8 md:p-12 text-center relative z-10">
-                <div className="relative inline-block mb-8 group">
-                  <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-2xl group-hover:bg-cyan-400/30 transition-all duration-500"></div>
+              <div className="p-4 md:p-8 text-center relative z-10">
+                <div className="relative inline-block mb-4 group">
+                  <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-xl group-hover:bg-cyan-400/30 transition-all duration-500"></div>
                   <img 
                     src="/images/dompet.png" 
                     alt="Wallet" 
-                    className="relative w-64 h-auto mx-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                    className="relative w-28 md:w-44 h-auto mx-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -186,20 +186,20 @@ export default function Withdrawal() {
                   
                   {/* Fallback SVG Wallet */}
                   <div id="wallet-fallback" className="hidden relative" style={{ display: 'none' }}>
-                    <div className="w-48 h-32 bg-gradient-to-br from-cyan-700 to-cyan-900 rounded-2xl shadow-2xl mx-auto flex items-center justify-center border-4 border-cyan-600/50">
-                      <Wallet className="w-16 h-16 text-cyan-200" />
+                    <div className="w-24 h-16 bg-gradient-to-br from-cyan-700 to-cyan-900 rounded-xl shadow-2xl mx-auto flex items-center justify-center border-2 border-cyan-600/50">
+                      <Wallet className="w-8 h-8 text-cyan-200" />
                     </div>
                   </div>
                 </div>
 
                 {/* Balance Display */}
-                <div className="mb-10">
-                  <p className="text-gray-400 font-medium tracking-wider uppercase mb-2">Available Balance to Withdraw</p>
+                <div className="mb-8">
+                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-3">Available Balance to Withdraw</p>
                   <div className="flex items-end justify-center gap-2">
-                    <span className="text-2xl text-cyan-400 font-bold mb-1">USDT</span>
-                    <span className="text-5xl md:text-6xl text-white font-black tracking-tight">
+                    <span className="text-4xl md:text-5xl text-white font-black tracking-tight">
                       {availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
+                    <span className="text-lg md:text-2xl text-cyan-400 font-bold mb-1">USDT</span>
                   </div>
                 </div>
 
