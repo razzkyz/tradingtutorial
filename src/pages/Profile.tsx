@@ -327,14 +327,14 @@ export default function Profile() {
             )}
           </div>
 
-          {/* Investment Amount Card - With Glow Effect */}
-          <div className="bg-black/80 backdrop-blur-sm border border-cyan-500/50 rounded-2xl p-4 py-8 sm:p-6 sm:py-10 shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] transition-all duration-300">
+          {/* Investment Amount Card - With Glow Effect, taller */}
+          <div className="bg-black/80 backdrop-blur-sm border border-cyan-500/50 rounded-2xl p-4 py-10 sm:p-6 sm:py-12 shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] transition-all duration-300">
             
-            {/* Horizontal Row: Wallet left, content with spacing */}
-            <div className="flex items-center gap-6 min-[375px]:gap-8 min-[414px]:gap-10 sm:gap-12 md:gap-16">
-              {/* Wallet Icon - Left positioned */}
+            {/* Horizontal Row: Wallet left, content shifted left */}
+            <div className="flex items-center gap-4 min-[375px]:gap-5 min-[414px]:gap-6 sm:gap-8 md:gap-12">
+              {/* Wallet Icon - Bigger */}
               <div className="flex-shrink-0 ml-4 sm:ml-8">
-                <Wallet className="w-10 h-10 min-[375px]:w-10 min-[375px]:h-10 min-[414px]:w-11 min-[414px]:h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 text-white" strokeWidth={1.5} />
+                <Wallet className="w-12 h-12 min-[375px]:w-13 min-[375px]:h-13 min-[414px]:w-14 min-[414px]:h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 text-white" strokeWidth={1.5} />
               </div>
 
               {/* Right Side: Title + Blue Box - Same width, aligned */}
