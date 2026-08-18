@@ -328,25 +328,25 @@ export default function Profile() {
           </div>
 
           {/* Investment Amount Card - With Glow Effect */}
-          <div className="bg-black/80 backdrop-blur-sm border border-cyan-500/50 rounded-2xl p-4 sm:p-6 shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] transition-all duration-300">
+          <div className="bg-black/80 backdrop-blur-sm border border-cyan-500/50 rounded-2xl p-4 py-8 sm:p-6 sm:py-10 shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] transition-all duration-300">
             
-            {/* Horizontal Row: Wallet Left, Content Right */}
-            <div className="flex items-center justify-center gap-4 sm:gap-6">
-              {/* Wallet Icon - Left */}
-              <div className="flex-shrink-0">
-                <Wallet className="w-10 h-10 sm:w-16 sm:h-16 text-white" strokeWidth={1.5} />
+            {/* Horizontal Row: Wallet Left, Content with spacing */}
+            <div className="flex items-center gap-3 sm:gap-6">
+              {/* Wallet Icon - Left, but more centered position */}
+              <div className="flex-shrink-0 mr-auto ml-6 sm:ml-12">
+                <Wallet className="w-10 h-10 sm:w-14 sm:h-14 text-white" strokeWidth={1.5} />
               </div>
 
-              {/* Right Side: Title + Blue Box (aligned, same width) */}
-              <div className="flex flex-col items-stretch gap-2 sm:gap-3">
-                {/* Title - Small, lighter weight for professional look */}
-                <h3 className="text-white text-[11px] sm:text-base md:text-lg font-semibold text-center tracking-wide uppercase">
+              {/* Right Side: Title + Blue Box - with margin right */}
+              <div className="flex flex-col items-center gap-2 sm:gap-3 mr-6 sm:mr-12">
+                {/* Title - sets the width reference */}
+                <h3 className="text-white text-[10px] sm:text-sm md:text-base font-semibold tracking-wide uppercase whitespace-nowrap">
                   Investment Amount
                 </h3>
                 
-                {/* Value Box - Blue background, compact, same width as title */}
-                <div className="bg-gradient-to-br from-cyan-600 to-blue-700 border border-cyan-400/60 rounded-lg px-5 sm:px-8 py-3 sm:py-5 shadow-[0_0_25px_rgba(6,182,212,0.5)]">
-                  <p className="text-white text-base sm:text-xl md:text-2xl font-medium text-center">
+                {/* Value Box - MATCHES title width exactly, taller */}
+                <div className="w-full bg-gradient-to-br from-cyan-600 to-blue-700 border border-cyan-400/60 rounded-lg px-4 sm:px-6 py-5 sm:py-8 shadow-[0_0_25px_rgba(6,182,212,0.5)]">
+                  <p className="text-white text-sm sm:text-lg md:text-xl font-medium text-center whitespace-nowrap">
                     {profile.investment_amount.toFixed(0)} USDT
                   </p>
                 </div>
