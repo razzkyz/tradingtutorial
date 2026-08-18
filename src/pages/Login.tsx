@@ -1,5 +1,6 @@
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useNavigate } from 'react-router-dom'
 import { TrendingUp, Mail, Lock, LogIn } from 'lucide-react'
 
 export default function Login() {
@@ -7,6 +8,38 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [checkingAuth, setCheckingAuth] = useState(true)
+  const navigate = useNavigate()
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session?.user) {
+          // User is already logged in, check their role and redirect
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .single() as any
+
+          if (profile?.role === 'admin') {
+            navigate('/admin/dashboard', { replace: true })
+          } else {
+            navigate('/dashboard', { replace: true })
+          }
+        }
+      } catch (error) {
+        console.error('Session check error:', error)
+      } finally {
+        setCheckingAuth(false)
+      }
+    }
+
+    checkSession()
+  }, [navigate])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -14,32 +47,53 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Sign in with Supabase
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (signInError) throw signInError
+
+      if (!data.user) {
+        throw new Error('Login failed - no user returned')
+      }
 
       // Check user role from database
-      if (data.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .single() as any
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', data.user.id)
+        .single() as any
 
-        // Redirect based on role
-        if (profile?.role === 'admin') {
-          window.location.href = '/admin/dashboard'
-        } else {
-          window.location.href = '/dashboard'
-        }
+      if (profileError) {
+        console.error('Profile fetch error:', profileError)
+        throw new Error('Failed to fetch user profile')
       }
-    } catch (err: unknown) {
-      setError('Invalid email or password.')
+
+      // Redirect based on role - use navigate instead of window.location
+      if (profile?.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true })
+      } else {
+        navigate('/dashboard', { replace: true })
+      }
+    } catch (err: any) {
+      console.error('Login error:', err)
+      setError(err.message || 'Invalid email or password.')
       setLoading(false)
     }
+  }
+
+  // Show loading while checking existing session
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
+          <p className="text-cyan-300">Checking authentication...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

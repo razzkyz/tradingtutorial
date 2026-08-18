@@ -43,9 +43,25 @@ export default function Header() {
   }
 
   const handleLogoutConfirm = async () => {
-    await supabase.auth.signOut()
-    setShowLogoutModal(false)
-    navigate('/login')
+    try {
+      // Sign out from Supabase - this invalidates the session globally
+      // All devices using this session will be logged out
+      const { error } = await supabase.auth.signOut()
+      
+      if (error) {
+        console.error('Logout error:', error)
+      }
+      
+      // Close modal
+      setShowLogoutModal(false)
+      
+      // Navigate to login - the auth state change will be detected by useAuth
+      navigate('/login', { replace: true })
+    } catch (error) {
+      console.error('Logout failed:', error)
+      setShowLogoutModal(false)
+      navigate('/login', { replace: true })
+    }
   }
 
   const handleLogoutCancel = () => {
