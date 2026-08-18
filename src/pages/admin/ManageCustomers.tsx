@@ -30,6 +30,9 @@ export default function ManageCustomers() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [balanceAmount, setBalanceAmount] = useState('')
   const [balanceType, setBalanceType] = useState('balance_1')
+  const [balanceCurrency, setBalanceCurrency] = useState('USDT')
+  const [usdtRate, setUsdtRate] = useState(1)
+  const [fetchingRate, setFetchingRate] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [editForm, setEditForm] = useState({
     full_name: '',
@@ -159,10 +162,37 @@ export default function ManageCustomers() {
     }
   }
 
+  const CURRENCIES = [
+    { value: 'USDT', label: 'USDT (Tether)', symbol: 'USDT' },
+    { value: 'BTC',  label: 'Bitcoin (BTC)', symbol: 'BTCUSDT' },
+    { value: 'ETH',  label: 'Ethereum (ETH)', symbol: 'ETHUSDT' },
+    { value: 'BNB',  label: 'BNB',            symbol: 'BNBUSDT' },
+    { value: 'SOL',  label: 'Solana (SOL)',   symbol: 'SOLUSDT' },
+    { value: 'XRP',  label: 'Ripple (XRP)',   symbol: 'XRPUSDT' },
+  ]
+
+  const fetchCryptoPrice = async (currency: string) => {
+    if (currency === 'USDT') { setUsdtRate(1); return }
+    const sym = CURRENCIES.find(c => c.value === currency)?.symbol
+    if (!sym) return
+    setFetchingRate(true)
+    try {
+      const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}`)
+      const data = await res.json()
+      setUsdtRate(parseFloat(data.price) || 1)
+    } catch {
+      setUsdtRate(1)
+    } finally {
+      setFetchingRate(false)
+    }
+  }
+
   const openBalanceModal = (customer: Customer) => {
     setSelectedCustomer(customer)
     setBalanceAmount('')
     setBalanceType('balance_1')
+    setBalanceCurrency('USDT')
+    setUsdtRate(1)
     setShowBalanceModal(true)
   }
 
@@ -187,12 +217,15 @@ export default function ManageCustomers() {
 
     setUpdating(true)
     try {
-      const amount = parseFloat(balanceAmount)
-      if (amount <= 0) {
+      const rawAmount = parseFloat(balanceAmount)
+      if (rawAmount <= 0) {
         setToast({ message: 'Amount must be greater than 0', type: 'warning' })
         setUpdating(false)
         return
       }
+
+      // Convert to USDT
+      const usdtAmount = balanceCurrency === 'USDT' ? rawAmount : rawAmount * usdtRate
 
       // Get current balance
       const { data: currentBalance } = await supabase
@@ -202,7 +235,7 @@ export default function ManageCustomers() {
         .eq('balance_type', balanceType)
         .single()
 
-      const newAmount = (currentBalance as any)?.amount + amount || amount
+      const newAmount = ((currentBalance as any)?.amount || 0) + usdtAmount
 
       // Update balance
       const result = await (supabase
@@ -215,7 +248,8 @@ export default function ManageCustomers() {
 
       setShowBalanceModal(false)
       await loadCustomers()
-      setToast({ message: `Added ${amount} USDT to ${balanceType}`, type: 'success' })
+      const displayCrypto = balanceCurrency !== 'USDT' ? ` (${rawAmount} ${balanceCurrency} @ $${usdtRate.toLocaleString()})` : ''
+      setToast({ message: `Added USDT ${usdtAmount.toFixed(2)}${displayCrypto} to ${selectedCustomer.full_name}`, type: 'success' })
     } catch (error) {
       console.error('Error adding balance:', error)
       setToast({ message: 'Failed to add balance', type: 'error' })
@@ -438,18 +472,20 @@ export default function ManageCustomers() {
         {/* Add Balance Modal */}
         {showBalanceModal && selectedCustomer && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-black/95 border-2 border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.6)] rounded-lg max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-white mb-4">
-                Add Balance for {selectedCustomer.full_name}
+            <div className="bg-gray-950 border border-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-6">
+              <h3 className="text-xl font-bold text-white mb-1">
+                Add Balance
               </h3>
+              <p className="text-gray-400 text-sm mb-6">for <span className="text-cyan-400 font-semibold">{selectedCustomer.full_name}</span></p>
 
               <div className="space-y-4">
+                {/* Balance Slot */}
                 <div>
-                  <label className="block text-text-secondary text-sm mb-2">Balance Type</label>
+                  <label className="block text-gray-400 text-sm mb-2">Balance Slot</label>
                   <select
                     value={balanceType}
                     onChange={(e) => setBalanceType(e.target.value)}
-                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20"
+                    className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500 transition-all"
                     disabled={updating}
                   >
                     <option value="balance_1">Balance 1</option>
@@ -459,31 +495,74 @@ export default function ManageCustomers() {
                   </select>
                 </div>
 
+                {/* Currency Selector */}
                 <div>
-                  <label className="block text-text-secondary text-sm mb-2">Amount (USDT)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={balanceAmount}
-                    onChange={(e) => setBalanceAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20"
-                    disabled={updating}
-                  />
+                  <label className="block text-gray-400 text-sm mb-2">Currency</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {CURRENCIES.map(c => (
+                      <button
+                        key={c.value}
+                        type="button"
+                        disabled={updating}
+                        onClick={() => { setBalanceCurrency(c.value); fetchCryptoPrice(c.value) }}
+                        className={`py-2.5 px-3 rounded-xl text-sm font-bold border transition-all ${
+                          balanceCurrency === c.value
+                            ? 'bg-cyan-500/20 border-cyan-500/60 text-cyan-400'
+                            : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
+                        }`}
+                      >
+                        {c.value}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="flex gap-3 mt-6">
+                {/* Amount Input */}
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Amount in {balanceCurrency}</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="any"
+                      value={balanceAmount}
+                      onChange={(e) => setBalanceAmount(e.target.value)}
+                      placeholder={`0.00 ${balanceCurrency}`}
+                      className="w-full px-4 pr-16 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500 transition-all"
+                      disabled={updating}
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">{balanceCurrency}</span>
+                  </div>
+                </div>
+
+                {/* Conversion Preview */}
+                {balanceCurrency !== 'USDT' && (
+                  <div className="p-3 bg-gray-900/80 border border-gray-800 rounded-xl">
+                    {fetchingRate ? (
+                      <p className="text-gray-500 text-sm text-center">Fetching live price...</p>
+                    ) : (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400 text-sm">Converts to USDT:</span>
+                        <span className="text-emerald-400 font-bold text-lg">
+                          ≈ {balanceAmount ? (parseFloat(balanceAmount || '0') * usdtRate).toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0.00'} USDT
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-gray-600 text-xs mt-1">1 {balanceCurrency} = ${usdtRate.toLocaleString('en-US', { maximumFractionDigits: 2 })} USDT (live)</p>
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-2">
                   <button
                     onClick={() => setShowBalanceModal(false)}
                     disabled={updating}
-                    className="flex-1 px-4 py-3 bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold rounded-lg transition-all disabled:opacity-50"
+                    className="flex-1 px-4 py-3 bg-transparent border-2 border-gray-700 hover:border-gray-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleAddBalance}
-                    disabled={updating || !balanceAmount}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={updating || !balanceAmount || fetchingRate}
+                    className="flex-1 px-4 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {updating ? 'Adding...' : 'Add Balance'}
                   </button>

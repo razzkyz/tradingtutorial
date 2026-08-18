@@ -1,391 +1,369 @@
-# Trading Tutorials Web Application
+# Trading Tutorials Platform
 
-A modern, secure trading tutorials dashboard built with React, TypeScript, and Supabase.
+A modern, secure trading tutorial and portfolio management platform built with React, TypeScript, Tailwind CSS, and Supabase.
 
-## 📋 Project Overview
-
-Trading Tutorials is a full-stack web application that provides users with a secure dashboard to manage their trading balances, access market data, and submit withdrawal requests. The application follows modern security best practices with Row Level Security (RLS) and proper authentication flows.
+---
 
 ## ✨ Features
 
-- **Authentication**: Secure login system using Supabase Auth
-- **Session Management**: Persistent sessions with automatic token refresh
-- **Protected Routes**: Client-side route protection with loading states
-- **User Profile**: View personal information and investment details
-- **Balance Dashboard**: Real-time balance tracking across multiple accounts
-- **Market Global**: View global market data and trading pairs
-- **Trading Access**: Manage trading access and view total available balance
-- **Withdrawal System**: Submit withdrawal requests with validation
-- **Responsive Design**: Mobile-first design that works on all devices
-- **Premium UI**: Dark fintech theme with teal/cyan/green gradients
+### 🔐 Authentication System
+- Secure user registration and login
+- Multi-device logout detection
+- Session persistence and validation
+- Protected routes with role-based access
+- Admin and user role management
 
-## 🛠 Tech Stack
+### 💰 Balance Management
+- Multi-currency support (USDT, BTC, ETH, etc.)
+- Real-time balance display
+- Investment amount tracking
+- Admin balance management
 
-### Frontend
-- **React 18**: Modern React with hooks
-- **Vite**: Fast build tool and dev server
-- **TypeScript**: Type-safe development
-- **Tailwind CSS**: Utility-first CSS framework
-- **React Router**: Client-side routing
+### 💸 Withdrawal System
+- User withdrawal requests
+- Multiple network support (ERC20, TRC20, BEP20)
+- Admin approval workflow
+- Withdrawal history tracking
+- Status management (pending, approved, rejected, completed)
 
-### Backend / BaaS
-- **Supabase**: Backend-as-a-Service
-  - Authentication
-  - PostgreSQL database
-  - Row Level Security (RLS)
-  - Real-time capabilities
+### 📊 Binance Integration
+- API key management
+- Real-time trading data
+- Secure API key storage
+- Trading status monitoring
 
-### Validation
-- **Zod**: Runtime type validation
+### 👤 User Management
+- Profile management
+- Avatar upload
+- User information (name, email, phone, country, address)
+- Investment amount display
 
-### Deployment
-- **Vercel**: Frontend hosting and deployment
+### 🛡️ Admin Features
+- User overview and management
+- Balance management for all users
+- Withdrawal approval/rejection
+- System configuration
+- Analytics and reporting
 
-## 📁 Folder Structure
+### 🎨 Modern UI/UX
+- Responsive design (mobile, tablet, desktop)
+- Dark theme with blue/cyan accents
+- Smooth animations and transitions
+- Professional card-based layout
+- Loading states and skeletons
 
-```
-trading-tutorials/
-├── src/
-│   ├── components/
-│   │   ├── Header.tsx
-│   │   ├── HamburgerMenu.tsx
-│   │   ├── BalanceCard.tsx
-│   │   ├── TradingStatus.tsx
-│   │   ├── LoadingState.tsx
-│   │   └── ErrorState.tsx
-│   ├── layouts/
-│   │   └── AppLayout.tsx
-│   ├── pages/
-│   │   ├── Login.tsx
-│   │   ├── Dashboard.tsx
-│   │   ├── Profile.tsx
-│   │   ├── MarketGlobal.tsx
-│   │   ├── TradingAccess.tsx
-│   │   └── Withdrawal.tsx
-│   ├── routes/
-│   │   └── ProtectedRoute.tsx
-│   ├── hooks/
-│   │   └── useAuth.ts
-│   ├── services/
-│   │   ├── profileService.ts
-│   │   ├── balanceService.ts
-│   │   └── withdrawalService.ts
-│   ├── schemas/
-│   │   └── withdrawalSchema.ts
-│   ├── lib/
-│   │   └── supabase.ts
-│   ├── types/
-│   │   └── database.ts
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-├── tailwind.config.js
-└── README.md
-```
+---
 
-## 🗄 Database Schema
-
-### Tables
-
-#### profiles
-```sql
-CREATE TABLE profiles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  full_name TEXT NOT NULL,
-  address TEXT,
-  phone_number TEXT,
-  email TEXT NOT NULL,
-  country TEXT,
-  avatar_url TEXT,
-  investment_amount NUMERIC(15, 2) DEFAULT 100.00,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id)
-);
-```
-
-#### balances
-```sql
-CREATE TABLE balances (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  balance_type TEXT NOT NULL,
-  amount NUMERIC(15, 2) DEFAULT 0.00,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, balance_type)
-);
-```
-
-#### trading_access
-```sql
-CREATE TABLE trading_access (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  status TEXT DEFAULT 'inactive' CHECK (status IN ('active', 'inactive')),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id)
-);
-```
-
-#### withdrawals
-```sql
-CREATE TABLE withdrawals (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  amount NUMERIC(15, 2) NOT NULL CHECK (amount > 0),
-  wallet_address TEXT NOT NULL,
-  network TEXT NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'completed')),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Indexes
-```sql
-CREATE INDEX idx_profiles_user_id ON profiles(user_id);
-CREATE INDEX idx_balances_user_id ON balances(user_id);
-CREATE INDEX idx_trading_access_user_id ON trading_access(user_id);
-CREATE INDEX idx_withdrawals_user_id ON withdrawals(user_id);
-CREATE INDEX idx_withdrawals_status ON withdrawals(status);
-```
-
-## 🔒 Row Level Security (RLS)
-
-All tables have RLS enabled. Users can only access their own data.
-
-### profiles
-```sql
--- Enable RLS
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-
--- SELECT policy
-CREATE POLICY "Users can view own profile"
-  ON profiles FOR SELECT
-  USING (auth.uid() = user_id);
-
--- INSERT policy (for profile creation)
-CREATE POLICY "Users can insert own profile"
-  ON profiles FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
--- UPDATE policy
-CREATE POLICY "Users can update own profile"
-  ON profiles FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-```
-
-### balances
-```sql
--- Enable RLS
-ALTER TABLE balances ENABLE ROW LEVEL SECURITY;
-
--- SELECT policy
-CREATE POLICY "Users can view own balances"
-  ON balances FOR SELECT
-  USING (auth.uid() = user_id);
-
--- No UPDATE/DELETE for regular users
-```
-
-### trading_access
-```sql
--- Enable RLS
-ALTER TABLE trading_access ENABLE ROW LEVEL SECURITY;
-
--- SELECT policy
-CREATE POLICY "Users can view own trading access"
-  ON trading_access FOR SELECT
-  USING (auth.uid() = user_id);
-
--- No UPDATE for regular users
-```
-
-### withdrawals
-```sql
--- Enable RLS
-ALTER TABLE withdrawals ENABLE ROW LEVEL SECURITY;
-
--- SELECT policy
-CREATE POLICY "Users can view own withdrawals"
-  ON withdrawals FOR SELECT
-  USING (auth.uid() = user_id);
-
--- INSERT policy
-CREATE POLICY "Users can create own withdrawals"
-  ON withdrawals FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
--- No UPDATE/DELETE for regular users
-```
-
-## 🔐 Security Measures
-
-1. **Authentication**: Supabase Auth handles all authentication
-2. **Session Management**: Automatic session refresh and validation
-3. **Authorization**: RLS ensures users only access their own data
-4. **IDOR Protection**: All queries filtered by authenticated user ID
-5. **Input Validation**: Zod schemas validate all user inputs
-6. **No Exposed Secrets**: Service role keys never sent to frontend
-7. **Safe Error Messages**: Generic error messages prevent information leakage
-8. **XSS Protection**: React's built-in XSS protection (no dangerouslySetInnerHTML)
-
-## 🌍 Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-```
-
-**IMPORTANT**: Never commit your `.env` file or expose your service role key in the frontend.
-
-## 🚀 Local Development
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ and npm
-- Supabase account and project
+- Node.js v18 or higher
+- npm or yarn
+- Supabase account
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd trading-tutorials
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd trading-tutorials
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   # Copy example file
+   copy .env.example .env
+   
+   # Edit .env with your Supabase credentials
+   ```
+
+4. **Set up database**
+   - See `docs/DATABASE-SETUP-GUIDE.md`
+   - Run `database/00-COMPLETE-DATABASE-SETUP.sql` in Supabase SQL Editor
+
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open browser**
+   ```
+   http://localhost:5173
+   ```
+
+📚 **Full setup instructions**: See `docs/COMPLETE-SETUP-GUIDE.md`
+
+---
+
+## 📁 Project Structure
+
+```
+trading-tutorials/
+├── database/              # Database setup scripts
+│   ├── 00-COMPLETE-DATABASE-SETUP.sql  # Main setup
+│   ├── 3-ADD-ADMIN.sql                 # Admin setup
+│   ├── INSERT-DEMO-USERS.sql           # Demo data
+│   └── insert-initial-data.sql
+│
+├── docs/                  # Documentation
+│   ├── COMPLETE-SETUP-GUIDE.md         # Full setup guide
+│   ├── DATABASE-SETUP-GUIDE.md         # Database guide
+│   ├── AUTHENTICATION-FIX-COMPLETE.md  # Auth system
+│   ├── ADMIN-SETUP-GUIDE.md            # Admin features
+│   ├── BINANCE-INTEGRATION-GUIDE.md    # Binance setup
+│   ├── DEPLOYMENT.md                   # Deploy guide
+│   └── README.md                       # Docs overview
+│
+├── public/               # Static assets
+│   ├── images/          # Logo, wallet icons
+│   └── icons.svg        # SVG icons
+│
+├── src/
+│   ├── components/      # React components
+│   │   ├── Header.tsx
+│   │   ├── BalanceCard.tsx
+│   │   ├── WithdrawalForm.tsx
+│   │   ├── BinanceTrading.tsx
+│   │   └── ...
+│   │
+│   ├── pages/           # Page components
+│   │   ├── Dashboard.tsx
+│   │   ├── Profile.tsx
+│   │   ├── Withdrawal.tsx
+│   │   ├── MarketGlobal.tsx
+│   │   ├── Login.tsx
+│   │   └── Admin/
+│   │       ├── AdminDashboard.tsx
+│   │       ├── UserManagement.tsx
+│   │       └── WithdrawalManagement.tsx
+│   │
+│   ├── routes/          # Route protection
+│   │   ├── ProtectedRoute.tsx
+│   │   └── AdminRoute.tsx
+│   │
+│   ├── hooks/           # Custom hooks
+│   │   └── useAuth.ts
+│   │
+│   ├── lib/             # Libraries
+│   │   └── supabase.ts
+│   │
+│   └── layouts/         # Layout components
+│       └── AppLayout.tsx
+│
+├── .env                 # Environment variables (create this)
+├── .env.example         # Environment template
+├── package.json         # Dependencies
+├── vite.config.ts       # Vite configuration
+└── tailwind.config.js   # Tailwind configuration
 ```
 
-2. Install dependencies:
-```bash
-npm install
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **React Router** - Routing
+
+### Backend
+- **Supabase** - Backend as a Service
+  - Authentication
+  - PostgreSQL Database
+  - Storage (avatars)
+  - Row Level Security
+
+### External APIs
+- **Binance API** - Trading data and execution (optional)
+
+---
+
+## 📖 Documentation
+
+All documentation is located in the `docs/` folder:
+
+| Document | Description |
+|----------|-------------|
+| [COMPLETE-SETUP-GUIDE.md](docs/COMPLETE-SETUP-GUIDE.md) | Complete setup from scratch |
+| [DATABASE-SETUP-GUIDE.md](docs/DATABASE-SETUP-GUIDE.md) | Database configuration |
+| [AUTHENTICATION-FIX-COMPLETE.md](docs/AUTHENTICATION-FIX-COMPLETE.md) | Authentication system |
+| [ADMIN-SETUP-GUIDE.md](docs/ADMIN-SETUP-GUIDE.md) | Admin features |
+| [BINANCE-INTEGRATION-GUIDE.md](docs/BINANCE-INTEGRATION-GUIDE.md) | Binance setup |
+| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Production deployment |
+| [SECURITY.md](docs/SECURITY.md) | Security best practices |
+| [PROJECT-SUMMARY.md](docs/PROJECT-SUMMARY.md) | Project overview |
+
+---
+
+## 🗄️ Database Schema
+
+### Tables
+
+**profiles**
+- User profile information
+- Role management (user/admin)
+- Investment amount
+- Contact details
+
+**balances**
+- Multi-currency balances
+- Per-user currency tracking
+- Auto-updated timestamps
+
+**withdrawals**
+- Withdrawal requests
+- Status tracking
+- Admin notes
+- Network support
+
+**binance_api_keys**
+- Secure API key storage
+- Per-user keys
+- Active/inactive status
+
+### Security
+- Row Level Security (RLS) enabled
+- Role-based access control
+- Automatic profile creation on signup
+- Secure storage policies
+
+---
+
+## 🎯 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Required variables in `.env`:
+
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=your-project-url
+VITE_SUPABASE_ANON_KEY=your-anon-key
+
+# Optional: Binance API
+VITE_BINANCE_API_KEY=your-api-key
+VITE_BINANCE_API_SECRET=your-api-secret
 ```
 
-3. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your Supabase credentials
+Get Supabase credentials from:
+**Project Settings** > **API** in Supabase dashboard
+
+---
+
+## 🚢 Deployment
+
+### Vercel (Recommended)
+
+1. Push code to GitHub/GitLab/Bitbucket
+2. Import project in Vercel dashboard
+3. Configure:
+   - Framework: Vite
+   - Build command: `npm run build`
+   - Output directory: `dist`
+4. Add environment variables
+5. Deploy!
+
+📚 **Full guide**: See `docs/DEPLOYMENT.md`
+
+### Other Platforms
+- Netlify
+- Railway
+- Render
+- AWS Amplify
+- Any static hosting
+
+---
+
+## 🔐 Security Features
+
+- ✅ Row Level Security (RLS)
+- ✅ Role-based access control
+- ✅ Secure session management
+- ✅ Multi-device logout detection
+- ✅ Protected API routes
+- ✅ Input validation
+- ✅ XSS protection
+- ✅ CSRF protection
+
+📚 **Details**: See `docs/SECURITY.md`
+
+---
+
+## 🎨 Customization
+
+### Branding
+- Logo: `public/images/logo.png`
+- Favicon: `public/favicon.svg`
+- Colors: `tailwind.config.js`
+- App name: `index.html`
+
+### Theme Colors
+```javascript
+// tailwind.config.js
+theme: {
+  extend: {
+    colors: {
+      primary: '#0891b2',    // Cyan
+      secondary: '#1e40af',  // Blue
+      // Customize as needed
+    }
+  }
+}
 ```
 
-4. Run the development server:
-```bash
-npm run dev
-```
+---
 
-5. Open your browser at `http://localhost:3000`
+## 🤝 Contributing
 
-## 🏗 Build
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-Build for production:
+---
 
-```bash
-npm run build
-```
+## 📝 License
 
-Preview production build:
+This project is proprietary software. All rights reserved.
 
-```bash
-npm run preview
-```
+---
 
-## 📦 Deployment to Vercel
+## 📧 Support
 
-1. Push your code to GitHub
-2. Import project in Vercel
-3. Add environment variables:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_PUBLISHABLE_KEY`
-4. Deploy
+For questions or issues:
+- Check documentation in `docs/` folder
+- Review Supabase documentation
+- Contact project maintainers
 
-## 🧪 Supabase Setup
+---
 
-### 1. Create Supabase Project
-- Go to https://supabase.com
-- Create a new project
-- Note your project URL and anon key
+## 🙏 Acknowledgments
 
-### 2. Run Database Migrations
-Execute the SQL scripts in the Supabase SQL Editor:
-- Create tables (see Database Schema section)
-- Enable RLS
-- Create policies
-- Create indexes
+- [Supabase](https://supabase.com) - Backend infrastructure
+- [Tailwind CSS](https://tailwindcss.com) - UI styling
+- [React](https://react.dev) - UI framework
+- [Vite](https://vitejs.dev) - Build tool
+- [Binance API](https://www.binance.com/en/binance-api) - Trading data
 
-### 3. Seed Data (Optional)
-Create test users and seed data:
+---
 
-```sql
--- Create test user via Supabase Auth Dashboard first
--- Then seed profile
-INSERT INTO profiles (user_id, full_name, email, address, phone_number, country, investment_amount)
-VALUES 
-  ('user-uuid-here', 'Mark Cloop', 'markcloop@gmail.com', 'California', '+15553633566', 'America', 100.00);
-
--- Seed balances
-INSERT INTO balances (user_id, balance_type, amount)
-VALUES 
-  ('user-uuid-here', 'balance_1', 200.00),
-  ('user-uuid-here', 'balance_2', 400.00),
-  ('user-uuid-here', 'balance_3', 500.00),
-  ('user-uuid-here', 'balance_4', 700.00);
-
--- Seed trading access
-INSERT INTO trading_access (user_id, status)
-VALUES 
-  ('user-uuid-here', 'inactive');
-```
-
-## 🎨 Design System
-
-### Color Palette
-- **Deep Navy**: `#061923` - Primary background
-- **Dark Teal**: `#063B4C` - Secondary background
-- **Teal**: `#087E8B` - Accent color
-- **Emerald**: `#16A085` - Success states
-- **Cyan**: `#20C9D8` - Interactive elements
-- **Green**: `#22C55E` - Active states
-
-### Gradients
-- **Main Background**: `linear-gradient(135deg, #061923 0%, #073B4C 45%, #075F65 100%)`
-- **Card Gradient**: `linear-gradient(135deg, #063B4C, #087E8B)`
-- **Button Gradient**: `linear-gradient(135deg, #087E8B, #20C9D8)`
-- **Active Gradient**: `linear-gradient(135deg, #16A085, #22C55E)`
-
-## ⚠️ Important Notes
-
-1. **This is a Demo Application**: No real cryptocurrency transactions occur
-2. **Withdrawal Requests**: Create database records only, no blockchain transactions
-3. **Balance Management**: Admin-controlled via database, users have read-only access
-4. **Trading Status**: Admin-controlled, users cannot change their own status
-5. **Payment Gateway**: Not implemented in this version; architecture supports future integration
-
-## 🔍 Security Audit Checklist
-
-- [x] Authentication via Supabase Auth
-- [x] Session management with auto-refresh
-- [x] RLS enabled on all tables
-- [x] User isolation via auth.uid()
-- [x] IDOR protection tested
-- [x] Input validation with Zod
-- [x] No service role key in frontend
-- [x] No hardcoded credentials
-- [x] Safe error messages
-- [x] No XSS vulnerabilities
-- [x] Protected routes implemented
-- [x] Balance server-controlled
-- [x] Trading status server-controlled
-- [x] Withdrawal validation
-
-## 📄 License
-
-This project is for technical assessment purposes.
-
-## 👥 Support
-
-For issues or questions, please contact the development team.
+**Built with ❤️ using React + TypeScript + Supabase**

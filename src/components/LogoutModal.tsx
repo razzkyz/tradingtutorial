@@ -1,4 +1,4 @@
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, LogOut } from 'lucide-react'
 
 interface LogoutModalProps {
   isOpen: boolean
@@ -13,25 +13,25 @@ export default function LogoutModal({ isOpen, onConfirm, onCancel }: LogoutModal
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 animate-fade-in">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md"
         onClick={onCancel}
       />
       
       {/* Modal */}
-      <div className="relative bg-gradient-to-br from-deep-navy/95 to-dark-teal/95 backdrop-blur-sm rounded-2xl border border-teal-700/30 shadow-2xl max-w-md w-full animate-scale-in">
+      <div className="relative bg-gray-950 backdrop-blur-sm rounded-2xl border border-gray-800 shadow-[0_0_60px_rgba(0,0,0,0.8)] max-w-md w-full animate-scale-in">
         {/* Icon Header */}
         <div className="flex justify-center pt-8 pb-4">
-          <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 p-4 rounded-full border-2 border-red-500/30">
-            <AlertTriangle className="w-12 h-12 text-red-400" />
+          <div className="bg-red-500/15 p-5 rounded-full border-2 border-red-500/40">
+            <AlertTriangle className="w-10 h-10 text-red-500" />
           </div>
         </div>
 
         {/* Content */}
-        <div className="px-8 pb-6 text-center">
-          <h3 className="text-2xl font-bold text-text-primary mb-3">
+        <div className="px-8 pb-8 text-center">
+          <h3 className="text-2xl font-bold text-white mb-3">
             Confirm Logout
           </h3>
-          <p className="text-text-secondary mb-6">
+          <p className="text-gray-400 mb-8">
             Are you sure you want to logout from your account?
           </p>
 
@@ -39,14 +39,15 @@ export default function LogoutModal({ isOpen, onConfirm, onCancel }: LogoutModal
           <div className="flex gap-3">
             <button
               onClick={onCancel}
-              className="flex-1 px-6 py-3 rounded-xl bg-dark-teal/40 hover:bg-dark-teal/60 text-text-primary font-medium border border-teal-700/30 hover:border-cyan/50 transition-all"
+              className="flex-1 px-6 py-3.5 rounded-xl bg-transparent border-2 border-gray-600 hover:border-gray-400 text-white font-semibold transition-all hover:bg-gray-800"
             >
               Cancel
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-semibold shadow-lg hover:shadow-red-500/50 transition-all"
+              className="flex-1 px-6 py-3.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition-all shadow-lg shadow-red-900/50 flex items-center justify-center gap-2"
             >
+              <LogOut className="w-4 h-4" />
               Yes, Logout
             </button>
           </div>

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { TrendingUp, TrendingDown, Activity, Search, Star, X, Maximize2, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react'
+import { MarketSection } from '../components/market/MarketSection'
+import Footer from '../components/Footer'
 
 interface CoinData {
   symbol: string
@@ -56,16 +58,35 @@ export default function MarketGlobal() {
     { symbol: 'AVAXUSDT', name: 'Avalanche', tvSymbol: 'BINANCE:AVAXUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
     { symbol: 'LINKUSDT', name: 'Chainlink', tvSymbol: 'BINANCE:LINKUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
     { symbol: 'LTCUSDT', name: 'Litecoin', tvSymbol: 'BINANCE:LTCUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
+    { symbol: 'TONUSDT', name: 'Toncoin', tvSymbol: 'BINANCE:TONUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
+    { symbol: 'SHIBUSDT', name: 'Shiba Inu', tvSymbol: 'BINANCE:SHIBUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
+    { symbol: 'TRXUSDT', name: 'TRON', tvSymbol: 'BINANCE:TRXUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
+    { symbol: 'NEARUSDT', name: 'NEAR Protocol', tvSymbol: 'BINANCE:NEARUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
+    { symbol: 'UNIUSDT', name: 'Uniswap', tvSymbol: 'BINANCE:UNIUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
+    { symbol: 'ATOMUSDT', name: 'Cosmos', tvSymbol: 'BINANCE:ATOMUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
+    { symbol: 'APTUSDT', name: 'Aptos', tvSymbol: 'BINANCE:APTUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
+    { symbol: 'ARBUSDT', name: 'Arbitrum', tvSymbol: 'BINANCE:ARBUSDT', price: '0', change24h: 0, category: 'crypto', favorite: false },
     { symbol: 'EURUSD', name: 'EUR/USD', tvSymbol: 'FX:EURUSD', price: '0', change24h: 0, category: 'forex', favorite: false },
     { symbol: 'GBPUSD', name: 'GBP/USD', tvSymbol: 'FX:GBPUSD', price: '0', change24h: 0, category: 'forex', favorite: false },
     { symbol: 'USDJPY', name: 'USD/JPY', tvSymbol: 'FX:USDJPY', price: '0', change24h: 0, category: 'forex', favorite: false },
     { symbol: 'AAPL', name: 'Apple Inc', tvSymbol: 'NASDAQ:AAPL', price: '0', change24h: 0, category: 'stocks', favorite: false },
-    { symbol: 'TSLA', name: 'Tesla Inc', tvSymbol: 'NASDAQ:TSLA', price: '0', change24h: 0, category: 'stocks', favorite: false },
+    { symbol: 'MSFT', name: 'Microsoft', tvSymbol: 'NASDAQ:MSFT', price: '0', change24h: 0, category: 'stocks', favorite: false },
+    { symbol: 'GOOGL', name: 'Google', tvSymbol: 'NASDAQ:GOOGL', price: '0', change24h: 0, category: 'stocks', favorite: false },
+    { symbol: 'AMZN', name: 'Amazon', tvSymbol: 'NASDAQ:AMZN', price: '0', change24h: 0, category: 'stocks', favorite: false },
+    { symbol: 'TSLA', name: 'Tesla', tvSymbol: 'NASDAQ:TSLA', price: '0', change24h: 0, category: 'stocks', favorite: false },
     { symbol: 'NVDA', name: 'NVIDIA', tvSymbol: 'NASDAQ:NVDA', price: '0', change24h: 0, category: 'stocks', favorite: false },
+    { symbol: 'META', name: 'Meta (Facebook)', tvSymbol: 'NASDAQ:META', price: '0', change24h: 0, category: 'stocks', favorite: false },
+    { symbol: 'NFLX', name: 'Netflix', tvSymbol: 'NASDAQ:NFLX', price: '0', change24h: 0, category: 'stocks', favorite: false },
+    { symbol: 'JPM', name: 'JP Morgan', tvSymbol: 'NYSE:JPM', price: '0', change24h: 0, category: 'stocks', favorite: false },
+    { symbol: 'V', name: 'Visa', tvSymbol: 'NYSE:V', price: '0', change24h: 0, category: 'stocks', favorite: false },
+    { symbol: 'DIS', name: 'Disney', tvSymbol: 'NYSE:DIS', price: '0', change24h: 0, category: 'stocks', favorite: false },
     { symbol: 'XAUUSD', name: 'Gold', tvSymbol: 'OANDA:XAUUSD', price: '0', change24h: 0, category: 'commodities', favorite: true },
+    { symbol: 'XAGUSD', name: 'Silver', tvSymbol: 'OANDA:XAGUSD', price: '0', change24h: 0, category: 'commodities', favorite: false },
   ]
 
   const [coinsData, setCoinsData] = useState<CoinData[]>(allCoins)
+
+  // Crypto icon mapping with real CDN URLs
 
   const categories = [
     { id: 'all', label: 'All' },
@@ -194,10 +215,78 @@ export default function MarketGlobal() {
       }
     }
 
-    fetchCryptoData()
-    const interval = setInterval(fetchCryptoData, 10000)
+    // Initialize stocks with placeholder prices
+    const initializeStocksPrices = () => {
+      setCoinsData(prevCoins =>
+        prevCoins.map((coin) => {
+          if (coin.category === 'stocks') {
+            // Set realistic placeholder prices
+            const stockPrices: Record<string, { price: string; change: number }> = {
+              'AAPL': { price: '178.50', change: 1.25 },
+              'MSFT': { price: '378.91', change: 0.85 },
+              'GOOGL': { price: '141.80', change: -0.45 },
+              'AMZN': { price: '145.32', change: 1.10 },
+              'TSLA': { price: '242.84', change: 2.35 },
+              'NVDA': { price: '495.22', change: 3.15 },
+              'META': { price: '325.67', change: 0.95 },
+              'NFLX': { price: '445.73', change: -0.32 },
+              'JPM': { price: '158.45', change: 0.55 },
+              'V': { price: '245.88', change: 0.75 },
+              'DIS': { price: '91.23', change: -0.65 },
+            }
+            const stockData = stockPrices[coin.symbol]
+            if (stockData) {
+              return {
+                ...coin,
+                price: stockData.price,
+                change24h: stockData.change,
+              }
+            }
+          }
+          if (coin.category === 'forex') {
+            const forexPrices: Record<string, { price: string; change: number }> = {
+              'EURUSD': { price: '1.0875', change: 0.15 },
+              'GBPUSD': { price: '1.2645', change: -0.22 },
+              'USDJPY': { price: '148.75', change: 0.35 },
+            }
+            const forexData = forexPrices[coin.symbol]
+            if (forexData) {
+              return {
+                ...coin,
+                price: forexData.price,
+                change24h: forexData.change,
+              }
+            }
+          }
+          if (coin.category === 'commodities') {
+            const commodityPrices: Record<string, { price: string; change: number }> = {
+              'XAUUSD': { price: '2045.50', change: 0.85 },
+              'XAGUSD': { price: '24.35', change: 1.15 },
+            }
+            const commodityData = commodityPrices[coin.symbol]
+            if (commodityData) {
+              return {
+                ...coin,
+                price: commodityData.price,
+                change24h: commodityData.change,
+              }
+            }
+          }
+          return coin
+        })
+      )
+    }
 
-    return () => clearInterval(interval)
+    // Initialize stocks prices once
+    initializeStocksPrices()
+    
+    // Fetch crypto data immediately and then every 10 seconds
+    fetchCryptoData()
+    const cryptoInterval = setInterval(fetchCryptoData, 10000)
+
+    return () => {
+      clearInterval(cryptoInterval)
+    }
   }, [])
 
   const handleCoinSelect = (symbol: string) => {
@@ -255,7 +344,7 @@ export default function MarketGlobal() {
   }, [isResizing])
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col bg-black">
+    <div className="min-h-screen flex flex-col bg-black">
       {/* Timeframe Toolbar - TOP ROW */}
       <div className="bg-black border-b border-gray-800 px-4 py-2">
         <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar">
@@ -340,7 +429,7 @@ export default function MarketGlobal() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden relative bg-black">
+      <div className="flex-1 flex overflow-hidden relative bg-black min-h-[600px]">
         {/* Sidebar Overlay for Mobile */}
         {sidebarOpen && (
           <div 
@@ -498,14 +587,23 @@ export default function MarketGlobal() {
           </button>
         )}
 
-        <div className="flex-1 bg-black relative">
+        <div className="flex-1 min-w-0 overflow-x-hidden bg-black relative flex flex-col min-h-[600px]">
           <div 
             id="tradingview_chart" 
             ref={chartContainerRef} 
-            className="w-full h-full"
+            className="w-full h-[600px]"
+          />
+          
+          {/* Real-time Market Section */}
+          <MarketSection 
+            onCoinSelect={(symbol) => handleCoinSelect(symbol + 'USDT')}
+            selectedCoin={selectedCoin.replace('USDT', '')}
           />
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
 
       {showSearch && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">

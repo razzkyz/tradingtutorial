@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { getProfile } from '../services/profileService'
+import { getBalances, calculateTotalBalance } from '../services/balanceService'
 import { supabase } from '../lib/supabase'
 import { Wallet, Edit2, Save, X, Camera } from 'lucide-react'
 import LoadingState from '../components/LoadingState'
@@ -27,6 +28,7 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState<ProfileData | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null)
+  const [totalBalance, setTotalBalance] = useState(0)
 
   useEffect(() => {
     if (!user) return
@@ -45,9 +47,13 @@ export default function Profile() {
     try {
       setLoading(true)
       setError('')
-      const data = await getProfile(user.id)
+      const [data, balances] = await Promise.all([
+        getProfile(user.id),
+        getBalances(user.id),
+      ])
       setProfile(data)
       setFormData(data)
+      setTotalBalance(calculateTotalBalance(balances))
     } catch (err) {
       console.error('Error loading profile:', err)
       setError('Failed to load profile')
@@ -347,7 +353,7 @@ export default function Profile() {
                 {/* Value Box - Wider landscape, taller */}
                 <div className="w-full bg-gradient-to-br from-cyan-600 to-blue-700 border border-cyan-400/60 rounded-lg px-8 min-[375px]:px-10 min-[414px]:px-12 sm:px-16 md:px-20 lg:px-24 py-4 min-[375px]:py-5 min-[414px]:py-6 sm:py-7 md:py-8 shadow-[0_0_25px_rgba(6,182,212,0.5)]">
                   <p className="text-white text-xs min-[375px]:text-sm min-[414px]:text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-center whitespace-nowrap">
-                    {profile.investment_amount.toFixed(0)} USDT
+                    {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
                   </p>
                 </div>
               </div>

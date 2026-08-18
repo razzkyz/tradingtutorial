@@ -152,6 +152,16 @@ export default function AdminDashboard() {
             <h3 className="text-xl font-bold text-white mb-2">Website Settings</h3>
             <p className="text-cyan-200 text-sm">Update logo, images, and content</p>
           </button>
+
+          {/* Withdrawal Transactions */}
+          <button
+            onClick={() => navigate('/admin/withdrawals')}
+            className="bg-black/95 backdrop-blur-sm border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)] rounded-lg p-8 text-left hover:shadow-[0_0_40px_rgba(251,191,36,0.7)] hover:border-yellow-400/70 transition-all duration-300 group"
+          >
+            <FileText className="w-12 h-12 text-yellow-400 mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xl font-bold text-white mb-2">Withdrawal Transactions</h3>
+            <p className="text-cyan-200 text-sm">View all user withdrawal history</p>
+          </button>
         </div>
       </div>
     </div>

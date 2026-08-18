@@ -3,25 +3,26 @@ import { useAuth } from '../hooks/useAuth'
 import { getBalances, calculateTotalBalance } from '../services/balanceService'
 import { createWithdrawal } from '../services/withdrawalService'
 import { withdrawalSchema } from '../schemas/withdrawalSchema'
-import { getProfile } from '../services/profileService'
+
 import LoadingState from '../components/LoadingState'
 import ErrorState from '../components/ErrorState'
+import { Wallet, AlertCircle, CheckCircle2, ArrowRight, ShieldCheck, Activity } from 'lucide-react'
 
 export default function Withdrawal() {
   const { user } = useAuth()
   const [showForm, setShowForm] = useState(false)
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showInitialConfirmModal, setShowInitialConfirmModal] = useState(false)
+  const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [availableBalance, setAvailableBalance] = useState(0)
-  const [userName, setUserName] = useState('')
 
   const [formData, setFormData] = useState({
     amount: '',
     wallet_address: '',
-    network: '',
+    network: 'TRC20',
   })
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
@@ -29,32 +30,16 @@ export default function Withdrawal() {
     if (!user) return
 
     loadData()
-    
-    // Cleanup
-    return () => {
-      // Cancel any pending requests
-    }
-  }, [user?.id]) // Only depend on user.id
+  }, [user?.id])
 
   const loadData = async () => {
     if (!user) return
-
     try {
       setLoading(true)
       setError('')
-
-      const [balances, profile] = await Promise.all([
-        getBalances(user.id),
-        getProfile(user.id),
-      ])
-
+      const balances = await getBalances(user.id)
       const total = calculateTotalBalance(balances)
       setAvailableBalance(total)
-      
-      const profileData = profile as any
-      if (profileData?.full_name) {
-        setUserName(profileData.full_name)
-      }
     } catch (err) {
       console.error('Error loading data:', err)
       setError('Failed to load data')
@@ -69,6 +54,31 @@ export default function Withdrawal() {
     setFormErrors((prev) => ({ ...prev, [name]: '' }))
   }
 
+  const handleWithdrawClick = () => {
+    setShowInitialConfirmModal(true)
+  }
+
+  const handleConfirmProceed = () => {
+    setShowInitialConfirmModal(false)
+    setShowForm(true)
+  }
+
+  const handleWithdrawAll = () => {
+    setFormData(prev => ({
+      ...prev,
+      amount: availableBalance.toString()
+    }))
+    setFormErrors(prev => ({ ...prev, amount: '' }))
+  }
+
+  const handleUseDemoWallet = () => {
+    setFormData(prev => ({
+      ...prev,
+      wallet_address: 'DEMO123'
+    }))
+    setFormErrors(prev => ({ ...prev, wallet_address: '' }))
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!user) return
@@ -77,21 +87,18 @@ export default function Withdrawal() {
     setError('')
 
     try {
-      // Validate input
       const parsedData = withdrawalSchema.parse({
         amount: parseFloat(formData.amount),
         wallet_address: formData.wallet_address,
         network: formData.network,
       })
 
-      // Check if amount exceeds available balance
       if (parsedData.amount > availableBalance) {
         setFormErrors({ amount: 'Amount exceeds available balance' })
         return
       }
 
-      // Show confirmation modal instead of submitting directly
-      setShowConfirmModal(true)
+      setShowFinalConfirmModal(true)
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'errors' in err) {
         const zodErrors = err as { errors: Array<{ path: string[]; message: string }> }
@@ -110,9 +117,7 @@ export default function Withdrawal() {
 
   const handleConfirmWithdrawal = async () => {
     if (!user) return
-
     setSubmitting(true)
-
     try {
       const parsedData = withdrawalSchema.parse({
         amount: parseFloat(formData.amount),
@@ -120,19 +125,18 @@ export default function Withdrawal() {
         network: formData.network,
       })
 
-      // Create withdrawal request
       await createWithdrawal(user.id, parsedData)
 
       setSuccess(true)
       setShowForm(false)
-      setShowConfirmModal(false)
-      setFormData({ amount: '', wallet_address: '', network: '' })
-
-      // Reset success message after 5 seconds
+      setShowFinalConfirmModal(false)
+      setFormData({ amount: '', wallet_address: '', network: 'TRC20' })
+      setAvailableBalance(prev => prev - parsedData.amount)
+      
       setTimeout(() => setSuccess(false), 5000)
     } catch (err) {
       setError('Failed to submit withdrawal request')
-      setShowConfirmModal(false)
+      setShowFinalConfirmModal(false)
     } finally {
       setSubmitting(false)
     }
@@ -142,213 +146,203 @@ export default function Withdrawal() {
   if (error && !showForm) return <ErrorState message={error} />
 
   return (
-    <div className="min-h-[calc(100vh-64px)] px-4 py-6 bg-black">
-      <div className="max-w-xl mx-auto">
+    <div className="min-h-[calc(100vh-64px)] px-4 py-8 bg-black flex items-center justify-center">
+      <div className="w-full max-w-2xl mx-auto">
         {success && (
-          <div className="mb-6 p-4 bg-green/20 border border-green/50 rounded-xl text-green-200 text-center">
-            ✅ Withdrawal request submitted successfully! Status: Pending
+          <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/50 rounded-xl text-emerald-300 text-center flex items-center justify-center gap-3 animate-fade-in shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+            <CheckCircle2 className="w-6 h-6" /> 
+            <span className="font-semibold text-lg">Withdrawal request submitted successfully!</span>
           </div>
         )}
 
-        <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] overflow-hidden hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
+        <div className="bg-black/80 backdrop-blur-xl rounded-2xl border-2 border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden transition-all duration-500 hover:border-cyan-400/50 hover:shadow-[0_0_60px_rgba(6,182,212,0.25)] relative">
+          
+          {/* Subtle Background Glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-32 bg-cyan-500/10 blur-[100px] pointer-events-none"></div>
+
           {!showForm ? (
             <>
               {/* Wallet Illustration Section */}
-              <div className="p-8 text-center">
-                {/* Wallet Image */}
-                <div className="relative inline-block mb-6">
+              <div className="p-8 md:p-12 text-center relative z-10">
+                <div className="relative inline-block mb-8 group">
+                  <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-2xl group-hover:bg-cyan-400/30 transition-all duration-500"></div>
                   <img 
                     src="/images/dompet.png" 
                     alt="Wallet" 
-                    className="w-64 h-auto mx-auto object-contain drop-shadow-2xl"
+                    className="relative w-64 h-auto mx-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      // Fallback to jpeg if png not found
                       const imgElement = e.currentTarget
                       if (imgElement.src.includes('dompet.png')) {
                         imgElement.src = '/images/dompet.jpeg'
                       } else {
                         imgElement.style.display = 'none'
                         const fallback = document.getElementById('wallet-fallback')
-                        if (fallback) {
-                          fallback.style.display = 'block'
-                        }
+                        if (fallback) fallback.style.display = 'block'
                       }
                     }}
                   />
                   
-                  {/* Fallback SVG Wallet (hidden by default) */}
-                  <div id="wallet-fallback" className="hidden" style={{ display: 'none' }}>
-                    {/* Sparkle Left */}
-                    <div className="absolute -left-8 top-1/2 transform -translate-y-1/2">
-                      <svg className="w-8 h-8 text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                      </svg>
-                    </div>
-
-                    {/* Main Wallet */}
-                    <div className="relative">
-                      {/* Money Bills - Green */}
-                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-6 z-10">
-                        <div className="flex gap-1">
-                          <div className="w-20 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg shadow-xl rotate-[-8deg] border-2 border-green-600"></div>
-                          <div className="w-20 h-14 bg-gradient-to-br from-green-300 to-emerald-400 rounded-lg shadow-xl rotate-[5deg] border-2 border-green-500"></div>
-                        </div>
-                      </div>
-
-                      {/* Wallet Body - Brown/Orange */}
-                      <div className="relative w-52 h-32 bg-gradient-to-br from-orange-600 via-orange-700 to-orange-800 rounded-2xl shadow-2xl overflow-hidden mt-6">
-                        {/* Wallet Stitching Lines */}
-                        <div className="absolute bottom-4 left-4 right-4 border-t-2 border-dashed border-orange-400/40"></div>
-                        <div className="absolute bottom-7 left-4 right-4 border-t-2 border-dashed border-orange-400/40"></div>
-                        
-                        {/* Card Holder - Blue */}
-                        <div className="absolute right-8 top-1/2 transform -translate-y-1/2 w-16 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg">
-                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-yellow-400 rounded-full"></div>
-                        </div>
-
-                        {/* User Name on Wallet */}
-                        <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
-                          <p className="text-white font-bold text-base drop-shadow-lg">
-                            {userName || 'User'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Sparkle Right */}
-                    <div className="absolute -right-8 bottom-8">
-                      <svg className="w-10 h-10 text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                      </svg>
+                  {/* Fallback SVG Wallet */}
+                  <div id="wallet-fallback" className="hidden relative" style={{ display: 'none' }}>
+                    <div className="w-48 h-32 bg-gradient-to-br from-cyan-700 to-cyan-900 rounded-2xl shadow-2xl mx-auto flex items-center justify-center border-4 border-cyan-600/50">
+                      <Wallet className="w-16 h-16 text-cyan-200" />
                     </div>
                   </div>
                 </div>
 
                 {/* Balance Display */}
-                <div className="mb-8 mt-12">
-                  <p className="text-white text-4xl font-bold">
-                    USDT {availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
+                <div className="mb-10">
+                  <p className="text-gray-400 font-medium tracking-wider uppercase mb-2">Available Balance to Withdraw</p>
+                  <div className="flex items-end justify-center gap-2">
+                    <span className="text-2xl text-cyan-400 font-bold mb-1">USDT</span>
+                    <span className="text-5xl md:text-6xl text-white font-black tracking-tight">
+                      {availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Withdrawal Button */}
                 <button
-                  onClick={() => setShowForm(true)}
-                  className="w-full max-w-md mx-auto block bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-lg py-4 px-6 rounded-lg transition-all shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] uppercase tracking-wide"
+                  onClick={handleWithdrawClick}
+                  disabled={availableBalance <= 0}
+                  className="w-full max-w-md mx-auto flex items-center justify-center gap-3 bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-xl py-5 px-8 rounded-xl transition-all shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                  Withdrawal
+                  <Wallet className="w-6 h-6 group-hover:-translate-y-1 transition-transform" />
+                  Request Withdrawal
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </>
           ) : (
             <>
               {/* Withdrawal Form */}
-              <div className="bg-gradient-to-r from-cyan-900/30 to-teal-900/30 p-6 border-b border-cyan-500/30">
-                <h1 className="text-2xl font-bold text-white">Withdrawal Request</h1>
+              <div className="bg-gray-900/50 p-6 md:p-8 border-b border-gray-800 flex items-center gap-4 relative z-10">
+                <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/50">
+                  <Activity className="w-6 h-6 text-cyan-400" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white tracking-wide">USDT Withdrawal</h1>
+                  <p className="text-gray-400 text-sm mt-1">TRC20 Network Only</p>
+                </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-8 space-y-6">
+              <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8 relative z-10">
                 {error && (
-                  <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
-                    {error}
+                  <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <span>{error}</span>
                   </div>
                 )}
 
-                <div>
-                  <label htmlFor="amount" className="block text-text-secondary text-sm mb-2">
-                    Amount (USDT) *
-                  </label>
-                  <input
-                    id="amount"
-                    name="amount"
-                    type="number"
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                    placeholder="Enter amount"
-                    required
-                    disabled={submitting}
-                  />
+                {/* Amount Input */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end">
+                    <label htmlFor="amount" className="block text-gray-300 font-medium">
+                      Withdrawal Amount
+                    </label>
+                    <span className="text-sm text-gray-400">
+                      Available: <span className="text-cyan-400 font-semibold">USDT {availableBalance.toFixed(2)}</span>
+                    </span>
+                  </div>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <span className="text-gray-500 font-bold">USDT</span>
+                    </div>
+                    <input
+                      id="amount"
+                      name="amount"
+                      type="number"
+                      step="0.01"
+                      value={formData.amount}
+                      onChange={handleInputChange}
+                      className="w-full pl-16 pr-28 py-4 bg-black/50 border border-gray-700 rounded-xl text-white font-bold text-lg placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all group-hover:border-gray-600"
+                      placeholder="0.00"
+                      required
+                      disabled={submitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleWithdrawAll}
+                      disabled={submitting || availableBalance <= 0}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-cyan-400 text-sm font-bold rounded-lg transition-all disabled:opacity-50"
+                    >
+                      MAX
+                    </button>
+                  </div>
                   {formErrors.amount && (
-                    <p className="mt-2 text-red-400 text-sm">{formErrors.amount}</p>
+                    <p className="text-red-400 text-sm flex items-center gap-1"><AlertCircle className="w-4 h-4" />{formErrors.amount}</p>
                   )}
-                  <p className="mt-2 text-text-muted text-sm">
-                    Available: USDT {availableBalance.toFixed(2)}
-                  </p>
                 </div>
 
-                <div>
-                  <label htmlFor="wallet_address" className="block text-text-secondary text-sm mb-2">
-                    Wallet Address *
+                {/* Wallet Input */}
+                <div className="space-y-3">
+                  <label htmlFor="wallet_address" className="block text-gray-300 font-medium">
+                    Destination Address (TRC20)
                   </label>
-                  <input
-                    id="wallet_address"
-                    name="wallet_address"
-                    type="text"
-                    value={formData.wallet_address}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                    placeholder="Enter wallet address"
-                    required
-                    disabled={submitting}
-                  />
+                  <div className="relative group">
+                    <input
+                      id="wallet_address"
+                      name="wallet_address"
+                      type="text"
+                      value={formData.wallet_address}
+                      onChange={handleInputChange}
+                      className="w-full px-4 pr-36 py-4 bg-black/50 border border-gray-700 rounded-xl text-white font-mono placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all group-hover:border-gray-600"
+                      placeholder="Enter TRC20 wallet address"
+                      required
+                      disabled={submitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleUseDemoWallet}
+                      disabled={submitting}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-bold rounded-lg transition-all disabled:opacity-50 flex items-center gap-2"
+                    >
+                      <ShieldCheck className="w-4 h-4" /> Use Demo
+                    </button>
+                  </div>
                   {formErrors.wallet_address && (
-                    <p className="mt-2 text-red-400 text-sm">{formErrors.wallet_address}</p>
+                    <p className="text-red-400 text-sm flex items-center gap-1"><AlertCircle className="w-4 h-4" />{formErrors.wallet_address}</p>
                   )}
                 </div>
 
-                <div>
-                  <label htmlFor="network" className="block text-text-secondary text-sm mb-2">
-                    Network *
-                  </label>
-                  <select
-                    id="network"
-                    name="network"
-                    value={formData.network}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                    required
-                    disabled={submitting}
-                  >
-                    <option value="">Select network</option>
-                    <option value="TRC20">TRC20</option>
-                    <option value="ERC20">ERC20</option>
-                    <option value="BEP20">BEP20</option>
-                  </select>
-                  {formErrors.network && (
-                    <p className="mt-2 text-red-400 text-sm">{formErrors.network}</p>
-                  )}
+                <div className="p-4 bg-cyan-900/20 border border-cyan-800/50 rounded-xl flex items-start gap-3">
+                  <ShieldCheck className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-white font-semibold mb-1">Network Security</p>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      Please ensure your destination wallet supports the <strong>TRON (TRC20)</strong> network. Sending funds to an unsupported network will result in permanent loss.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="p-4 bg-cyan/10 border border-cyan/30 rounded-xl">
-                  <p className="text-text-secondary text-sm">
-                    ⚠️ This is a demo withdrawal request. No real transactions will be processed.
-                  </p>
-                </div>
-
-                <div className="flex gap-4">
+                <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
                   <button
                     type="button"
                     onClick={() => {
                       setShowForm(false)
-                      setFormData({ amount: '', wallet_address: '', network: '' })
+                      setFormData({ amount: '', wallet_address: '', network: 'TRC20' })
                       setFormErrors({})
                       setError('')
                     }}
                     disabled={submitting}
-                    className="flex-1 bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold py-3 px-6 rounded-lg transition-all disabled:opacity-50"
+                    className="w-full sm:w-1/3 bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 px-6 rounded-xl transition-all disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-2/3 bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-500 hover:to-teal-400 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {submitting ? 'Submitting...' : 'Submit Withdrawal'}
+                    {submitting ? (
+                      <span className="flex items-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...
+                      </span>
+                    ) : (
+                      'Confirm & Proceed'
+                    )}
                   </button>
                 </div>
               </form>
@@ -356,45 +350,76 @@ export default function Withdrawal() {
           )}
         </div>
 
-        {/* Confirmation Modal */}
-        {showConfirmModal && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-black/95 border-2 border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.6)] rounded-lg max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Confirm Withdrawal</h3>
+        {/* Initial Confirmation Modal */}
+        {showInitialConfirmModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 border border-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-8 animate-scale-in">
+              <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center mb-6 mx-auto">
+                <ShieldCheck className="w-8 h-8 text-cyan-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white text-center mb-4">Secure Withdrawal</h3>
+              <p className="text-gray-400 text-center mb-8">
+                You are about to initiate a USDT (TRC20) withdrawal. Please ensure you have a valid destination wallet address ready.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowInitialConfirmModal(false)}
+                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleConfirmProceed}
+                  className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Final Confirmation Modal */}
+        {showFinalConfirmModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 border border-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-8 animate-scale-in">
+              <h3 className="text-2xl font-bold text-white mb-6 text-center">Confirm Transfer</h3>
               
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">Amount:</span>
-                  <span className="text-white font-bold">USDT {formData.amount}</span>
+              <div className="bg-black/50 rounded-xl p-5 mb-6 space-y-4 border border-gray-800">
+                <div className="flex justify-between items-center pb-4 border-b border-gray-800">
+                  <span className="text-gray-400">Total Amount</span>
+                  <span className="text-xl text-cyan-400 font-bold">USDT {formData.amount}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">Network:</span>
-                  <span className="text-white font-bold">{formData.network}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Network</span>
+                  <span className="text-white font-semibold bg-gray-800 px-3 py-1 rounded-md">TRC20 (TRON)</span>
                 </div>
-                <div className="bg-cyan/10 rounded-lg p-3 mt-4">
-                  <p className="text-text-secondary text-sm">Wallet Address:</p>
-                  <p className="text-white text-xs font-mono break-all mt-1">{formData.wallet_address}</p>
+                <div className="pt-2">
+                  <p className="text-gray-400 text-sm mb-2">Destination Wallet:</p>
+                  <p className="text-white font-mono bg-gray-800 p-3 rounded-lg text-sm break-all border border-gray-700">
+                    {formData.wallet_address}
+                  </p>
                 </div>
               </div>
 
-              <p className="text-text-secondary text-sm mb-6">
-                Are you sure you want to proceed with this withdrawal? This action cannot be undone.
-              </p>
-
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <button
-                  onClick={() => setShowConfirmModal(false)}
+                  onClick={() => setShowFinalConfirmModal(false)}
                   disabled={submitting}
-                  className="flex-1 bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold py-3 px-6 rounded-lg transition-all disabled:opacity-50"
+                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmWithdrawal}
                   disabled={submitting}
-                  className="flex-1 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-500 hover:to-teal-400 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] disabled:opacity-50 flex justify-center items-center gap-2"
                 >
-                  {submitting ? 'Processing...' : 'Confirm'}
+                  {submitting ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    'Confirm Transfer'
+                  )}
                 </button>
               </div>
             </div>

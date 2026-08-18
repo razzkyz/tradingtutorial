@@ -18,6 +18,7 @@ const Settings = lazy(() => import('./pages/Settings'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AddCustomer = lazy(() => import('./pages/admin/AddCustomer'))
 const ManageCustomers = lazy(() => import('./pages/admin/ManageCustomers'))
+const AdminWithdrawals = lazy(() => import('./pages/admin/AdminWithdrawals'))
 
 function App() {
   return (
@@ -99,6 +100,14 @@ function App() {
               element={
                 <AdminRoute>
                   <ManageCustomers />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/withdrawals"
+              element={
+                <AdminRoute>
+                  <AdminWithdrawals />
                 </AdminRoute>
               }
             />

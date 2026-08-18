@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 import { getBalances, calculateTotalBalance } from '../services/balanceService'
 import { Wallet, TrendingUp, TrendingDown, Activity, Search, Star, X, Maximize2, ChevronRight, GripVertical } from 'lucide-react'
 import { SkeletonBalanceCard } from '../components/Skeleton'
+import { MarketSection } from '../components/market/MarketSection'
 import ErrorState from '../components/ErrorState'
 
 interface Balance {
@@ -600,11 +601,17 @@ export default function TradingAccess() {
             </button>
           )}
 
-          <div className="flex-1 bg-black relative">
+          <div className="flex-1 min-w-0 overflow-x-hidden bg-black relative flex flex-col min-h-[600px]">
             <div 
               id="tradingview_chart_trading_access" 
               ref={chartContainerRef} 
-              className="w-full h-full"
+              className="w-full h-[600px]"
+            />
+            
+            {/* Real-time Market Section */}
+            <MarketSection 
+              onCoinSelect={(symbol) => handleCoinSelect(symbol + 'USDT')}
+              selectedCoin={selectedCoin.replace('USDT', '')}
             />
           </div>
         </div>

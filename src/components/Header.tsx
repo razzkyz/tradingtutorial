@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { Home, User, Globe, Briefcase, Wallet, LogOut, TrendingUp, Menu, X, Users, UserPlus, Settings } from 'lucide-react'
+import { Home, User, Globe, Briefcase, Wallet, LogOut, TrendingUp, Menu, X, Users, UserPlus, Settings, ArrowDownToLine } from 'lucide-react'
 import LogoutModal from './LogoutModal'
 
 export default function Header() {
@@ -73,6 +73,7 @@ export default function Header() {
         { label: 'Admin Dashboard', path: '/admin/dashboard', icon: Home },
         { label: 'Manage Customers', path: '/admin/customers', icon: Users },
         { label: 'Add Customer', path: '/admin/add-customer', icon: UserPlus },
+        { label: 'Withdrawals', path: '/admin/withdrawals', icon: ArrowDownToLine },
         { label: 'Settings', path: '/admin/settings', icon: Settings },
       ]
     : [

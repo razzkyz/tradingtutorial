@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import type { WithdrawalInput } from '../schemas/withdrawalSchema'
+import { deductBalance } from './balanceService'
 
 export async function createWithdrawal(userId: string, data: WithdrawalInput) {
   const { data: withdrawal, error } = await supabase
@@ -15,6 +16,10 @@ export async function createWithdrawal(userId: string, data: WithdrawalInput) {
     .single()
 
   if (error) throw error
+
+  // Immediately deduct the balance globally so it is reflected everywhere
+  await deductBalance(userId, data.amount)
+
   return withdrawal
 }
 
