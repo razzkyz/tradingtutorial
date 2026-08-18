@@ -1,8 +1,32 @@
 import { MarketData, CRYPTO_ASSETS } from './marketTypes';
 import { fetchUsMarketData } from './marketApi';
 
-// Binance REST API - works on ALL networks including mobile
-const BINANCE_REST_URL = 'https://api.binance.com/api/v3/ticker/24hr';
+// CoinGecko API - designed for browser access, no CORS issues, works on ALL networks
+const COINGECKO_API = 'https://api.coingecko.com/api/v3/coins/markets';
+
+// Map Binance symbols to CoinGecko coin IDs
+const COINGECKO_ID_MAP: Record<string, string> = {
+  BTCUSDT: 'bitcoin',
+  ETHUSDT: 'ethereum',
+  BNBUSDT: 'binancecoin',
+  XRPUSDT: 'ripple',
+  SOLUSDT: 'solana',
+  ADAUSDT: 'cardano',
+  DOGEUSDT: 'dogecoin',
+  TRXUSDT: 'tron',
+  SHIBUSDT: 'shiba-inu',
+  LTCUSDT: 'litecoin',
+  AVAXUSDT: 'avalanche-2',
+  DOTUSDT: 'polkadot',
+  LINKUSDT: 'chainlink',
+  TONUSDT: 'the-open-network',
+  BCHUSDT: 'bitcoin-cash',
+  UNIUSDT: 'uniswap',
+  NEARUSDT: 'near',
+  APTUSDT: 'aptos',
+  SUIUSDT: 'sui',
+  ATOMUSDT: 'cosmos',
+};
 
 class MarketService {
   private cryptoSubscribers: Set<(data: MarketData[]) => void> = new Set();
@@ -16,7 +40,6 @@ class MarketService {
   private disconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
-    // Initialize with loading state
     CRYPTO_ASSETS.forEach(asset => {
       this.latestCryptoData.set(asset.symbol, {
         symbol: asset.displaySymbol,
@@ -31,13 +54,10 @@ class MarketService {
       });
     });
 
-    // Handle mobile browser sleep/wake and network reconnects
     if (typeof window !== 'undefined') {
       const handleWakeUp = () => {
         if (document.visibilityState === 'visible' || navigator.onLine) {
-          if (this.cryptoSubscribers.size > 0) {
-            this.fetchCryptoData();
-          }
+          if (this.cryptoSubscribers.size > 0) this.fetchCryptoData();
           if (this.usMarketSubscribers.size > 0) {
             this.stopUsMarketPolling();
             this.startUsMarketPolling();
@@ -49,32 +69,38 @@ class MarketService {
     }
   }
 
-  // Fetch crypto prices via REST (100% compatible with all mobile networks)
   private async fetchCryptoData() {
     try {
-      const symbols = JSON.stringify(CRYPTO_ASSETS.map(a => a.symbol));
-      const url = `${BINANCE_REST_URL}?symbols=${encodeURIComponent(symbols)}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Fetch failed');
-      const tickers: Array<{
+      const ids = CRYPTO_ASSETS.map(a => COINGECKO_ID_MAP[a.symbol]).filter(Boolean).join(',');
+      const url = `${COINGECKO_API}?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=false&price_change_percentage=24h&per_page=50`;
+
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!res.ok) throw new Error(`CoinGecko error: ${res.status}`);
+
+      const coins: Array<{
+        id: string;
         symbol: string;
-        lastPrice: string;
-        priceChangePercent: string;
-        priceChange: string;
-        highPrice: string;
-        lowPrice: string;
+        current_price: number;
+        price_change_percentage_24h: number;
+        price_change_24h: number;
+        high_24h: number;
+        low_24h: number;
       }> = await res.json();
 
-      tickers.forEach(ticker => {
-        const asset = CRYPTO_ASSETS.find(a => a.symbol === ticker.symbol);
+      // Build reverse map: coingecko id -> CRYPTO_ASSETS entry
+      const idToAsset: Record<string, typeof CRYPTO_ASSETS[0]> = {};
+      CRYPTO_ASSETS.forEach(asset => {
+        const cgId = COINGECKO_ID_MAP[asset.symbol];
+        if (cgId) idToAsset[cgId] = asset;
+      });
+
+      coins.forEach(coin => {
+        const asset = idToAsset[coin.id];
         if (!asset) return;
 
-        const price = parseFloat(ticker.lastPrice);
-        const changePercent = parseFloat(ticker.priceChangePercent);
-        const change = parseFloat(ticker.priceChange);
-        const high = parseFloat(ticker.highPrice);
-        const low = parseFloat(ticker.lowPrice);
-
+        const changePercent = coin.price_change_percentage_24h ?? 0;
         let technicalRating: MarketData['technicalRating'] = 'Netral';
         if (changePercent > 1.5) technicalRating = 'Pembelian kuat';
         else if (changePercent > 0.5) technicalRating = 'Pembelian';
@@ -84,11 +110,11 @@ class MarketService {
         this.latestCryptoData.set(asset.symbol, {
           symbol: asset.displaySymbol,
           name: asset.name,
-          price,
+          price: coin.current_price,
           changePercent,
-          change,
-          high,
-          low,
+          change: coin.price_change_24h ?? 0,
+          high: coin.high_24h ?? 0,
+          low: coin.low_24h ?? 0,
           technicalRating,
           market: 'crypto',
         });
@@ -97,15 +123,15 @@ class MarketService {
       const updatedData = Array.from(this.latestCryptoData.values());
       this.cryptoSubscribers.forEach(sub => sub(updatedData));
     } catch (err) {
-      console.error('Crypto fetch error:', err);
+      console.error('CoinGecko fetch error:', err);
     }
   }
 
   private startCryptoPolling() {
     if (this.cryptoInterval) return;
-    // Fetch immediately, then every 5 seconds
+    // Fetch immediately, then every 30s (CoinGecko free tier: max ~30 req/min)
     this.fetchCryptoData();
-    this.cryptoInterval = setInterval(() => this.fetchCryptoData(), 5000);
+    this.cryptoInterval = setInterval(() => this.fetchCryptoData(), 30000);
   }
 
   private stopCryptoPolling() {
@@ -115,9 +141,7 @@ class MarketService {
     }
   }
 
-  // CRYPTO: Subscribe/Unsubscribe
   public subscribeToCrypto(callback: (data: MarketData[]) => void) {
-    // Cancel any pending disconnect
     if (this.disconnectTimer) {
       clearTimeout(this.disconnectTimer);
       this.disconnectTimer = null;
@@ -128,24 +152,19 @@ class MarketService {
     if (!this.cryptoInterval) {
       this.startCryptoPolling();
     } else {
-      // Send latest data immediately
       callback(Array.from(this.latestCryptoData.values()));
     }
 
     return () => {
       this.cryptoSubscribers.delete(callback);
       if (this.cryptoSubscribers.size === 0) {
-        // Debounce stop by 3s to handle rapid auth state changes
         this.disconnectTimer = setTimeout(() => {
-          if (this.cryptoSubscribers.size === 0) {
-            this.stopCryptoPolling();
-          }
+          if (this.cryptoSubscribers.size === 0) this.stopCryptoPolling();
         }, 3000);
       }
     };
   }
 
-  // US MARKET: Polling Implementation
   public subscribeToUsMarket(callback: (data: MarketData[]) => void) {
     this.usMarketSubscribers.add(callback);
 
@@ -157,9 +176,7 @@ class MarketService {
 
     return () => {
       this.usMarketSubscribers.delete(callback);
-      if (this.usMarketSubscribers.size === 0) {
-        this.stopUsMarketPolling();
-      }
+      if (this.usMarketSubscribers.size === 0) this.stopUsMarketPolling();
     };
   }
 
@@ -176,7 +193,6 @@ class MarketService {
 
     const isSimulated = !import.meta.env.VITE_US_MARKET_API_KEY;
     const intervalMs = isSimulated ? 3000 : 60 * 1000;
-
     this.usMarketInterval = window.setInterval(fetchAndUpdate, intervalMs);
   }
 
