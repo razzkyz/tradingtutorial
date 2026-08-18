@@ -21,42 +21,30 @@ export const MarketTableRow: React.FC<MarketTableRowProps> = ({ data, onClick, i
   // Helper for icons based on symbol
   const getIcon = (symbol: string, market: MarketType) => {
     if (market === 'crypto') {
-      const cryptoMap: Record<string, string> = {
-        'BTC': 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
-        'ETH': 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-        'BNB': 'https://cryptologos.cc/logos/bnb-bnb-logo.png',
-        'XRP': 'https://cryptologos.cc/logos/xrp-xrp-logo.png',
-        'SOL': 'https://cryptologos.cc/logos/solana-sol-logo.png',
-        'ADA': 'https://cryptologos.cc/logos/cardano-ada-logo.png',
-        'DOGE': 'https://cryptologos.cc/logos/dogecoin-doge-logo.png',
-        'TRX': 'https://cryptologos.cc/logos/tron-trx-logo.png',
-        'SHIB': 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png',
-        'LTC': 'https://cryptologos.cc/logos/litecoin-ltc-logo.png'
-      };
-      if (cryptoMap[symbol]) {
-        return (
-          <div className="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0">
-            <img src={cryptoMap[symbol]} alt={symbol} className="w-4 h-4 object-contain" />
-          </div>
-        );
-      }
+      const iconUrl = `https://assets.coincap.io/assets/icons/${symbol.toLowerCase()}@2x.png`;
+      return (
+        <div className="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <img 
+            src={iconUrl} 
+            alt={symbol} 
+            className="w-4 h-4 object-contain"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              if (target.parentElement) {
+                target.parentElement.innerHTML = `<span class="text-white font-bold text-[8px]">${symbol.slice(0,3)}</span>`;
+              }
+            }}
+          />
+        </div>
+      );
     }
     
-    // US Market styling matching screenshot
-    const usConfig: Record<string, { bg: string, text: string }> = {
-      'SPX': { bg: 'bg-[#d1243a]', text: '500' },
-      'IXIC': { bg: 'bg-[#009bce]', text: '100' },
-      'DJI': { bg: 'bg-[#2962ff]', text: '30' },
-      'RUT': { bg: 'bg-[#4a152e]', text: '2000' },
-      'RUA': { bg: 'bg-[#000000]', text: '3000' }, // Russell 3000
-      'VIX': { bg: 'bg-[#15803d]', text: 'VIX' },
-    };
-    
-    const config = usConfig[symbol] || { bg: 'bg-gray-800', text: symbol.slice(0, 3) };
-    
+    // US Market Dynamic Icons
+    const usIconUrl = `https://ui-avatars.com/api/?name=${symbol}&background=random&color=fff&rounded=true&bold=true&size=64`;
     return (
-      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${config.bg}`}>
-        <span className="text-white font-bold text-[9px] leading-none">{config.text}</span>
+      <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <img src={usIconUrl} alt={symbol} className="w-full h-full object-cover" />
       </div>
     );
   };

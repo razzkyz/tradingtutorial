@@ -6,7 +6,7 @@ import { withdrawalSchema } from '../schemas/withdrawalSchema'
 
 import LoadingState from '../components/LoadingState'
 import ErrorState from '../components/ErrorState'
-import { Wallet, AlertCircle, CheckCircle2, ArrowRight, ShieldCheck, Activity } from 'lucide-react'
+import { Wallet, AlertCircle, CheckCircle2, ShieldCheck, Activity } from 'lucide-react'
 
 export default function Withdrawal() {
   const { user } = useAuth()
@@ -207,11 +207,9 @@ export default function Withdrawal() {
                 <button
                   onClick={handleWithdrawClick}
                   disabled={availableBalance <= 0}
-                  className="w-full max-w-md mx-auto flex items-center justify-center gap-3 bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-xl py-5 px-8 rounded-xl transition-all shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed group"
+                  className="w-full max-w-md mx-auto flex items-center justify-center bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-xl py-5 px-8 rounded-xl transition-all shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Wallet className="w-6 h-6 group-hover:-translate-y-1 transition-transform" />
-                  Request Withdrawal
-                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                  Withdraw
                 </button>
               </div>
             </>

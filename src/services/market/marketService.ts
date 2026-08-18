@@ -73,57 +73,72 @@ class MarketService {
   private connectCryptoWs() {
     if (this.cryptoWs) return;
 
-    // Use Binance stream for multiple symbols: !miniTicker@arr gives all tickers, 
-    // but we can filter it or subscribe to specific ones.
-    const streams = CRYPTO_ASSETS.map(asset => `${asset.symbol.toLowerCase()}@miniTicker`).join('/');
-    this.cryptoWs = new WebSocket(`${BINANCE_WS_URL}/${streams}`);
+    this.cryptoWs = new WebSocket(BINANCE_WS_URL);
+
+    this.cryptoWs.onopen = () => {
+      const streams = CRYPTO_ASSETS.map(asset => `${asset.symbol.toLowerCase()}@miniTicker`);
+      const subscribeMsg = {
+        method: 'SUBSCRIBE',
+        params: streams,
+        id: 1
+      };
+      this.cryptoWs?.send(JSON.stringify(subscribeMsg));
+    };
 
     this.cryptoWs.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const symbolInfo = CRYPTO_ASSETS.find(a => a.symbol === data.s);
-      
-      if (symbolInfo) {
-        const price = parseFloat(data.c);
-        const openPrice = parseFloat(data.o);
-        const change = price - openPrice;
-        const changePercent = (change / openPrice) * 100;
-        const high = parseFloat(data.h);
-        const low = parseFloat(data.l);
+      try {
+        const data = JSON.parse(event.data);
         
-        let technicalRating: MarketData['technicalRating'] = 'Netral';
-        if (changePercent > 1.5) technicalRating = 'Pembelian kuat';
-        else if (changePercent > 0.5) technicalRating = 'Pembelian';
-        else if (changePercent < -1.5) technicalRating = 'Penjualan kuat';
-        else if (changePercent < -0.5) technicalRating = 'Penjualan';
+        // Ignore ping/pong or subscription responses
+        if (!data.s) return;
 
-        const marketData: MarketData = {
-          symbol: symbolInfo.displaySymbol,
-          name: symbolInfo.name,
-          price,
-          changePercent,
-          change,
-          high,
-          low,
-          technicalRating,
-          market: 'crypto',
-        };
-
-        this.latestCryptoData.set(symbolInfo.symbol, marketData);
+        const symbolInfo = CRYPTO_ASSETS.find(a => a.symbol === data.s);
         
-        // Notify subscribers
-        const updatedData = Array.from(this.latestCryptoData.values());
-        this.cryptoSubscribers.forEach(sub => sub(updatedData));
+        if (symbolInfo) {
+          const price = parseFloat(data.c);
+          const openPrice = parseFloat(data.o);
+          const change = price - openPrice;
+          const changePercent = (change / openPrice) * 100;
+          const high = parseFloat(data.h);
+          const low = parseFloat(data.l);
+          
+          let technicalRating: MarketData['technicalRating'] = 'Netral';
+          if (changePercent > 1.5) technicalRating = 'Pembelian kuat';
+          else if (changePercent > 0.5) technicalRating = 'Pembelian';
+          else if (changePercent < -1.5) technicalRating = 'Penjualan kuat';
+          else if (changePercent < -0.5) technicalRating = 'Penjualan';
+
+          const marketData: MarketData = {
+            symbol: symbolInfo.displaySymbol,
+            name: symbolInfo.name,
+            price,
+            changePercent,
+            change,
+            high,
+            low,
+            technicalRating,
+            market: 'crypto',
+          };
+
+          this.latestCryptoData.set(symbolInfo.symbol, marketData);
+          
+          // Notify subscribers
+          const updatedData = Array.from(this.latestCryptoData.values());
+          this.cryptoSubscribers.forEach(sub => sub(updatedData));
+        }
+      } catch (error) {
+        console.error('Crypto WebSocket Parse Error:', error);
       }
     };
 
     this.cryptoWs.onerror = (error) => {
       console.error('Crypto WebSocket Error:', error);
-      // Implement reconnect logic if necessary
     };
 
     this.cryptoWs.onclose = () => {
       this.cryptoWs = null;
       if (this.cryptoSubscribers.size > 0) {
+
         setTimeout(() => this.connectCryptoWs(), 5000); // Reconnect after 5s
       }
     };
