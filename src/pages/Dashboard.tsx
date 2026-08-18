@@ -476,7 +476,7 @@ export default function Dashboard() {
           {/* Title Bar with Running Text */}
           <div className="bg-gradient-to-r from-emerald-900/40 via-green-900/40 to-emerald-900/40 backdrop-blur-sm border-b border-emerald-500/30 py-3 sm:py-4 overflow-hidden">
             <div className="whitespace-nowrap animate-marquee">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold inline-block italic font-archivo-black">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-light inline-block italic font-roboto">
                 <span className="text-white">Trade Smarter.</span>
                 <span className="text-emerald-400 ml-2 mr-12">Move Faster.</span>
                 <span className="text-white">Trade Smarter.</span>

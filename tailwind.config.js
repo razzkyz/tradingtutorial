@@ -11,6 +11,7 @@ export default {
         'inter': ['Inter', 'sans-serif'],
         'manrope': ['Manrope', 'sans-serif'],
         'jetbrains': ['"JetBrains Mono"', 'monospace'],
+        'roboto': ['Roboto', 'sans-serif'],
       },
       colors: {
         'deep-navy': '#0A2F2F',
