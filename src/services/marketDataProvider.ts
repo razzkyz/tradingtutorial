@@ -143,7 +143,7 @@ class BinanceProvider implements MarketDataProvider {
 
   subscribeToQuotes(symbols: string[], callback: (quote: QuoteData) => void): () => void {
     const streams = symbols.map(s => `${s.toLowerCase()}@ticker`).join('/')
-    const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`)
+    const ws = new WebSocket(`wss://stream.binance.com/stream?streams=${streams}`)
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data)

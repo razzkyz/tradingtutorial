@@ -1,7 +1,7 @@
 import { MarketData, MarketType, US_MARKET_INDICES } from './marketTypes';
 
 // We use Binance WebSocket for real-time crypto prices
-export const BINANCE_WS_URL = 'wss://stream.binance.com:9443/ws';
+export const BINANCE_WS_URL = 'wss://stream.binance.com/ws';
 
 // For US Market, we'll simulate real-time data if no API key is provided,
 // but structure it for a real REST API (e.g., Financial Modeling Prep or Alpha Vantage)
