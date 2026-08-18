@@ -1,15 +1,19 @@
 import { MarketData, CRYPTO_ASSETS } from './marketTypes';
 import { fetchUsMarketData } from './marketApi';
 
+// Binance REST API - works on ALL networks including mobile
+const BINANCE_REST_URL = 'https://api.binance.com/api/v3/ticker/24hr';
+
 class MarketService {
-  private cryptoWs: WebSocket | null = null;
   private cryptoSubscribers: Set<(data: MarketData[]) => void> = new Set();
   private usMarketSubscribers: Set<(data: MarketData[]) => void> = new Set();
-  
+
   private latestCryptoData: Map<string, MarketData> = new Map();
   private latestUsData: MarketData[] = [];
-  
+
+  private cryptoInterval: ReturnType<typeof setInterval> | null = null;
   private usMarketInterval: number | null = null;
+  private disconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     // Initialize with loading state
@@ -27,127 +31,124 @@ class MarketService {
       });
     });
 
-    // Handle mobile browser sleep/wake and network disconnects
+    // Handle mobile browser sleep/wake and network reconnects
     if (typeof window !== 'undefined') {
       const handleWakeUp = () => {
         if (document.visibilityState === 'visible' || navigator.onLine) {
-          // Reconnect Crypto WS if dead
           if (this.cryptoSubscribers.size > 0) {
-            if (!this.cryptoWs || this.cryptoWs.readyState !== WebSocket.OPEN) {
-              this.disconnectCryptoWs();
-              this.connectCryptoWs();
-            }
+            this.fetchCryptoData();
           }
-          // Force immediate US market update
           if (this.usMarketSubscribers.size > 0) {
             this.stopUsMarketPolling();
             this.startUsMarketPolling();
           }
         }
       };
-
       window.addEventListener('visibilitychange', handleWakeUp);
       window.addEventListener('online', handleWakeUp);
     }
   }
 
-  // CRYPTO: WebSocket Implementation
+  // Fetch crypto prices via REST (100% compatible with all mobile networks)
+  private async fetchCryptoData() {
+    try {
+      const symbols = JSON.stringify(CRYPTO_ASSETS.map(a => a.symbol));
+      const url = `${BINANCE_REST_URL}?symbols=${encodeURIComponent(symbols)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Fetch failed');
+      const tickers: Array<{
+        symbol: string;
+        lastPrice: string;
+        priceChangePercent: string;
+        priceChange: string;
+        highPrice: string;
+        lowPrice: string;
+      }> = await res.json();
+
+      tickers.forEach(ticker => {
+        const asset = CRYPTO_ASSETS.find(a => a.symbol === ticker.symbol);
+        if (!asset) return;
+
+        const price = parseFloat(ticker.lastPrice);
+        const changePercent = parseFloat(ticker.priceChangePercent);
+        const change = parseFloat(ticker.priceChange);
+        const high = parseFloat(ticker.highPrice);
+        const low = parseFloat(ticker.lowPrice);
+
+        let technicalRating: MarketData['technicalRating'] = 'Netral';
+        if (changePercent > 1.5) technicalRating = 'Pembelian kuat';
+        else if (changePercent > 0.5) technicalRating = 'Pembelian';
+        else if (changePercent < -1.5) technicalRating = 'Penjualan kuat';
+        else if (changePercent < -0.5) technicalRating = 'Penjualan';
+
+        this.latestCryptoData.set(asset.symbol, {
+          symbol: asset.displaySymbol,
+          name: asset.name,
+          price,
+          changePercent,
+          change,
+          high,
+          low,
+          technicalRating,
+          market: 'crypto',
+        });
+      });
+
+      const updatedData = Array.from(this.latestCryptoData.values());
+      this.cryptoSubscribers.forEach(sub => sub(updatedData));
+    } catch (err) {
+      console.error('Crypto fetch error:', err);
+    }
+  }
+
+  private startCryptoPolling() {
+    if (this.cryptoInterval) return;
+    // Fetch immediately, then every 5 seconds
+    this.fetchCryptoData();
+    this.cryptoInterval = setInterval(() => this.fetchCryptoData(), 5000);
+  }
+
+  private stopCryptoPolling() {
+    if (this.cryptoInterval) {
+      clearInterval(this.cryptoInterval);
+      this.cryptoInterval = null;
+    }
+  }
+
+  // CRYPTO: Subscribe/Unsubscribe
   public subscribeToCrypto(callback: (data: MarketData[]) => void) {
+    // Cancel any pending disconnect
+    if (this.disconnectTimer) {
+      clearTimeout(this.disconnectTimer);
+      this.disconnectTimer = null;
+    }
+
     this.cryptoSubscribers.add(callback);
-    
-    if (this.cryptoSubscribers.size === 1) {
-      this.connectCryptoWs();
+
+    if (!this.cryptoInterval) {
+      this.startCryptoPolling();
     } else {
-      // Immediately send latest data
+      // Send latest data immediately
       callback(Array.from(this.latestCryptoData.values()));
     }
 
     return () => {
       this.cryptoSubscribers.delete(callback);
       if (this.cryptoSubscribers.size === 0) {
-        this.disconnectCryptoWs();
+        // Debounce stop by 3s to handle rapid auth state changes
+        this.disconnectTimer = setTimeout(() => {
+          if (this.cryptoSubscribers.size === 0) {
+            this.stopCryptoPolling();
+          }
+        }, 3000);
       }
     };
-  }
-
-  private connectCryptoWs() {
-    if (this.cryptoWs) return;
-    const streams = CRYPTO_ASSETS.map(asset => `${asset.symbol.toLowerCase()}@miniTicker`).join('/');
-    const ws = new WebSocket(`wss://stream.binance.com/stream?streams=${streams}`);
-    this.cryptoWs = ws;
-
-    ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        
-        // Combined streams wrap the payload in a 'data' object
-        const data = message.data;
-        if (!data || !data.s) return;
-
-        const symbolInfo = CRYPTO_ASSETS.find(a => a.symbol === data.s);
-        
-        if (symbolInfo) {
-          const price = parseFloat(data.c);
-          const openPrice = parseFloat(data.o);
-          const change = price - openPrice;
-          const changePercent = (change / openPrice) * 100;
-          const high = parseFloat(data.h);
-          const low = parseFloat(data.l);
-          
-          let technicalRating: MarketData['technicalRating'] = 'Netral';
-          if (changePercent > 1.5) technicalRating = 'Pembelian kuat';
-          else if (changePercent > 0.5) technicalRating = 'Pembelian';
-          else if (changePercent < -1.5) technicalRating = 'Penjualan kuat';
-          else if (changePercent < -0.5) technicalRating = 'Penjualan';
-
-          const marketData: MarketData = {
-            symbol: symbolInfo.displaySymbol,
-            name: symbolInfo.name,
-            price,
-            changePercent,
-            change,
-            high,
-            low,
-            technicalRating,
-            market: 'crypto',
-          };
-
-          this.latestCryptoData.set(symbolInfo.symbol, marketData);
-          
-          // Notify subscribers
-          const updatedData = Array.from(this.latestCryptoData.values());
-          this.cryptoSubscribers.forEach(sub => sub(updatedData));
-        }
-      } catch (error) {
-        console.error('Crypto WebSocket Parse Error:', error);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error('Crypto WebSocket Error:', error);
-    };
-
-    ws.onclose = () => {
-      if (this.cryptoWs === ws) {
-        this.cryptoWs = null;
-        if (this.cryptoSubscribers.size > 0) {
-          setTimeout(() => this.connectCryptoWs(), 5000); // Reconnect after 5s
-        }
-      }
-    };
-  }
-
-  private disconnectCryptoWs() {
-    if (this.cryptoWs) {
-      this.cryptoWs.close();
-      this.cryptoWs = null;
-    }
   }
 
   // US MARKET: Polling Implementation
   public subscribeToUsMarket(callback: (data: MarketData[]) => void) {
     this.usMarketSubscribers.add(callback);
-    
+
     if (this.usMarketSubscribers.size === 1) {
       this.startUsMarketPolling();
     } else if (this.latestUsData.length > 0) {
@@ -172,13 +173,10 @@ class MarketService {
     };
 
     await fetchAndUpdate();
-    
-    // Check if we are simulating (no API key in env). 
-    // If simulating, update every 3 seconds to make it look "live".
-    // If using real API, update every 60 seconds to respect rate limits.
+
     const isSimulated = !import.meta.env.VITE_US_MARKET_API_KEY;
     const intervalMs = isSimulated ? 3000 : 60 * 1000;
-    
+
     this.usMarketInterval = window.setInterval(fetchAndUpdate, intervalMs);
   }
 
