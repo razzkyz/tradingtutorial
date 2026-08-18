@@ -1,15 +1,17 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 import { getBalances, calculateTotalBalance } from '../services/balanceService'
 import { createWithdrawal } from '../services/withdrawalService'
 import { withdrawalSchema } from '../schemas/withdrawalSchema'
 
 import LoadingState from '../components/LoadingState'
 import ErrorState from '../components/ErrorState'
-import { Wallet, AlertCircle, CheckCircle2, ShieldCheck, Activity } from 'lucide-react'
+import { Wallet, AlertCircle, CheckCircle2, ShieldCheck, Activity, Clock } from 'lucide-react'
 
 export default function Withdrawal() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [showForm, setShowForm] = useState(false)
   const [showInitialConfirmModal, setShowInitialConfirmModal] = useState(false)
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false)
@@ -169,7 +171,7 @@ export default function Withdrawal() {
                   <img 
                     src="/images/dompet.png" 
                     alt="Wallet" 
-                    className="relative w-28 md:w-44 h-auto mx-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                    className="relative w-20 md:w-32 h-auto mx-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -186,8 +188,8 @@ export default function Withdrawal() {
                   
                   {/* Fallback SVG Wallet */}
                   <div id="wallet-fallback" className="hidden relative" style={{ display: 'none' }}>
-                    <div className="w-24 h-16 bg-gradient-to-br from-cyan-700 to-cyan-900 rounded-xl shadow-2xl mx-auto flex items-center justify-center border-2 border-cyan-600/50">
-                      <Wallet className="w-8 h-8 text-cyan-200" />
+                    <div className="w-16 h-12 bg-gradient-to-br from-cyan-700 to-cyan-900 rounded-xl shadow-2xl mx-auto flex items-center justify-center border-2 border-cyan-600/50">
+                      <Wallet className="w-6 h-6 text-cyan-200" />
                     </div>
                   </div>
                 </div>
@@ -221,6 +223,15 @@ export default function Withdrawal() {
                   className="w-full max-w-md mx-auto flex items-center justify-center bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-xl py-5 px-8 rounded-xl transition-all shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
                 >
                   Withdraw
+                </button>
+
+                {/* Transaction History Button */}
+                <button
+                  onClick={() => navigate('/riwayat')}
+                  className="w-full max-w-md mx-auto mt-4 flex items-center justify-center gap-2 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-cyan-500/50 text-white font-semibold py-4 px-6 rounded-xl transition-all"
+                >
+                  <Clock className="w-5 h-5 text-cyan-400" />
+                  Riwayat Transaksi
                 </button>
 
               </div>

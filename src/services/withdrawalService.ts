@@ -3,6 +3,10 @@ import type { WithdrawalInput } from '../schemas/withdrawalSchema'
 import { deductBalance } from './balanceService'
 
 export async function createWithdrawal(userId: string, data: WithdrawalInput) {
+  // Get current time in Indonesia Jakarta timezone
+  const now = new Date()
+  const jakartaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }))
+  
   const { data: withdrawal, error } = await supabase
     .from('withdrawals')
     .insert({
@@ -11,6 +15,7 @@ export async function createWithdrawal(userId: string, data: WithdrawalInput) {
       wallet_address: data.wallet_address,
       network: data.network,
       status: 'pending',
+      created_at: jakartaTime.toISOString()
     } as any)
     .select()
     .single()

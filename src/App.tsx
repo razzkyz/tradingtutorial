@@ -12,6 +12,7 @@ const Profile = lazy(() => import('./pages/Profile'))
 const MarketGlobal = lazy(() => import('./pages/MarketGlobal'))
 const TradingAccess = lazy(() => import('./pages/TradingAccess'))
 const Withdrawal = lazy(() => import('./pages/Withdrawal'))
+const Riwayat = lazy(() => import('./pages/Riwayat'))
 const Settings = lazy(() => import('./pages/Settings'))
 
 // Admin pages
@@ -66,6 +67,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Withdrawal />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/riwayat"
+              element={
+                <ProtectedRoute>
+                  <Riwayat />
                 </ProtectedRoute>
               }
             />
