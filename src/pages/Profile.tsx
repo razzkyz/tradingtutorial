@@ -344,8 +344,8 @@ export default function Profile() {
                   Investment Amount
                 </h3>
                 
-                {/* Value Box - Wider landscape, same width as title */}
-                <div className="w-full bg-gradient-to-br from-cyan-600 to-blue-700 border border-cyan-400/60 rounded-lg px-8 min-[375px]:px-10 min-[414px]:px-12 sm:px-16 md:px-20 lg:px-24 py-3 min-[375px]:py-3.5 min-[414px]:py-4 sm:py-5 md:py-6 shadow-[0_0_25px_rgba(6,182,212,0.5)]">
+                {/* Value Box - Wider landscape, taller */}
+                <div className="w-full bg-gradient-to-br from-cyan-600 to-blue-700 border border-cyan-400/60 rounded-lg px-8 min-[375px]:px-10 min-[414px]:px-12 sm:px-16 md:px-20 lg:px-24 py-4 min-[375px]:py-5 min-[414px]:py-6 sm:py-7 md:py-8 shadow-[0_0_25px_rgba(6,182,212,0.5)]">
                   <p className="text-white text-xs min-[375px]:text-sm min-[414px]:text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-center whitespace-nowrap">
                     {profile.investment_amount.toFixed(0)} USDT
                   </p>
