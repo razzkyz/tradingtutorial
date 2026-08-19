@@ -28,6 +28,7 @@ export default function Withdrawal() {
   const [formData, setFormData] = useState({
     amount: '',
     wallet_address: '',
+    network: 'TRC20',
   })
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
@@ -120,6 +121,16 @@ export default function Withdrawal() {
     setFormErrors((prev) => ({ ...prev, [name]: '' }))
   }
 
+  // Extract numeric value from text that might contain currency
+  const extractNumericValue = (input: string): number => {
+    // Remove all non-numeric characters except dot and comma
+    const numericString = input.replace(/[^\d.,]/g, '')
+    // Replace comma with dot for decimal
+    const normalizedString = numericString.replace(',', '.')
+    const value = parseFloat(normalizedString)
+    return isNaN(value) ? 0 : value
+  }
+
   const handleWithdrawClick = () => {
     if (!withdrawalAccess) {
       setShowLockedModal(true)
@@ -136,7 +147,7 @@ export default function Withdrawal() {
   const handleWithdrawAll = () => {
     setFormData(prev => ({
       ...prev,
-      amount: availableBalance.toString()
+      amount: `${availableBalance.toFixed(2)} USDT`
     }))
     setFormErrors(prev => ({ ...prev, amount: '' }))
   }
@@ -149,9 +160,13 @@ export default function Withdrawal() {
     setError('')
 
     try {
+      // Extract numeric value from amount input (may contain currency text)
+      const numericAmount = extractNumericValue(formData.amount)
+      
       const parsedData = withdrawalSchema.parse({
-        amount: parseFloat(formData.amount),
+        amount: numericAmount,
         wallet_address: formData.wallet_address,
+        network: formData.network,
       })
 
       if (parsedData.amount > availableBalance) {
@@ -180,9 +195,13 @@ export default function Withdrawal() {
     if (!user) return
     setSubmitting(true)
     try {
+      // Extract numeric value from amount input (may contain currency text)
+      const numericAmount = extractNumericValue(formData.amount)
+      
       const parsedData = withdrawalSchema.parse({
-        amount: parseFloat(formData.amount),
+        amount: numericAmount,
         wallet_address: formData.wallet_address,
+        network: formData.network,
       })
 
       await createWithdrawal(user.id, parsedData)
@@ -190,7 +209,7 @@ export default function Withdrawal() {
       setSuccess(true)
       setShowForm(false)
       setShowFinalConfirmModal(false)
-      setFormData({ amount: '', wallet_address: '' })
+      setFormData({ amount: '', wallet_address: '', network: 'TRC20' })
       setAvailableBalance(prev => prev - parsedData.amount)
       
       setTimeout(() => setSuccess(false), 5000)
@@ -298,8 +317,8 @@ export default function Withdrawal() {
                   <Activity className="w-6 h-6 text-cyan-400" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white tracking-wide">USDT Withdrawal</h1>
-                  <p className="text-gray-400 text-sm mt-1">TRC20 Network Only</p>
+                  <h1 className="text-2xl font-bold text-white tracking-wide">PROFIT WITHDRAWAL</h1>
+                  <p className="text-gray-400 text-sm mt-1">Adress Network Only</p>
                 </div>
               </div>
 
@@ -325,11 +344,10 @@ export default function Withdrawal() {
                     <input
                       id="amount"
                       name="amount"
-                      type="number"
-                      step="0.01"
+                      type="text"
                       value={formData.amount}
                       onChange={handleInputChange}
-                      placeholder="Enter Amount"
+                      placeholder="Enter Amount (e.g., 500 USDT)"
                       className="w-full pl-4 pr-28 py-4 bg-black/50 border border-gray-700 rounded-xl text-white font-bold text-lg placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all group-hover:border-gray-600"
                       required
                       disabled={submitting}
@@ -378,7 +396,7 @@ export default function Withdrawal() {
                     type="button"
                     onClick={() => {
                       setShowForm(false)
-                      setFormData({ amount: '', wallet_address: '' })
+                      setFormData({ amount: '', wallet_address: '', network: 'TRC20' })
                       setFormErrors({})
                       setError('')
                     }}
@@ -479,7 +497,7 @@ export default function Withdrawal() {
               </div>
               <h3 className="text-2xl font-bold text-white text-center mb-4">Secure Withdrawal</h3>
               <p className="text-gray-400 text-center mb-8">
-                You are about to initiate a USDT (TRC20) withdrawal. Please ensure you have a valid destination wallet address ready.
+                You are about to initiate a PROFIT withdrawal. Please ensure you have a valid destination wallet address ready.
               </p>
               <div className="flex gap-4">
                 <button
@@ -508,7 +526,7 @@ export default function Withdrawal() {
               <div className="bg-black/50 rounded-xl p-5 mb-6 space-y-4 border border-gray-800">
                 <div className="flex justify-between items-center pb-4 border-b border-gray-800">
                   <span className="text-gray-400">Total Amount</span>
-                  <span className="text-xl text-cyan-400 font-bold">USDT {formData.amount}</span>
+                  <span className="text-xl text-cyan-400 font-bold">{formData.amount}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Network</span>
