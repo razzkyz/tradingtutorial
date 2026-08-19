@@ -7,7 +7,7 @@ import { withdrawalSchema } from '../schemas/withdrawalSchema'
 
 import LoadingState from '../components/LoadingState'
 import ErrorState from '../components/ErrorState'
-import { Wallet, AlertCircle, CheckCircle2, ShieldCheck, Activity, Clock } from 'lucide-react'
+import { Wallet, AlertCircle, CheckCircle2, ShieldCheck, Activity } from 'lucide-react'
 
 export default function Withdrawal() {
   const { user } = useAuth()
@@ -225,15 +225,6 @@ export default function Withdrawal() {
                   Withdraw
                 </button>
 
-                {/* Transaction History Button */}
-                <button
-                  onClick={() => navigate('/riwayat')}
-                  className="w-full max-w-md mx-auto mt-4 flex items-center justify-center gap-2 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-cyan-500/50 text-white font-semibold py-4 px-6 rounded-xl transition-all"
-                >
-                  <Clock className="w-5 h-5 text-cyan-400" />
-                  Riwayat Transaksi
-                </button>
-
               </div>
             </>
           ) : (
@@ -370,6 +361,26 @@ export default function Withdrawal() {
             </>
           )}
         </div>
+
+        {/* Transaction History Section - Outside Card */}
+        {!showForm && (
+          <div className="mt-8">
+            <h2 className="text-white font-bold text-lg mb-4 tracking-wider">TRANSACTION HISTORY</h2>
+            
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-white text-sm leading-relaxed" style={{ maxWidth: '200px' }}>
+                To view your transaction history, please click the "View History" button here.
+              </p>
+              
+              <button
+                onClick={() => navigate('/riwayat')}
+                className="bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-base px-6 py-2.5 rounded-xl border-2 border-cyan-500/30 hover:border-cyan-400/50 transition-all shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] whitespace-nowrap flex-shrink-0"
+              >
+                Click Here
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Initial Confirmation Modal */}
         {showInitialConfirmModal && (
