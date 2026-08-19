@@ -157,7 +157,7 @@ export default function Withdrawal() {
           </div>
         )}
 
-        <div className="bg-black/80 backdrop-blur-xl rounded-2xl border-2 border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden transition-all duration-500 hover:border-cyan-400/50 hover:shadow-[0_0_60px_rgba(6,182,212,0.25)] relative">
+        <div className="bg-black/80 backdrop-blur-xl rounded-2xl border-2 border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden transition-all duration-500 hover:border-cyan-400/50 hover:shadow-[0_0_60px_rgba(6,182,212,0.25)] relative animate-fade-in">
           
           {/* Subtle Background Glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-32 bg-cyan-500/10 blur-[100px] pointer-events-none"></div>
@@ -171,7 +171,7 @@ export default function Withdrawal() {
                   <img 
                     src="/images/dompet.png" 
                     alt="Wallet" 
-                    className="relative w-20 md:w-32 h-auto mx-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                    className="relative w-20 md:w-32 h-auto mx-auto object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -195,10 +195,10 @@ export default function Withdrawal() {
                 </div>
 
                 {/* Balance Display */}
-                <div className="mb-8">
+                <div className="mb-8 animate-slide-up">
                   <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-3">Available Balance to Withdraw</p>
                   <div className="flex items-end justify-center gap-2">
-                    <span className="text-4xl md:text-5xl text-white font-black tracking-tight">
+                    <span className="text-4xl md:text-5xl text-white font-black tracking-tight animate-pulse-slow">
                       {availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                     <span className="text-lg md:text-2xl text-cyan-400 font-bold mb-1">USDT</span>
@@ -220,7 +220,7 @@ export default function Withdrawal() {
                 <button
                   onClick={availableBalance <= 0 ? undefined : handleWithdrawClick}
                   disabled={availableBalance <= 0}
-                  className="w-full max-w-md mx-auto flex items-center justify-center bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-xl py-5 px-8 rounded-xl transition-all shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                  className="w-full max-w-md mx-auto flex items-center justify-center bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-xl py-5 px-8 rounded-xl transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] hover:scale-105 uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100"
                 >
                   Withdraw
                 </button>
@@ -365,19 +365,72 @@ export default function Withdrawal() {
         {/* Transaction History Section - Outside Card */}
         {!showForm && (
           <div className="mt-8">
-            <h2 className="text-white font-bold text-lg mb-4 tracking-wider">TRANSACTION HISTORY</h2>
+            <h2 className="text-white font-bold text-xl mb-6 tracking-wider">TRANSACTION HISTORY</h2>
             
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-white text-sm leading-relaxed" style={{ maxWidth: '200px' }}>
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-white text-base leading-relaxed" style={{ maxWidth: '280px' }}>
                 To view your transaction history, please click the "View History" button here.
               </p>
               
               <button
                 onClick={() => navigate('/riwayat')}
-                className="bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-base px-6 py-2.5 rounded-xl border-2 border-cyan-500/30 hover:border-cyan-400/50 transition-all shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] whitespace-nowrap flex-shrink-0"
+                className="bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-lg px-10 py-3 rounded-2xl border-2 border-cyan-500/30 hover:border-cyan-400/50 transition-all shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] whitespace-nowrap flex-shrink-0"
               >
                 Click Here
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* How to Withdraw Section */}
+        {!showForm && (
+          <div className="mt-12 animate-fade-in">
+            <h2 className="text-white font-bold text-xl mb-6 tracking-wider">HOW TO WITHDRAW</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Step 1 */}
+              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 hover:border-cyan-500/40 transition-all">
+                <div className="mb-2">
+                  <span className="text-cyan-400 font-bold text-sm">STEP 1</span>
+                  <h3 className="text-white font-bold text-base mt-1">Click Withdraw</h3>
+                </div>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  Click the "Withdraw" button above to start the withdrawal process.
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 hover:border-cyan-500/40 transition-all">
+                <div className="mb-2">
+                  <span className="text-cyan-400 font-bold text-sm">STEP 2</span>
+                  <h3 className="text-white font-bold text-base mt-1">Enter Details</h3>
+                </div>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  Fill in the amount (USDT) and your TRC20 wallet address.
+                </p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 hover:border-cyan-500/40 transition-all">
+                <div className="mb-2">
+                  <span className="text-cyan-400 font-bold text-sm">STEP 3</span>
+                  <h3 className="text-white font-bold text-base mt-1">Wait Process</h3>
+                </div>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  Confirm your withdrawal. Processing time: 5-10 minutes.
+                </p>
+              </div>
+            </div>
+
+            {/* Important Notes */}
+            <div className="mt-6 bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-600/30 rounded-xl p-4">
+              <h4 className="text-yellow-300 font-bold text-sm mb-2">IMPORTANT NOTES</h4>
+              <div className="text-gray-300 text-xs space-y-1.5 leading-relaxed">
+                <p>• Only TRC20 network is supported</p>
+                <p>• Double-check your wallet address before confirming</p>
+                <p>• Minimum withdrawal: 10 USDT</p>
+                <p>• Contact support if withdrawal takes longer than expected</p>
+              </div>
             </div>
           </div>
         )}
