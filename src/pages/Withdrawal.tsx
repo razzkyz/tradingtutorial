@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 import { getBalances, calculateTotalBalance } from '../services/balanceService'
 import { createWithdrawal } from '../services/withdrawalService'
 import { withdrawalSchema } from '../schemas/withdrawalSchema'
@@ -32,6 +33,29 @@ export default function Withdrawal() {
     if (!user) return
 
     loadData()
+
+    // Subscribe to real-time changes in balances
+    const balanceSubscription = supabase
+      .channel('balance_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'balances',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Balance changed:', payload)
+          // Reload balance when any change occurs
+          loadData()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      balanceSubscription.unsubscribe()
+    }
   }, [user?.id])
 
   const loadData = async () => {
@@ -149,15 +173,18 @@ export default function Withdrawal() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] px-4 py-4 bg-black">
-      <div className="w-full max-w-md mx-auto">
-        {success && (
-          <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/50 rounded-xl text-emerald-300 text-center flex items-center justify-center gap-3 animate-fade-in shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-            <CheckCircle2 className="w-6 h-6" /> 
-            <span className="font-semibold text-lg">Withdrawal request submitted successfully!</span>
-          </div>
-        )}
+      <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
+        
+        {/* Form and History Container */}
+        <div className="w-full max-w-md">
+          {success && (
+            <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/50 rounded-xl text-emerald-300 text-center flex items-center justify-center gap-3 animate-fade-in shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+              <CheckCircle2 className="w-6 h-6" /> 
+              <span className="font-semibold text-lg">Withdrawal request submitted successfully!</span>
+            </div>
+          )}
 
-        <div className="bg-black/80 backdrop-blur-xl rounded-2xl border-2 border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden transition-all duration-500 hover:border-cyan-400/50 hover:shadow-[0_0_60px_rgba(6,182,212,0.25)] relative animate-fade-in">
+          <div className="bg-black/80 backdrop-blur-xl rounded-2xl border-2 border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden transition-all duration-500 hover:border-cyan-400/50 hover:shadow-[0_0_60px_rgba(6,182,212,0.25)] relative animate-fade-in">
           
           {/* Subtle Background Glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-32 bg-cyan-500/10 blur-[100px] pointer-events-none"></div>
@@ -381,55 +408,59 @@ export default function Withdrawal() {
             </div>
           </div>
         )}
+        </div> {/* Close Form and History Container */}
 
         {/* How to Withdraw Section */}
         {!showForm && (
-          <div className="mt-12 animate-fade-in">
-            <h2 className="text-white font-bold text-xl mb-6 tracking-wider">HOW TO WITHDRAW</h2>
+          <div className="w-full mt-12 md:mt-16 animate-fade-in">
+            <h2 className="text-white font-bold text-xl md:text-2xl mb-8 tracking-wider text-center md:text-left">HOW TO WITHDRAW</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {/* Step 1 */}
-              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 hover:border-cyan-500/40 transition-all">
-                <div className="mb-2">
-                  <span className="text-cyan-400 font-bold text-sm">STEP 1</span>
-                  <h3 className="text-white font-bold text-base mt-1">Click Withdraw</h3>
+              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 md:p-8 hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 transform hover:-translate-y-1">
+                <div className="mb-3">
+                  <span className="inline-block px-3 py-1 bg-cyan-500/10 text-cyan-400 font-bold text-xs md:text-sm rounded-full mb-3">STEP 1</span>
+                  <h3 className="text-white font-bold text-lg md:text-xl">Click Withdraw</h3>
                 </div>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed">
                   Click the "Withdraw" button above to start the withdrawal process.
                 </p>
               </div>
 
               {/* Step 2 */}
-              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 hover:border-cyan-500/40 transition-all">
-                <div className="mb-2">
-                  <span className="text-cyan-400 font-bold text-sm">STEP 2</span>
-                  <h3 className="text-white font-bold text-base mt-1">Enter Details</h3>
+              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 md:p-8 hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 transform hover:-translate-y-1">
+                <div className="mb-3">
+                  <span className="inline-block px-3 py-1 bg-cyan-500/10 text-cyan-400 font-bold text-xs md:text-sm rounded-full mb-3">STEP 2</span>
+                  <h3 className="text-white font-bold text-lg md:text-xl">Enter Details</h3>
                 </div>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed">
                   Fill in the amount (USDT) and your TRC20 wallet address.
                 </p>
               </div>
 
               {/* Step 3 */}
-              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 hover:border-cyan-500/40 transition-all">
-                <div className="mb-2">
-                  <span className="text-cyan-400 font-bold text-sm">STEP 3</span>
-                  <h3 className="text-white font-bold text-base mt-1">Wait Process</h3>
+              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 md:p-8 hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 transform hover:-translate-y-1">
+                <div className="mb-3">
+                  <span className="inline-block px-3 py-1 bg-cyan-500/10 text-cyan-400 font-bold text-xs md:text-sm rounded-full mb-3">STEP 3</span>
+                  <h3 className="text-white font-bold text-lg md:text-xl">Wait Process</h3>
                 </div>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed">
                   Confirm your withdrawal. Processing time: 5-10 minutes.
                 </p>
               </div>
             </div>
 
             {/* Important Notes */}
-            <div className="mt-6 bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-600/30 rounded-xl p-4">
-              <h4 className="text-yellow-300 font-bold text-sm mb-2">IMPORTANT NOTES</h4>
-              <div className="text-gray-300 text-xs space-y-1.5 leading-relaxed">
-                <p>• Only TRC20 network is supported</p>
-                <p>• Double-check your wallet address before confirming</p>
-                <p>• Minimum withdrawal: 10 USDT</p>
-                <p>• Contact support if withdrawal takes longer than expected</p>
+            <div className="mt-8 bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-600/30 rounded-2xl p-6 md:p-8 hover:border-yellow-500/40 transition-colors">
+              <h4 className="text-yellow-400 font-bold text-base md:text-lg mb-4 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5" />
+                IMPORTANT NOTES
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-gray-300 text-sm md:text-base leading-relaxed">
+                <div className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2"></div><p>Only TRC20 network is supported</p></div>
+                <div className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2"></div><p>Double-check your wallet address before confirming</p></div>
+                <div className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2"></div><p>Minimum withdrawal: 10 USDT</p></div>
+                <div className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2"></div><p>Contact support if withdrawal takes longer than expected</p></div>
               </div>
             </div>
           </div>

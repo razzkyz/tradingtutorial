@@ -42,6 +42,29 @@ export default function Riwayat() {
   useEffect(() => {
     if (!user) return
     loadTransactionHistory()
+
+    // Subscribe to real-time changes in withdrawals
+    const withdrawalSubscription = supabase
+      .channel('withdrawal_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'withdrawals',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Withdrawal changed:', payload)
+          // Reload transaction history when any change occurs
+          loadTransactionHistory()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      withdrawalSubscription.unsubscribe()
+    }
   }, [user?.id])
 
   const loadTransactionHistory = async () => {
@@ -65,7 +88,7 @@ export default function Riwayat() {
         amount: w.amount,
         wallet_address: w.wallet_address,
         network: w.network,
-        status: w.status === 'pending' ? 'processing' : w.status,
+        status: w.status === 'pending' ? 'processing' : w.status === 'approved' ? 'completed' : w.status === 'rejected' ? 'failed' : w.status,
         created_at: w.created_at
       }))
 

@@ -21,7 +21,6 @@ export default function AddCustomer() {
     phone_number: '',
     address: '',
     country: '',
-    investment_amount: '100',
   })
 
   useEffect(() => {
@@ -92,18 +91,18 @@ export default function AddCustomer() {
         phone_number: formData.phone_number || null,
         address: formData.address || null,
         country: formData.country || null,
-        investment_amount: parseFloat(formData.investment_amount),
+        investment_amount: 0,
         role: 'user',
       }] as any)
 
       if (profileError) throw profileError
 
-      // 3. Create default balances
+      // 3. Create default balances (initialized to 0)
       const balances = [
-        { user_id: authData.user.id, balance_type: 'balance_1', amount: 200 },
-        { user_id: authData.user.id, balance_type: 'balance_2', amount: 400 },
-        { user_id: authData.user.id, balance_type: 'balance_3', amount: 500 },
-        { user_id: authData.user.id, balance_type: 'balance_4', amount: 700 },
+        { user_id: authData.user.id, balance_type: 'balance_1', amount: 0 },
+        { user_id: authData.user.id, balance_type: 'balance_2', amount: 0 },
+        { user_id: authData.user.id, balance_type: 'balance_3', amount: 0 },
+        { user_id: authData.user.id, balance_type: 'balance_4', amount: 0 },
       ]
 
       const { error: balancesError } = await supabase.from('balances').insert(balances as any)
@@ -125,7 +124,6 @@ export default function AddCustomer() {
         phone_number: '',
         address: '',
         country: '',
-        investment_amount: '100',
       })
 
       setTimeout(() => {
@@ -273,23 +271,7 @@ export default function AddCustomer() {
               />
             </div>
 
-            <div>
-              <label htmlFor="investment_amount" className="block text-text-secondary text-sm mb-2">
-                Initial Investment Amount (USDT) *
-              </label>
-              <input
-                id="investment_amount"
-                name="investment_amount"
-                type="number"
-                step="0.01"
-                value={formData.investment_amount}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                placeholder="100.00"
-                required
-                disabled={loading}
-              />
-            </div>
+
 
             <button
               type="submit"

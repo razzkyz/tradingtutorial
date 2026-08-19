@@ -100,7 +100,40 @@ export default function AdminWithdrawals() {
   const handleStatusUpdate = async (id: string, status: 'approved' | 'rejected') => {
     setUpdatingId(id)
     try {
+      // Get withdrawal details
+      const withdrawal = withdrawals.find(w => w.id === id)
+      if (!withdrawal) {
+        console.error('Withdrawal not found')
+        return
+      }
+
+      // Update withdrawal status
       await (supabase.from('withdrawals') as any).update({ status }).eq('id', id)
+
+      // If rejected, return the amount back to user's balance
+      if (status === 'rejected') {
+        // Get current balance_1 (main balance)
+        const { data: currentBalance } = await supabase
+          .from('balances')
+          .select('amount')
+          .eq('user_id', withdrawal.user_id)
+          .eq('balance_type', 'balance_1')
+          .single()
+
+        if (currentBalance) {
+          // Add withdrawal amount back to balance
+          const newAmount = (currentBalance as any).amount + withdrawal.amount
+
+          await (supabase
+            .from('balances') as any)
+            .update({ amount: newAmount })
+            .eq('user_id', withdrawal.user_id)
+            .eq('balance_type', 'balance_1')
+
+          console.log(`Returned ${withdrawal.amount} USDT to user ${withdrawal.profiles?.full_name || withdrawal.user_id}`)
+        }
+      }
+
       setWithdrawals(prev => prev.map(w => w.id === id ? { ...w, status } : w))
     } catch (err) {
       console.error('Failed to update status:', err)
@@ -120,6 +153,17 @@ export default function AdminWithdrawals() {
       w.network,
       w.status,
     ])
+    
+    // Add empty row
+    rows.push([])
+    
+    // Add total row (only pending + approved)
+    const totalPendingApproved = filtered
+      .filter(w => w.status === 'pending' || w.status === 'approved')
+      .reduce((sum, w) => sum + w.amount, 0)
+    
+    rows.push(['', '', 'TOTAL (Pending + Approved):', totalPendingApproved.toFixed(2), '', '', ''])
+    
     const csv = [header, ...rows].map(r => r.join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
@@ -141,7 +185,10 @@ export default function AdminWithdrawals() {
     return matchStatus && matchSearch
   })
 
-  const totalAmount = filtered.reduce((sum, w) => sum + w.amount, 0)
+  // Only count pending and approved (exclude rejected)
+  const totalAmount = filtered
+    .filter(w => w.status === 'pending' || w.status === 'approved')
+    .reduce((sum, w) => sum + w.amount, 0)
 
   if (authLoading || loading) return <LoadingState />
   if (!isAdmin) return null

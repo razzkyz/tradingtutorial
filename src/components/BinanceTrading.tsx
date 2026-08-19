@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
 
 interface BinanceTradingProps {
-  symbol: string
   compact?: boolean
 }
 
-export default function BinanceTrading({ symbol, compact = false }: BinanceTradingProps) {
+export default function BinanceTrading({ compact = false }: BinanceTradingProps) {
   const [side, setSide] = useState<'BUY' | 'SELL'>('BUY')
   const [quantity, setQuantity] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,36 +22,11 @@ export default function BinanceTrading({ symbol, compact = false }: BinanceTradi
     setMessage('')
 
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        throw new Error('Please login first')
-      }
+      // Simulate network request for mock trading
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/binance-trade`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'place_order',
-            symbol,
-            side,
-            quantity: parseFloat(quantity),
-            type: 'MARKET',
-          }),
-        }
-      )
-
-      const result = await response.json()
-
-      if (result.error) {
-        throw new Error(result.error)
-      }
-
-      setMessage(`✅ ${side} order placed successfully! Order ID: ${result.orderId}`)
+      const mockOrderId = Math.floor(Math.random() * 1000000000)
+      setMessage(`✅ ${side} order placed successfully! Order ID: ${mockOrderId}`)
       setQuantity('')
     } catch (err: any) {
       setError(err.message || 'Failed to place order')

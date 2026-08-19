@@ -34,10 +34,29 @@ export default function Profile() {
     if (!user) return
 
     loadProfile()
+
+    // Subscribe to real-time changes in balances
+    const balanceSubscription = supabase
+      .channel('profile_balance_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'balances',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Balance changed in Profile:', payload)
+          // Reload profile data when balance changes
+          loadProfile()
+        }
+      )
+      .subscribe()
     
     // Cleanup
     return () => {
-      // Cancel any pending requests
+      balanceSubscription.unsubscribe()
     }
   }, [user?.id]) // Only depend on user.id
 
@@ -339,20 +358,20 @@ export default function Profile() {
             {/* Horizontal Row: Wallet aligned with blue box */}
             <div className="flex items-end gap-4 min-[375px]:gap-5 min-[414px]:gap-6 sm:gap-8 md:gap-12">
               {/* Wallet Icon - Aligned with blue box bottom */}
-              <div className="flex-shrink-0 ml-4 sm:ml-8 mb-2 sm:mb-3">
+              <div className="flex-shrink-0 ml-2 sm:ml-8 mb-2 sm:mb-3">
                 <Wallet className="w-12 h-12 min-[375px]:w-13 min-[375px]:h-13 min-[414px]:w-14 min-[414px]:h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 text-white" strokeWidth={1.5} />
               </div>
 
               {/* Right Side: Title + Blue Box - Same width, aligned */}
-              <div className="flex flex-col items-stretch gap-1.5 sm:gap-2 flex-1 max-w-md">
+              <div className="flex flex-col items-stretch gap-1.5 sm:gap-2 flex-1 min-w-0 max-w-md mr-2 sm:mr-0">
                 {/* Title - Same width as box below, single line */}
-                <h3 className="text-white text-[11px] min-[375px]:text-xs min-[414px]:text-sm sm:text-base md:text-lg font-medium tracking-wide uppercase text-center whitespace-nowrap">
+                <h3 className="text-white text-[11px] min-[375px]:text-xs min-[414px]:text-sm sm:text-base md:text-lg font-medium tracking-wide uppercase text-center whitespace-nowrap truncate">
                   Investment Amount
                 </h3>
                 
                 {/* Value Box - Wider landscape, taller */}
-                <div className="w-full bg-gradient-to-br from-cyan-600 to-blue-700 border border-cyan-400/60 rounded-lg px-8 min-[375px]:px-10 min-[414px]:px-12 sm:px-16 md:px-20 lg:px-24 py-4 min-[375px]:py-5 min-[414px]:py-6 sm:py-7 md:py-8 shadow-[0_0_25px_rgba(6,182,212,0.5)]">
-                  <p className="text-white text-xs min-[375px]:text-sm min-[414px]:text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-center whitespace-nowrap">
+                <div className="w-full bg-gradient-to-br from-cyan-600 to-blue-700 border border-cyan-400/60 rounded-lg px-2 sm:px-6 md:px-8 py-4 min-[375px]:py-5 min-[414px]:py-6 sm:py-7 md:py-8 shadow-[0_0_25px_rgba(6,182,212,0.5)] flex items-center justify-center">
+                  <p className="text-white text-xs min-[375px]:text-sm min-[414px]:text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-center truncate">
                     {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
                   </p>
                 </div>

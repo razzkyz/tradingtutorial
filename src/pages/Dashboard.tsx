@@ -52,9 +52,49 @@ export default function Dashboard() {
 
     loadData()
     
+    // Subscribe to real-time changes in trading_access
+    const tradingSubscription = supabase
+      .channel('trading_access_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'trading_access',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Trading status changed:', payload)
+          if (payload.new && 'status' in payload.new) {
+            setTradingStatus((payload.new as any).status)
+          }
+        }
+      )
+      .subscribe()
+
+    // Subscribe to real-time changes in balances
+    const balanceSubscription = supabase
+      .channel('balance_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'balances',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Balance changed:', payload)
+          // Reload all data when balance changes
+          loadData()
+        }
+      )
+      .subscribe()
+    
     // Cleanup function to prevent memory leaks
     return () => {
-      // Cancel any pending requests if needed
+      tradingSubscription.unsubscribe()
+      balanceSubscription.unsubscribe()
     }
   }, [user?.id]) // Only re-run when user.id changes, not entire user object
 
@@ -184,17 +224,12 @@ export default function Dashboard() {
       setLoading(true)
       setError('')
 
-      const [balancesData, profileData, tradingData, apiKeysData] = await Promise.all([
+      const [balancesData, profileData, tradingData] = await Promise.all([
         getBalances(user.id),
         getProfile(user.id),
         supabase
           .from('trading_access')
           .select('status')
-          .eq('user_id', user.id)
-          .single(),
-        supabase
-          .from('user_binance_keys')
-          .select('api_key')
           .eq('user_id', user.id)
           .single(),
       ])
@@ -205,8 +240,8 @@ export default function Dashboard() {
       const tradingResult = tradingData as any
       setTradingStatus(tradingResult.data?.status || 'inactive')
 
-      const apiKeysResult = apiKeysData as any
-      setHasApiKeys(!!apiKeysResult.data?.api_key)
+      // Mock hasApiKeys to true so trading is always enabled
+      setHasApiKeys(true)
     } catch (err) {
       console.error('Error loading dashboard data:', err)
       setError('Failed to load dashboard data')
@@ -558,29 +593,13 @@ export default function Dashboard() {
                   
                   {/* Panel Content - Compact */}
                   <div className="p-3">
-                    <BinanceTrading symbol="BTCUSDT" compact={true} />
+                    <BinanceTrading compact={true} />
                   </div>
                 </div>
               </div>
             )}
 
-            {/* No API Keys Warning - Only show if panel is toggled */}
-            {!hasApiKeys && (
-              <div className="absolute top-4 left-4 z-10 w-full max-w-[calc(100%-2rem)] sm:w-auto">
-                <div className="bg-gradient-to-br from-red-900/95 to-gray-900/95 backdrop-blur-xl border border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.6)] rounded-lg p-3 sm:p-4 max-w-xs">
-                  <h3 className="text-white font-bold text-sm mb-1.5">🔒 Trading Disabled</h3>
-                  <p className="text-red-200 text-xs mb-2">
-                    Setup API keys to enable live trading.
-                  </p>
-                  <a
-                    href="/settings"
-                    className="block w-full text-center bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-3 rounded text-xs transition-all"
-                  >
-                    Go to Settings →
-                  </a>
-                </div>
-              </div>
-            )}
+            {/* No API Keys Warning removed since we use mock trading */}
           </div>
           
           {/* Info Footer */}

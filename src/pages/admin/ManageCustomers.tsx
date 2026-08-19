@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
-import { ArrowLeft, Search, CheckCircle, XCircle, DollarSign, Edit, Trash2 } from 'lucide-react'
+import { ArrowLeft, Search, CheckCircle, XCircle, DollarSign, Edit, Trash2, Power } from 'lucide-react'
 import LoadingState from '../../components/LoadingState'
 import Toast from '../../components/Toast'
 
@@ -28,8 +28,12 @@ export default function ManageCustomers() {
   const [showBalanceModal, setShowBalanceModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [balanceAmount, setBalanceAmount] = useState('')
-  const [balanceType, setBalanceType] = useState('balance_1')
+  const [balanceAmounts, setBalanceAmounts] = useState({
+    balance_1: '',
+    balance_2: '',
+    balance_3: '',
+    balance_4: ''
+  })
   const [balanceCurrency, setBalanceCurrency] = useState('USDT')
   const [usdtRate, setUsdtRate] = useState(1)
   const [fetchingRate, setFetchingRate] = useState(false)
@@ -189,8 +193,7 @@ export default function ManageCustomers() {
 
   const openBalanceModal = (customer: Customer) => {
     setSelectedCustomer(customer)
-    setBalanceAmount('')
-    setBalanceType('balance_1')
+    setBalanceAmounts({ balance_1: '', balance_2: '', balance_3: '', balance_4: '' })
     setBalanceCurrency('USDT')
     setUsdtRate(1)
     setShowBalanceModal(true)
@@ -213,43 +216,49 @@ export default function ManageCustomers() {
   }
 
   const handleAddBalance = async () => {
-    if (!selectedCustomer || !balanceAmount) return
+    if (!selectedCustomer) return
 
     setUpdating(true)
     try {
-      const rawAmount = parseFloat(balanceAmount)
-      if (rawAmount <= 0) {
-        setToast({ message: 'Amount must be greater than 0', type: 'warning' })
+      let totalAdded = 0
+      for (const [type, amount] of Object.entries(balanceAmounts)) {
+        if (!amount) continue
+        const rawAmount = parseFloat(amount)
+        if (rawAmount <= 0) continue
+
+        // Convert to USDT
+        const usdtAmount = balanceCurrency === 'USDT' ? rawAmount : rawAmount * usdtRate
+        totalAdded += usdtAmount
+
+        // Get current balance
+        const { data: currentBalance } = await supabase
+          .from('balances')
+          .select('amount')
+          .eq('user_id', selectedCustomer.user_id)
+          .eq('balance_type', type)
+          .single()
+
+        const newAmount = ((currentBalance as any)?.amount || 0) + usdtAmount
+
+        // Update balance
+        const result = await (supabase
+          .from('balances') as any)
+          .update({ amount: newAmount })
+          .eq('user_id', selectedCustomer.user_id)
+          .eq('balance_type', type)
+
+        if (result.error) throw result.error
+      }
+
+      if (totalAdded === 0) {
+        setToast({ message: 'Please enter an amount for at least one balance slot', type: 'warning' })
         setUpdating(false)
         return
       }
 
-      // Convert to USDT
-      const usdtAmount = balanceCurrency === 'USDT' ? rawAmount : rawAmount * usdtRate
-
-      // Get current balance
-      const { data: currentBalance } = await supabase
-        .from('balances')
-        .select('amount')
-        .eq('user_id', selectedCustomer.user_id)
-        .eq('balance_type', balanceType)
-        .single()
-
-      const newAmount = ((currentBalance as any)?.amount || 0) + usdtAmount
-
-      // Update balance
-      const result = await (supabase
-        .from('balances') as any)
-        .update({ amount: newAmount })
-        .eq('user_id', selectedCustomer.user_id)
-        .eq('balance_type', balanceType)
-
-      if (result.error) throw result.error
-
       setShowBalanceModal(false)
       await loadCustomers()
-      const displayCrypto = balanceCurrency !== 'USDT' ? ` (${rawAmount} ${balanceCurrency} @ $${usdtRate.toLocaleString()})` : ''
-      setToast({ message: `Added USDT ${usdtAmount.toFixed(2)}${displayCrypto} to ${selectedCustomer.full_name}`, type: 'success' })
+      setToast({ message: `Balances added successfully to ${selectedCustomer.full_name}`, type: 'success' })
     } catch (error) {
       console.error('Error adding balance:', error)
       setToast({ message: 'Failed to add balance', type: 'error' })
@@ -426,13 +435,14 @@ export default function ManageCustomers() {
                           <button
                             onClick={() => toggleTradingStatus(customer)}
                             disabled={updating}
-                            className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${
+                            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${
                               customer.trading_status === 'active'
-                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                                : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30'
+                                : 'bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30'
                             }`}
                             title={customer.trading_status === 'active' ? 'Deactivate Trading' : 'Activate Trading'}
                           >
+                            <Power className="w-3.5 h-3.5" />
                             {customer.trading_status === 'active' ? 'Deactivate' : 'Activate'}
                           </button>
                           <button
@@ -471,41 +481,25 @@ export default function ManageCustomers() {
 
         {/* Add Balance Modal */}
         {showBalanceModal && selectedCustomer && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-950 border border-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-white mb-1">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 sm:p-6">
+            <div className="bg-gray-950 border border-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-5 sm:p-8 max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
                 Add Balance
               </h3>
-              <p className="text-gray-400 text-sm mb-6">for <span className="text-cyan-400 font-semibold">{selectedCustomer.full_name}</span></p>
+              <p className="text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6">for <span className="text-cyan-400 font-semibold">{selectedCustomer.full_name}</span></p>
 
-              <div className="space-y-4">
-                {/* Balance Slot */}
-                <div>
-                  <label className="block text-gray-400 text-sm mb-2">Balance Slot</label>
-                  <select
-                    value={balanceType}
-                    onChange={(e) => setBalanceType(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500 transition-all"
-                    disabled={updating}
-                  >
-                    <option value="balance_1">Balance 1</option>
-                    <option value="balance_2">Balance 2</option>
-                    <option value="balance_3">Balance 3</option>
-                    <option value="balance_4">Balance 4</option>
-                  </select>
-                </div>
-
+              <div className="space-y-3 sm:space-y-4">
                 {/* Currency Selector */}
                 <div>
-                  <label className="block text-gray-400 text-sm mb-2">Currency</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <label className="block text-gray-400 text-xs sm:text-sm mb-2">Currency</label>
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                     {CURRENCIES.map(c => (
                       <button
                         key={c.value}
                         type="button"
                         disabled={updating}
                         onClick={() => { setBalanceCurrency(c.value); fetchCryptoPrice(c.value) }}
-                        className={`py-2.5 px-3 rounded-xl text-sm font-bold border transition-all ${
+                        className={`py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-bold border transition-all ${
                           balanceCurrency === c.value
                             ? 'bg-cyan-500/20 border-cyan-500/60 text-cyan-400'
                             : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
@@ -517,52 +511,55 @@ export default function ManageCustomers() {
                   </div>
                 </div>
 
-                {/* Amount Input */}
-                <div>
-                  <label className="block text-gray-400 text-sm mb-2">Amount in {balanceCurrency}</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      step="any"
-                      value={balanceAmount}
-                      onChange={(e) => setBalanceAmount(e.target.value)}
-                      placeholder={`0.00 ${balanceCurrency}`}
-                      className="w-full px-4 pr-16 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500 transition-all"
-                      disabled={updating}
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">{balanceCurrency}</span>
-                  </div>
+                {/* Amount Inputs */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-2">
+                  {Object.keys(balanceAmounts).map((slotKey) => {
+                    const label = slotKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    return (
+                      <div key={slotKey}>
+                        <label className="block text-gray-400 text-xs sm:text-sm mb-1">{label}</label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            step="any"
+                            value={balanceAmounts[slotKey as keyof typeof balanceAmounts]}
+                            onChange={(e) => setBalanceAmounts(prev => ({ ...prev, [slotKey]: e.target.value }))}
+                            placeholder={`0.00`}
+                            className="w-full px-3 sm:px-4 pr-10 sm:pr-14 py-2 sm:py-2.5 text-sm sm:text-base bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500 transition-all"
+                            disabled={updating}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs sm:text-sm font-bold">{balanceCurrency}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
 
                 {/* Conversion Preview */}
                 {balanceCurrency !== 'USDT' && (
-                  <div className="p-3 bg-gray-900/80 border border-gray-800 rounded-xl">
+                  <div className="p-2.5 sm:p-3 bg-gray-900/80 border border-gray-800 rounded-xl">
                     {fetchingRate ? (
-                      <p className="text-gray-500 text-sm text-center">Fetching live price...</p>
+                      <p className="text-gray-500 text-xs sm:text-sm text-center">Fetching live price...</p>
                     ) : (
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400 text-sm">Converts to USDT:</span>
-                        <span className="text-emerald-400 font-bold text-lg">
-                          ≈ {balanceAmount ? (parseFloat(balanceAmount || '0') * usdtRate).toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0.00'} USDT
-                        </span>
-                      </div>
+                      <p className="text-gray-400 text-xs sm:text-sm text-center">
+                        Live Rate: 1 {balanceCurrency} = <span className="text-emerald-400 font-bold">${usdtRate.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span> USDT
+                      </p>
                     )}
-                    <p className="text-gray-600 text-xs mt-1">1 {balanceCurrency} = ${usdtRate.toLocaleString('en-US', { maximumFractionDigits: 2 })} USDT (live)</p>
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-2 sm:gap-3 pt-2">
                   <button
                     onClick={() => setShowBalanceModal(false)}
                     disabled={updating}
-                    className="flex-1 px-4 py-3 bg-transparent border-2 border-gray-700 hover:border-gray-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-transparent border-2 border-gray-700 hover:border-gray-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleAddBalance}
-                    disabled={updating || !balanceAmount || fetchingRate}
-                    className="flex-1 px-4 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={updating || fetchingRate || !Object.values(balanceAmounts).some(v => parseFloat(v) > 0)}
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {updating ? 'Adding...' : 'Add Balance'}
                   </button>
@@ -574,70 +571,70 @@ export default function ManageCustomers() {
 
         {/* Edit Customer Modal */}
         {showEditModal && selectedCustomer && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-black/95 border-2 border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.6)] rounded-lg max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-white mb-4">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 sm:p-6">
+            <div className="bg-black/95 border-2 border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.6)] rounded-2xl max-w-md w-full p-5 sm:p-8 max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 break-words">
                 Edit Customer: {selectedCustomer.full_name}
               </h3>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-text-secondary text-sm mb-2">Full Name</label>
+                  <label className="block text-text-secondary text-xs sm:text-sm mb-2">Full Name</label>
                   <input
                     type="text"
                     value={editForm.full_name}
                     onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
-                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     disabled={updating}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-text-secondary text-sm mb-2">Phone Number</label>
+                  <label className="block text-text-secondary text-xs sm:text-sm mb-2">Phone Number</label>
                   <input
                     type="tel"
                     value={editForm.phone_number}
                     onChange={(e) => setEditForm({ ...editForm, phone_number: e.target.value })}
-                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     disabled={updating}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-text-secondary text-sm mb-2">Country</label>
+                  <label className="block text-text-secondary text-xs sm:text-sm mb-2">Country</label>
                   <input
                     type="text"
                     value={editForm.country}
                     onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
-                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     disabled={updating}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-text-secondary text-sm mb-2">Investment Amount (USDT)</label>
+                  <label className="block text-text-secondary text-xs sm:text-sm mb-2">Investment Amount (USDT)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={editForm.investment_amount}
                     onChange={(e) => setEditForm({ ...editForm, investment_amount: e.target.value })}
-                    className="w-full px-4 py-3 bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-deep-navy/50 border border-text-muted/30 rounded-lg text-text-primary focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     disabled={updating}
                   />
                 </div>
 
-                <div className="flex gap-3 mt-6">
+                <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
                   <button
                     onClick={() => setShowEditModal(false)}
                     disabled={updating}
-                    className="flex-1 px-4 py-3 bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold rounded-lg transition-all disabled:opacity-50"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold rounded-lg transition-all disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleEditCustomer}
                     disabled={updating || !editForm.full_name}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.5)] hover:shadow-[0_0_30px_rgba(59,130,246,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(59,130,246,0.5)] hover:shadow-[0_0_30px_rgba(59,130,246,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {updating ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -649,40 +646,40 @@ export default function ManageCustomers() {
 
         {/* Delete Customer Modal */}
         {showDeleteModal && selectedCustomer && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-black/95 border-2 border-red-500/50 shadow-[0_0_40px_rgba(239,68,68,0.6)] rounded-lg max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-red-400 mb-4">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 sm:p-6">
+            <div className="bg-black/95 border-2 border-red-500/50 shadow-[0_0_40px_rgba(239,68,68,0.6)] rounded-2xl max-w-md w-full p-5 sm:p-8 max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col">
+              <h3 className="text-lg sm:text-xl font-bold text-red-400 mb-3 sm:mb-4">
                 Delete Customer?
               </h3>
 
-              <p className="text-white mb-2">
+              <p className="text-white mb-2 text-sm sm:text-base">
                 Are you sure you want to delete <strong>{selectedCustomer.full_name}</strong>?
               </p>
-              <p className="text-text-secondary text-sm mb-6">
+              <p className="text-text-secondary text-xs sm:text-sm mb-3 sm:mb-6">
                 This will permanently delete:
               </p>
-              <ul className="text-text-secondary text-sm mb-6 space-y-1 list-disc list-inside">
+              <ul className="text-text-secondary text-xs sm:text-sm mb-3 sm:mb-6 space-y-1 list-disc list-inside">
                 <li>User account and profile</li>
                 <li>All balances (USDT {selectedCustomer.total_balance.toFixed(2)})</li>
                 <li>Trading access records</li>
                 <li>Withdrawal history</li>
               </ul>
-              <p className="text-red-400 text-sm font-semibold mb-6">
+              <p className="text-red-400 text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
                 ⚠️ This action cannot be undone!
               </p>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <button
                   onClick={() => setShowDeleteModal(false)}
                   disabled={updating}
-                  className="flex-1 px-4 py-3 bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold rounded-lg transition-all disabled:opacity-50"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-text-muted/20 hover:bg-text-muted/30 text-text-primary font-semibold rounded-lg transition-all disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteCustomer}
                   disabled={updating}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(239,68,68,0.5)] hover:shadow-[0_0_30px_rgba(239,68,68,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(239,68,68,0.5)] hover:shadow-[0_0_30px_rgba(239,68,68,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {updating ? 'Deleting...' : 'Yes, Delete'}
                 </button>

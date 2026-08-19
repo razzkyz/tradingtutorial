@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 import { getBalances, calculateTotalBalance } from '../services/balanceService'
 import { Wallet, TrendingUp, TrendingDown, Activity, Search, Star, X, Maximize2, ChevronRight, GripVertical } from 'lucide-react'
 import { SkeletonBalanceCard } from '../components/Skeleton'
@@ -100,10 +101,29 @@ export default function TradingAccess() {
     if (!user) return
 
     loadBalances()
+
+    // Subscribe to real-time changes in balances
+    const balanceSubscription = supabase
+      .channel('trading_balance_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'balances',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Balance changed in Trading:', payload)
+          // Reload balances when any change occurs
+          loadBalances()
+        }
+      )
+      .subscribe()
     
     // Cleanup
     return () => {
-      // Cancel any pending requests
+      balanceSubscription.unsubscribe()
     }
   }, [user?.id]) // Only depend on user.id
 
