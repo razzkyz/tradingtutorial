@@ -16,6 +16,7 @@ interface Customer {
   total_balance: number
   trading_status: string
   created_at: string
+  avatar_url: string | null
 }
 
 export default function ManageCustomers() {
@@ -38,11 +39,13 @@ export default function ManageCustomers() {
   const [usdtRate, setUsdtRate] = useState(1)
   const [fetchingRate, setFetchingRate] = useState(false)
   const [updating, setUpdating] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [editForm, setEditForm] = useState({
     full_name: '',
     phone_number: '',
     country: '',
-    investment_amount: '0'
+    investment_amount: '0',
+    avatar_url: null as string | null
   })
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null)
 
@@ -133,6 +136,7 @@ export default function ManageCustomers() {
             total_balance: totalBalance,
             trading_status: tradingStatus,
             created_at: profile.created_at,
+            avatar_url: profile.avatar_url,
           }
         })
       )
@@ -205,7 +209,8 @@ export default function ManageCustomers() {
       full_name: customer.full_name,
       phone_number: customer.phone_number || '',
       country: customer.country || '',
-      investment_amount: customer.investment_amount.toString()
+      investment_amount: customer.investment_amount.toString(),
+      avatar_url: customer.avatar_url || null
     })
     setShowEditModal(true)
   }
@@ -267,6 +272,82 @@ export default function ManageCustomers() {
     }
   }
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selectedCustomer || !e.target.files || e.target.files.length === 0) return
+
+    const file = e.target.files[0]
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setToast({ message: 'Please select an image file', type: 'warning' })
+      return
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setToast({ message: 'Image size must be less than 2MB', type: 'warning' })
+      return
+    }
+
+    try {
+      setUploadingAvatar(true)
+
+      // Convert image to base64
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      
+      await new Promise<void>((resolve, reject) => {
+        reader.onload = async () => {
+          try {
+            // Delete old avatar if exists
+            if (editForm.avatar_url) {
+              const oldPath = editForm.avatar_url.split('/').pop()
+              if (oldPath) {
+                try {
+                  await supabase.storage.from('avatars').remove([`${selectedCustomer.user_id}/${oldPath}`])
+                } catch (err) {
+                  console.log('Old avatar not found or already deleted')
+                }
+              }
+            }
+
+            // Upload new avatar with upsert option
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${Date.now()}.${fileExt}`
+            const filePath = `${selectedCustomer.user_id}/${fileName}`
+
+            const { error: uploadError } = await supabase.storage
+              .from('avatars')
+              .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: true
+              })
+
+            if (uploadError) throw uploadError
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+              .from('avatars')
+              .getPublicUrl(filePath)
+
+            // Update local state
+            setEditForm(prev => ({ ...prev, avatar_url: publicUrl }))
+            setToast({ message: 'Avatar uploaded successfully', type: 'success' })
+            resolve()
+          } catch (err) {
+            reject(err)
+          }
+        }
+        reader.onerror = reject
+      })
+    } catch (err) {
+      console.error('Error uploading avatar:', err)
+      setToast({ message: 'Failed to upload avatar. Please check storage permissions.', type: 'error' })
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
   const handleEditCustomer = async () => {
     if (!selectedCustomer) return
 
@@ -278,7 +359,8 @@ export default function ManageCustomers() {
           full_name: editForm.full_name,
           phone_number: editForm.phone_number || null,
           country: editForm.country || null,
-          investment_amount: parseFloat(editForm.investment_amount)
+          investment_amount: parseFloat(editForm.investment_amount),
+          avatar_url: editForm.avatar_url || null
         })
         .eq('user_id', selectedCustomer.user_id)
 
@@ -571,11 +653,55 @@ export default function ManageCustomers() {
 
         {/* Edit Customer Modal */}
         {showEditModal && selectedCustomer && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 sm:p-6">
-            <div className="bg-black/95 border-2 border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.6)] rounded-2xl max-w-md w-full p-5 sm:p-8 max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 overflow-y-auto">
+            <div className="bg-black/95 border-2 border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.6)] rounded-lg max-w-md w-full p-4 sm:p-6 my-8">
               <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 break-words">
                 Edit Customer: {selectedCustomer.full_name}
               </h3>
+
+              {/* Avatar Upload Section */}
+              <div className="flex justify-center mb-4">
+                <div className="relative group">
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-blue-500/50 transition-all duration-300 group-hover:border-blue-400">
+                    {editForm.avatar_url ? (
+                      <img
+                        src={editForm.avatar_url}
+                        alt={editForm.full_name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-600 to-cyan-700 flex items-center justify-center">
+                        <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                    
+                    {/* Upload Overlay */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                      {uploadingAvatar ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                      ) : (
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Hidden File Input */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    disabled={uploadingAvatar || updating}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                    title="Upload Avatar"
+                  />
+                </div>
+              </div>
+              <p className="text-center text-gray-400 text-xs mb-4">Click avatar to change photo</p>
 
               <div className="space-y-3 sm:space-y-4">
                 <div>

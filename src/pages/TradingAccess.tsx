@@ -318,71 +318,68 @@ export default function TradingAccess() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Balance Card Section */}
-      <div className="px-4 py-6 flex items-center">
+      {/* Balance Section - No Card, Direct on Background */}
+      <div className="px-4 py-6">
         <div className="w-full max-w-2xl mx-auto">
-          {/* Main Card Container */}
-          <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] p-4 md:p-8 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
-            
-            {/* Icon & Total Balance - Top Right */}
-            <div className="mb-5">
-              <div className="flex justify-end">
-                {loading ? (
-                  <div className="flex flex-col items-end">
-                    <div className="w-14 h-14 md:w-24 md:h-24 bg-text-muted/20 rounded-2xl animate-pulse mb-2"></div>
-                    <div className="h-7 w-32 bg-text-muted/20 rounded animate-pulse"></div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-end">
-                    {/* Wallet Icon */}
-                    <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-3 md:p-5 rounded-lg mb-2">
-                      <Wallet className="w-8 h-8 md:w-12 md:h-12 text-white" strokeWidth={2} />
-                    </div>
-                    {/* Total Balance */}
-                    <h2 className="text-xl md:text-3xl font-bold text-white">
-                      {totalBalance.toFixed(0).replace(/,/g, '')} <span className="text-cyan-400">USDT</span>
-                    </h2>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Balance Cards Grid */}
-            <div className="grid grid-cols-2 gap-2 md:gap-4 mb-4">
+          
+          {/* Icon & Total Balance - Top Right */}
+          <div className="mb-5">
+            <div className="flex justify-end">
               {loading ? (
-                <>
-                  <SkeletonBalanceCard />
-                  <SkeletonBalanceCard />
-                  <SkeletonBalanceCard />
-                  <SkeletonBalanceCard />
-                </>
+                <div className="flex flex-col items-end">
+                  <div className="w-14 h-14 md:w-24 md:h-24 bg-text-muted/20 rounded-2xl animate-pulse mb-2"></div>
+                  <div className="h-7 w-32 bg-text-muted/20 rounded animate-pulse"></div>
+                </div>
               ) : (
-                balances.map((balance, index) => (
-                  <div
-                    key={balance.id}
-                    className="bg-black/95 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)] rounded-lg p-2.5 md:p-4 animate-scale-in hover:shadow-[0_0_18px_rgba(6,182,212,0.35)] hover:border-cyan-400/50 transition-all duration-300"
-                    style={{ animationDelay: `${0.1 * index}s` }}
-                  >
-                    <p className="text-cyan-300 text-xs font-medium mb-0.5">
-                      Balance {index + 1}
-                    </p>
-                    <p className="text-white text-sm md:text-lg font-bold">
-                      {balance.amount.toLocaleString('en-US', { minimumFractionDigits: 0 })} <span className="text-cyan-400 font-normal text-xs md:text-sm">USDT</span>
-                    </p>
+                <div className="flex flex-col items-end">
+                  {/* Wallet Icon */}
+                  <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-3 md:p-5 rounded-lg mb-2">
+                    <Wallet className="w-8 h-8 md:w-12 md:h-12 text-white" strokeWidth={2} />
                   </div>
-                ))
+                  {/* Total Balance */}
+                  <h2 className="text-xl md:text-3xl font-bold text-white">
+                    {totalBalance.toFixed(0).replace(/,/g, '')} <span className="text-cyan-400">USDT</span>
+                  </h2>
+                </div>
               )}
             </div>
-
-            {/* Trading Access Button */}
-            <button
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-cyan-600 via-teal-600 to-cyan-600 hover:from-cyan-500 hover:via-teal-500 hover:to-cyan-500 text-white font-bold text-lg py-4 px-6 rounded-lg transition-all shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
-            >
-              Trading Access
-            </button>
-
           </div>
+
+          {/* Balance Cards Grid */}
+          <div className="grid grid-cols-2 gap-2 md:gap-4 mb-4">
+            {loading ? (
+              <>
+                <SkeletonBalanceCard />
+                <SkeletonBalanceCard />
+                <SkeletonBalanceCard />
+                <SkeletonBalanceCard />
+              </>
+            ) : (
+              balances.map((balance, index) => (
+                <div
+                  key={balance.id}
+                  className="bg-black/95 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)] rounded-lg p-2.5 md:p-4 animate-scale-in hover:shadow-[0_0_18px_rgba(6,182,212,0.35)] hover:border-cyan-400/50 transition-all duration-300"
+                  style={{ animationDelay: `${0.1 * index}s` }}
+                >
+                  <p className="text-cyan-300 text-xs font-medium mb-0.5">
+                    Balance {index + 1}
+                  </p>
+                  <p className="text-white text-sm md:text-lg font-bold">
+                    {balance.amount.toLocaleString('en-US', { minimumFractionDigits: 0 })} <span className="text-cyan-400 font-normal text-xs md:text-sm">USDT</span>
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Trading Access Button */}
+          <button
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-cyan-600 via-teal-600 to-cyan-600 hover:from-cyan-500 hover:via-teal-500 hover:to-cyan-500 text-white font-bold text-lg py-4 px-6 rounded-lg transition-all shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
+          >
+            Trading Access
+          </button>
+
         </div>
       </div>
 
