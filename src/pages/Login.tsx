@@ -1,7 +1,7 @@
 import { useState, FormEvent, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
-import { TrendingUp, Mail, Lock, LogIn } from 'lucide-react'
+import { TrendingUp, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -9,6 +9,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [checkingAuth, setCheckingAuth] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
 
   // Check if user is already logged in
@@ -237,14 +238,26 @@ export default function Login() {
                       </div>
                       <input
                         id="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="input-field pl-12"
+                        className="input-field pl-12 pr-12"
                         placeholder="Enter your password"
                         required
                         disabled={loading}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-text-muted hover:text-cyan-400 transition-colors"
+                        disabled={loading}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
                     </div>
                   </div>
 

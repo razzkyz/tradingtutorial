@@ -93,7 +93,7 @@ export default function Header() {
             {/* Logo - Single Image (banner.jpeg contains logo + text) */}
             <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="flex items-center hover:scale-105 transition-transform duration-300">
               <img 
-                src="/images/banner.png" 
+                src="/images/fixs.png" 
                 alt="Strategic Crypto Investment" 
                 className="h-12 sm:h-14 md:h-16 lg:h-18 w-auto object-contain"
                 loading="eager"
