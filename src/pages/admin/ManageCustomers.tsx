@@ -521,7 +521,7 @@ export default function ManageCustomers() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <p className="text-white font-bold text-lg">
-                          USDT {customer.total_balance.toFixed(2)}
+                          USDT {customer.total_balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -826,7 +826,7 @@ export default function ManageCustomers() {
               </p>
               <ul className="text-text-secondary text-xs sm:text-sm mb-3 sm:mb-6 space-y-1 list-disc list-inside">
                 <li>User account and profile</li>
-                <li>All balances (USDT {selectedCustomer.total_balance.toFixed(2)})</li>
+                <li>All balances (USDT {selectedCustomer.total_balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</li>
                 <li>Trading access records</li>
                 <li>Withdrawal history</li>
               </ul>

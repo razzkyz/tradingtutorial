@@ -424,7 +424,7 @@ export default function Dashboard() {
                     <div className="space-y-0.5">
                       {Object.entries(totalsByCurrency).map(([currency, total]) => (
                         <p key={currency} className="text-white text-xs sm:text-base font-bold leading-tight">
-                          {total.toFixed(0)} {currency}
+                          {total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} {currency}
                         </p>
                       ))}
                     </div>
@@ -449,7 +449,7 @@ export default function Dashboard() {
                   {groupedBalances['balance_1'] ? (
                     Object.entries(groupedBalances['balance_1']).map(([currency, amount]) => (
                       <p key={currency} className="text-white text-base sm:text-xl font-bold">
-                        {amount.toFixed(0)} {currency}
+                        {amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} {currency}
                       </p>
                     ))
                   ) : (
@@ -469,7 +469,7 @@ export default function Dashboard() {
                   {groupedBalances['balance_2'] ? (
                     Object.entries(groupedBalances['balance_2']).map(([currency, amount]) => (
                       <p key={currency} className="text-white text-base sm:text-xl font-bold">
-                        {amount.toFixed(0)} {currency}
+                        {amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} {currency}
                       </p>
                     ))
                   ) : (

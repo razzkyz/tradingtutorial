@@ -147,7 +147,7 @@ export default function Withdrawal() {
   const handleWithdrawAll = () => {
     setFormData(prev => ({
       ...prev,
-      amount: `${availableBalance.toFixed(2)} USDT`
+      amount: `${availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT`
     }))
     setFormErrors(prev => ({ ...prev, amount: '' }))
   }
