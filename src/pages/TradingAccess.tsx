@@ -334,7 +334,7 @@ export default function TradingAccess() {
                 <div className="flex flex-col items-end">
                   {/* Wallet Icon */}
                   <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-3 md:p-5 rounded-lg mb-2">
-                    <Wallet className="w-8 h-8 md:w-12 md:h-12 text-white" strokeWidth={2} />
+                    <Wallet className="w-12 h-12 md:w-16 md:h-16 text-white" strokeWidth={2} />
                   </div>
                   {/* Total Balance */}
                   <h2 className="text-xl md:text-3xl font-bold text-white">
