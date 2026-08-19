@@ -285,10 +285,10 @@ export default function AdminWithdrawals() {
             <div className="col-span-2 text-gray-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
               <Wallet className="w-3.5 h-3.5" /> Amount
             </div>
-            <div className="col-span-3 text-gray-400 text-xs font-semibold uppercase tracking-wider">
+            <div className="col-span-4 text-gray-400 text-xs font-semibold uppercase tracking-wider">
               Wallet Address
             </div>
-            <div className="col-span-1 text-gray-400 text-xs font-semibold uppercase tracking-wider">
+            <div className="hidden">
               Network
             </div>
             <div className="col-span-1 text-gray-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
@@ -331,14 +331,14 @@ export default function AdminWithdrawals() {
                   </div>
 
                   {/* Wallet Address */}
-                  <div className="col-span-3 flex items-center min-w-0">
+                  <div className="col-span-4 flex items-center min-w-0">
                     <span className="text-gray-300 font-mono text-xs truncate bg-gray-900 px-2 py-1 rounded-md border border-gray-800 block w-full">
                       {w.wallet_address}
                     </span>
                   </div>
 
-                  {/* Network */}
-                  <div className="col-span-1 flex items-center">
+                  {/* Network - Hidden */}
+                  <div className="hidden">
                     <span className="text-xs font-semibold text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-md border border-cyan-400/20">
                       {w.network}
                     </span>
