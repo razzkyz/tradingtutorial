@@ -11,8 +11,8 @@ export const withdrawalSchema = z.object({
     .max(500, 'Wallet address is too long'),
   network: z
     .string()
-    .optional()
-    .default('TRC20'),
+    .min(1, 'Network is required')
+    .max(50, 'Network name is too long'),
 })
 
 export type WithdrawalInput = z.infer<typeof withdrawalSchema>

@@ -28,7 +28,7 @@ export default function Withdrawal() {
   const [formData, setFormData] = useState({
     amount: '',
     wallet_address: '',
-    network: 'TRC20',
+    network: '',
   })
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
@@ -209,7 +209,7 @@ export default function Withdrawal() {
       setSuccess(true)
       setShowForm(false)
       setShowFinalConfirmModal(false)
-      setFormData({ amount: '', wallet_address: '', network: 'TRC20' })
+      setFormData({ amount: '', wallet_address: '', network: '' })
       setAvailableBalance(prev => prev - parsedData.amount)
       
       setTimeout(() => setSuccess(false), 5000)
@@ -318,7 +318,7 @@ export default function Withdrawal() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-white tracking-wide">PROFIT WITHDRAWAL</h1>
-                  <p className="text-gray-400 text-sm mt-1">Adress Network Only</p>
+                  <p className="text-gray-400 text-sm mt-1">Enter your network address</p>
                 </div>
               </div>
 
@@ -389,6 +389,33 @@ export default function Withdrawal() {
                   )}
                 </div>
 
+                {/* Network Input */}
+                <div className="space-y-3">
+                  <label htmlFor="network" className="block text-gray-300 font-medium">
+                    Network Address
+                  </label>
+                  <div className="relative group">
+                    <input
+                      id="network"
+                      name="network"
+                      type="text"
+                      value={formData.network}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-4 bg-black/50 border border-gray-700 rounded-xl text-white font-semibold placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all group-hover:border-gray-600 uppercase"
+                      placeholder="e.g., TRC20, BEP20, ERC20"
+                      required
+                      disabled={submitting}
+                    />
+                  </div>
+                  <p className="text-gray-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    Enter the blockchain network for your wallet address
+                  </p>
+                  {formErrors.network && (
+                    <p className="text-red-400 text-sm flex items-center gap-1"><AlertCircle className="w-4 h-4" />{formErrors.network}</p>
+                  )}
+                </div>
+
                
 
                 <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
@@ -396,7 +423,7 @@ export default function Withdrawal() {
                     type="button"
                     onClick={() => {
                       setShowForm(false)
-                      setFormData({ amount: '', wallet_address: '', network: 'TRC20' })
+                      setFormData({ amount: '', wallet_address: '', network: '' })
                       setFormErrors({})
                       setError('')
                     }}
@@ -530,7 +557,7 @@ export default function Withdrawal() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Network</span>
-                  <span className="text-white font-semibold bg-gray-800 px-3 py-1 rounded-md">TRC20 (TRON)</span>
+                  <span className="text-white font-semibold bg-gray-800 px-3 py-1 rounded-md uppercase">{formData.network || 'Not specified'}</span>
                 </div>
                 <div className="pt-2">
                   <p className="text-gray-400 text-sm mb-2">Destination Wallet:</p>
