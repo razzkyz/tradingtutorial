@@ -8,7 +8,8 @@ import { withdrawalSchema } from '../schemas/withdrawalSchema'
 
 import LoadingState from '../components/LoadingState'
 import ErrorState from '../components/ErrorState'
-import { Wallet, AlertCircle, CheckCircle2, ShieldCheck, Activity } from 'lucide-react'
+import { Wallet, AlertCircle, CheckCircle2, Activity, Lock } from 'lucide-react'
+import Footer from '../components/Footer'
 
 export default function Withdrawal() {
   const { user } = useAuth()
@@ -16,16 +17,17 @@ export default function Withdrawal() {
   const [showForm, setShowForm] = useState(false)
   const [showInitialConfirmModal, setShowInitialConfirmModal] = useState(false)
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false)
+  const [showLockedModal, setShowLockedModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [availableBalance, setAvailableBalance] = useState(0)
+  const [withdrawalAccess, setWithdrawalAccess] = useState(false)
 
   const [formData, setFormData] = useState({
     amount: '',
     wallet_address: '',
-    network: 'TRC20',
   })
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
@@ -53,8 +55,31 @@ export default function Withdrawal() {
       )
       .subscribe()
 
+    // Subscribe to real-time changes in withdrawal_access
+    const profileSubscription = supabase
+      .channel('profile_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Profile changed:', payload)
+          // Update withdrawal access when it changes
+          const newProfile = payload.new as { withdrawal_access?: boolean }
+          if ('withdrawal_access' in newProfile) {
+            setWithdrawalAccess(newProfile.withdrawal_access ?? false)
+          }
+        }
+      )
+      .subscribe()
+
     return () => {
       balanceSubscription.unsubscribe()
+      profileSubscription.unsubscribe()
     }
   }, [user?.id])
 
@@ -63,9 +88,24 @@ export default function Withdrawal() {
     try {
       setLoading(true)
       setError('')
+      
+      // Load balance
       const balances = await getBalances(user.id)
       const total = calculateTotalBalance(balances)
       setAvailableBalance(total)
+      
+      // Load withdrawal access status
+      const { data: profile, error: profileError } = await (supabase
+        .from('profiles')
+        .select('withdrawal_access')
+        .eq('user_id', user.id)
+        .single() as any)
+      
+      if (profileError) {
+        console.error('Error loading withdrawal access:', profileError)
+      } else {
+        setWithdrawalAccess((profile as any)?.withdrawal_access ?? false)
+      }
     } catch (err) {
       console.error('Error loading data:', err)
       setError('Failed to load data')
@@ -81,6 +121,10 @@ export default function Withdrawal() {
   }
 
   const handleWithdrawClick = () => {
+    if (!withdrawalAccess) {
+      setShowLockedModal(true)
+      return
+    }
     setShowInitialConfirmModal(true)
   }
 
@@ -97,14 +141,6 @@ export default function Withdrawal() {
     setFormErrors(prev => ({ ...prev, amount: '' }))
   }
 
-  const handleUseDemoWallet = () => {
-    setFormData(prev => ({
-      ...prev,
-      wallet_address: 'TRXDEMO0001'
-    }))
-    setFormErrors(prev => ({ ...prev, wallet_address: '' }))
-  }
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!user) return
@@ -116,7 +152,6 @@ export default function Withdrawal() {
       const parsedData = withdrawalSchema.parse({
         amount: parseFloat(formData.amount),
         wallet_address: formData.wallet_address,
-        network: formData.network,
       })
 
       if (parsedData.amount > availableBalance) {
@@ -148,7 +183,6 @@ export default function Withdrawal() {
       const parsedData = withdrawalSchema.parse({
         amount: parseFloat(formData.amount),
         wallet_address: formData.wallet_address,
-        network: formData.network,
       })
 
       await createWithdrawal(user.id, parsedData)
@@ -156,7 +190,7 @@ export default function Withdrawal() {
       setSuccess(true)
       setShowForm(false)
       setShowFinalConfirmModal(false)
-      setFormData({ amount: '', wallet_address: '', network: 'TRC20' })
+      setFormData({ amount: '', wallet_address: '' })
       setAvailableBalance(prev => prev - parsedData.amount)
       
       setTimeout(() => setSuccess(false), 5000)
@@ -172,8 +206,9 @@ export default function Withdrawal() {
   if (error && !showForm) return <ErrorState message={error} />
 
   return (
-    <div className="min-h-[calc(100vh-64px)] px-4 py-4 bg-black">
-      <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
+    <div className="min-h-screen flex flex-col bg-black">
+      <div className="flex-1 px-4 py-4">
+        <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
         
         {/* Form and History Container */}
         <div className="w-full max-w-md">
@@ -249,6 +284,7 @@ export default function Withdrawal() {
                   disabled={availableBalance <= 0}
                   className="w-full max-w-md mx-auto flex items-center justify-center bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 hover:from-cyan-500 hover:via-teal-400 hover:to-cyan-500 text-white font-bold text-xl py-5 px-8 rounded-xl transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] hover:scale-105 uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100"
                 >
+                  {!withdrawalAccess && <Lock className="w-5 h-5 mr-2" />}
                   Withdraw
                 </button>
 
@@ -282,13 +318,10 @@ export default function Withdrawal() {
                       Withdrawal Amount
                     </label>
                     <span className="text-sm text-gray-400">
-                      Available: <span className="text-cyan-400 font-semibold">USDT {availableBalance.toFixed(2)}</span>
+                      Available: <span className="text-cyan-400 font-semibold">USDT/BTC/USD </span>
                     </span>
                   </div>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <span className="text-gray-500 font-bold">USDT</span>
-                    </div>
                     <input
                       id="amount"
                       name="amount"
@@ -296,8 +329,8 @@ export default function Withdrawal() {
                       step="0.01"
                       value={formData.amount}
                       onChange={handleInputChange}
-                      className="w-full pl-16 pr-28 py-4 bg-black/50 border border-gray-700 rounded-xl text-white font-bold text-lg placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all group-hover:border-gray-600"
-                      placeholder="0.00"
+                      placeholder="Enter Amount"
+                      className="w-full pl-4 pr-28 py-4 bg-black/50 border border-gray-700 rounded-xl text-white font-bold text-lg placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all group-hover:border-gray-600"
                       required
                       disabled={submitting}
                     />
@@ -318,7 +351,7 @@ export default function Withdrawal() {
                 {/* Wallet Input */}
                 <div className="space-y-3">
                   <label htmlFor="wallet_address" className="block text-gray-300 font-medium">
-                    Destination Address (TRC20)
+                    Destination Address
                   </label>
                   <div className="relative group">
                     <input
@@ -327,41 +360,25 @@ export default function Withdrawal() {
                       type="text"
                       value={formData.wallet_address}
                       onChange={handleInputChange}
-                      className="w-full px-4 pr-36 py-4 bg-black/50 border border-gray-700 rounded-xl text-white font-mono placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all group-hover:border-gray-600"
-                      placeholder="Enter TRC20 wallet address"
+                      className="w-full px-4 py-4 bg-black/50 border border-gray-700 rounded-xl text-white font-mono placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all group-hover:border-gray-600"
+                      placeholder="Enter wallet address"
                       required
                       disabled={submitting}
                     />
-                    <button
-                      type="button"
-                      onClick={handleUseDemoWallet}
-                      disabled={submitting}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-bold rounded-lg transition-all disabled:opacity-50 flex items-center gap-2"
-                    >
-                      <ShieldCheck className="w-4 h-4" /> Use Demo
-                    </button>
                   </div>
                   {formErrors.wallet_address && (
                     <p className="text-red-400 text-sm flex items-center gap-1"><AlertCircle className="w-4 h-4" />{formErrors.wallet_address}</p>
                   )}
                 </div>
 
-                <div className="p-4 bg-cyan-900/20 border border-cyan-800/50 rounded-xl flex items-start gap-3">
-                  <ShieldCheck className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-white font-semibold mb-1">Network Security</p>
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      Please ensure your destination wallet supports the <strong>TRON (TRC20)</strong> network. Sending funds to an unsupported network will result in permanent loss.
-                    </p>
-                  </div>
-                </div>
+               
 
                 <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
                   <button
                     type="button"
                     onClick={() => {
                       setShowForm(false)
-                      setFormData({ amount: '', wallet_address: '', network: 'TRC20' })
+                      setFormData({ amount: '', wallet_address: '' })
                       setFormErrors({})
                       setError('')
                     }}
@@ -410,58 +427,45 @@ export default function Withdrawal() {
         )}
         </div> {/* Close Form and History Container */}
 
-        {/* How to Withdraw Section */}
-        {!showForm && (
-          <div className="w-full mt-12 md:mt-16 animate-fade-in">
-            <h2 className="text-white font-bold text-xl md:text-2xl mb-8 tracking-wider text-center md:text-left">HOW TO WITHDRAW</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-              {/* Step 1 */}
-              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 md:p-8 hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 transform hover:-translate-y-1">
-                <div className="mb-3">
-                  <span className="inline-block px-3 py-1 bg-cyan-500/10 text-cyan-400 font-bold text-xs md:text-sm rounded-full mb-3">STEP 1</span>
-                  <h3 className="text-white font-bold text-lg md:text-xl">Click Withdraw</h3>
+        {/* Important Notes */}
+        <div className="mt-8 bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-600/30 rounded-2xl p-6 md:p-8 hover:border-yellow-500/40 transition-colors">
+          <h4 className="text-yellow-400 font-bold text-base md:text-lg mb-4 flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" />
+            IMPORTANT NOTES
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-gray-300 text-sm md:text-base leading-relaxed">
+            <div className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2"></div><p>If you need help, please contact the admin.</p></div>
+          </div>
+        </div>
+
+        {/* Withdrawal Locked Modal */}
+        {showLockedModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-black/95 border-2 border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.6)] rounded-2xl max-w-md w-full p-6 animate-scale-in">
+              {/* Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-4 rounded-full">
+                  <Lock className="w-12 h-12 text-white" />
                 </div>
-                <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                  Click the "Withdraw" button above to start the withdrawal process.
-                </p>
               </div>
 
-              {/* Step 2 */}
-              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 md:p-8 hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 transform hover:-translate-y-1">
-                <div className="mb-3">
-                  <span className="inline-block px-3 py-1 bg-cyan-500/10 text-cyan-400 font-bold text-xs md:text-sm rounded-full mb-3">STEP 2</span>
-                  <h3 className="text-white font-bold text-lg md:text-xl">Enter Details</h3>
-                </div>
-                <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                  Fill in the amount (USDT) and your TRC20 wallet address.
-                </p>
-              </div>
+              {/* Title */}
+              <h3 className="text-2xl font-bold text-white text-center mb-3">
+                Withdrawal not available
+              </h3>
 
-              {/* Step 3 */}
-              <div className="bg-black/60 backdrop-blur-sm border border-cyan-500/20 rounded-xl p-5 md:p-8 hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 transform hover:-translate-y-1">
-                <div className="mb-3">
-                  <span className="inline-block px-3 py-1 bg-cyan-500/10 text-cyan-400 font-bold text-xs md:text-sm rounded-full mb-3">STEP 3</span>
-                  <h3 className="text-white font-bold text-lg md:text-xl">Wait Process</h3>
-                </div>
-                <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                  Confirm your withdrawal. Processing time: 5-10 minutes.
-                </p>
-              </div>
-            </div>
+              {/* Message */}
+              <p className="text-cyan-100 text-center text-lg mb-6">
+               <span className="font-bold text-cyan-400"></span> We apologize, withdrawals can only be made in accordance with the designated schedule.
+              </p>
 
-            {/* Important Notes */}
-            <div className="mt-8 bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-600/30 rounded-2xl p-6 md:p-8 hover:border-yellow-500/40 transition-colors">
-              <h4 className="text-yellow-400 font-bold text-base md:text-lg mb-4 flex items-center gap-2">
-                <AlertCircle className="w-5 h-5" />
-                IMPORTANT NOTES
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-gray-300 text-sm md:text-base leading-relaxed">
-                <div className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2"></div><p>Only TRC20 network is supported</p></div>
-                <div className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2"></div><p>Double-check your wallet address before confirming</p></div>
-                <div className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2"></div><p>Minimum withdrawal: 10 USDT</p></div>
-                <div className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2"></div><p>Contact support if withdrawal takes longer than expected</p></div>
-              </div>
+              {/* OK Button */}
+              <button
+                onClick={() => setShowLockedModal(false)}
+                className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold text-lg py-3 px-6 rounded-lg transition-all shadow-[0_0_25px_rgba(239,68,68,0.5)] hover:shadow-[0_0_40px_rgba(239,68,68,0.7)] uppercase"
+              >
+                OK
+              </button>
             </div>
           </div>
         )}
@@ -471,7 +475,7 @@ export default function Withdrawal() {
           <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
             <div className="bg-gray-900 border border-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-8 animate-scale-in">
               <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center mb-6 mx-auto">
-                <ShieldCheck className="w-8 h-8 text-cyan-400" />
+                <Wallet className="w-8 h-8 text-cyan-400" />
               </div>
               <h3 className="text-2xl font-bold text-white text-center mb-4">Secure Withdrawal</h3>
               <p className="text-gray-400 text-center mb-8">
@@ -541,7 +545,10 @@ export default function Withdrawal() {
             </div>
           </div>
         )}
-      </div>
+        </div> {/* Close w-full max-w-5xl mx-auto */}
+      </div> {/* Close flex-1 */}
+      
+      <Footer />
     </div>
   )
 }

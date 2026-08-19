@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
-import { ArrowLeft, Search, CheckCircle, XCircle, DollarSign, Edit, Trash2, Power } from 'lucide-react'
+import { ArrowLeft, Search, CheckCircle, XCircle, DollarSign, Edit, Trash2, Power, Lock, Unlock } from 'lucide-react'
 import LoadingState from '../../components/LoadingState'
 import Toast from '../../components/Toast'
 
@@ -17,6 +17,7 @@ interface Customer {
   trading_status: string
   created_at: string
   avatar_url: string | null
+  withdrawal_access: boolean
 }
 
 export default function ManageCustomers() {
@@ -137,6 +138,7 @@ export default function ManageCustomers() {
             trading_status: tradingStatus,
             created_at: profile.created_at,
             avatar_url: profile.avatar_url,
+            withdrawal_access: profile.withdrawal_access ?? false,
           }
         })
       )
@@ -165,6 +167,32 @@ export default function ManageCustomers() {
     } catch (error) {
       console.error('Error toggling trading status:', error)
       setToast({ message: 'Failed to update trading status', type: 'error' })
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const toggleWithdrawalAccess = async (customer: Customer) => {
+    setUpdating(true)
+    try {
+      const newAccess = !customer.withdrawal_access
+
+      const result = await (supabase
+        .from('profiles') as any)
+        .update({ withdrawal_access: newAccess })
+        .eq('user_id', customer.user_id)
+
+      if (result.error) throw result.error
+
+      // Reload customers
+      await loadCustomers()
+      setToast({ 
+        message: `Withdrawal access ${newAccess ? 'enabled' : 'disabled'} for ${customer.full_name}`, 
+        type: 'success' 
+      })
+    } catch (error) {
+      console.error('Error toggling withdrawal access:', error)
+      setToast({ message: 'Failed to update withdrawal access', type: 'error' })
     } finally {
       setUpdating(false)
     }
@@ -526,6 +554,18 @@ export default function ManageCustomers() {
                           >
                             <Power className="w-3.5 h-3.5" />
                             {customer.trading_status === 'active' ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => toggleWithdrawalAccess(customer)}
+                            disabled={updating}
+                            className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${
+                              customer.withdrawal_access
+                                ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30'
+                                : 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30'
+                            }`}
+                            title={customer.withdrawal_access ? 'Disable Withdrawal' : 'Enable Withdrawal'}
+                          >
+                            {customer.withdrawal_access ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                           </button>
                           <button
                             onClick={() => openBalanceModal(customer)}

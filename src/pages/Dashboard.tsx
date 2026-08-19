@@ -424,7 +424,7 @@ export default function Dashboard() {
                     <div className="space-y-0.5">
                       {Object.entries(totalsByCurrency).map(([currency, total]) => (
                         <p key={currency} className="text-white text-xs sm:text-base font-bold leading-tight">
-                          {currency} {total.toFixed(0)}
+                          {total.toFixed(0)} {currency}
                         </p>
                       ))}
                     </div>
@@ -449,11 +449,11 @@ export default function Dashboard() {
                   {groupedBalances['balance_1'] ? (
                     Object.entries(groupedBalances['balance_1']).map(([currency, amount]) => (
                       <p key={currency} className="text-white text-base sm:text-xl font-bold">
-                        {currency} {amount.toFixed(0)}
+                        {amount.toFixed(0)} {currency}
                       </p>
                     ))
                   ) : (
-                    <p className="text-white text-base sm:text-xl font-bold">USDT 0</p>
+                    <p className="text-white text-base sm:text-xl font-bold">0 USDT</p>
                   )}
                 </div>
               )}
@@ -469,11 +469,11 @@ export default function Dashboard() {
                   {groupedBalances['balance_2'] ? (
                     Object.entries(groupedBalances['balance_2']).map(([currency, amount]) => (
                       <p key={currency} className="text-white text-base sm:text-xl font-bold">
-                        {currency} {amount.toFixed(0)}
+                        {amount.toFixed(0)} {currency}
                       </p>
                     ))
                   ) : (
-                    <p className="text-white text-base sm:text-xl font-bold">USDT...</p>
+                    <p className="text-white text-base sm:text-xl font-bold">0 USDT</p>
                   )}
                 </div>
               )}
@@ -539,7 +539,7 @@ export default function Dashboard() {
             {hasApiKeys && (
               <button
                 ref={buttonRef}
-                className="absolute z-20 bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg shadow-[0_0_20px_rgba(234,179,8,0.6)] transition-colors text-sm sm:text-base select-none touch-none"
+                className="absolute z-20 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold px-4 py-2 rounded-lg shadow-[0_0_20px_rgba(6,182,212,0.6)] transition-all hover:scale-105 text-sm sm:text-base select-none touch-none"
                 style={{ 
                   left: 0,
                   top: 0,
@@ -572,14 +572,14 @@ export default function Dashboard() {
                   willChange: 'transform'
                 }}
               >
-                <div className="bg-gradient-to-br from-gray-900/98 to-gray-800/98 backdrop-blur-xl border border-yellow-500/40 shadow-[0_0_40px_rgba(234,179,8,0.3)] rounded-lg overflow-hidden">
+                <div className="bg-gradient-to-br from-gray-900/98 to-gray-800/98 backdrop-blur-xl border border-cyan-500/40 shadow-[0_0_40px_rgba(6,182,212,0.3)] rounded-lg overflow-hidden">
                   {/* Panel Header with Close Button - Draggable Handle */}
                   <div 
-                    className="bg-gradient-to-r from-yellow-600/20 to-yellow-500/20 px-3 py-2 border-b border-yellow-500/30 flex items-center justify-between cursor-grab active:cursor-grabbing select-none"
+                    className="bg-gradient-to-r from-cyan-600/20 to-blue-500/20 px-3 py-2 border-b border-cyan-500/30 flex items-center justify-between cursor-grab active:cursor-grabbing select-none"
                     onMouseDown={handleMouseDown}
                     onTouchStart={handleTouchStart}
                   >
-                    <h3 className="text-yellow-400 font-bold text-sm">Trade</h3>
+                    <h3 className="text-cyan-400 font-bold text-sm">Trade</h3>
                     <button
                       onClick={() => setShowTradePanel(false)}
                       className="text-gray-400 hover:text-white transition-colors"

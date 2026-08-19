@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { Wallet } from 'lucide-react'
 import LoadingState from '../components/LoadingState'
 import ErrorState from '../components/ErrorState'
+import Footer from '../components/Footer'
 
 interface ProfileData {
   full_name: string
@@ -89,9 +90,10 @@ export default function Profile() {
   if (!profile) return <ErrorState message="Profile not found" />
 
   return (
-    <div className="min-h-[calc(100vh-64px)] px-4 py-6 bg-black">
-      <div className="max-w-xl mx-auto">
-        <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] overflow-hidden p-6 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
+    <div className="min-h-screen flex flex-col bg-black">
+      <div className="flex-1 px-4 py-6">
+        <div className="max-w-xl mx-auto">
+          <div className="bg-black/95 backdrop-blur-sm rounded-lg border-2 border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)] overflow-hidden p-6 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] hover:border-cyan-400/70 transition-all duration-300">
           
           {/* Header */}
           <div className="mb-6">
@@ -167,6 +169,9 @@ export default function Profile() {
 
         </div>
       </div>
+    </div>
+      
+    <Footer />
     </div>
   )
 }

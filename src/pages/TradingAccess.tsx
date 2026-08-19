@@ -6,6 +6,7 @@ import { Wallet, TrendingUp, TrendingDown, Activity, Search, Star, X, Maximize2,
 import { SkeletonBalanceCard } from '../components/Skeleton'
 import { MarketSection } from '../components/market/MarketSection'
 import ErrorState from '../components/ErrorState'
+import Footer from '../components/Footer'
 
 interface Balance {
   id: string
@@ -727,6 +728,8 @@ export default function TradingAccess() {
           </div>
         </div>
       )}
+      
+      <Footer />
     </div>
   )
 }

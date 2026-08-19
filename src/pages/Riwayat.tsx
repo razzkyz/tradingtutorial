@@ -5,13 +5,13 @@ import LoadingState from '../components/LoadingState'
 import ErrorState from '../components/ErrorState'
 import { Clock, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import Footer from '../components/Footer'
 
 interface Transaction {
   id: string
   type: 'withdrawal'
   amount: number
   wallet_address: string
-  network: string
   status: 'processing' | 'completed' | 'failed'
   created_at: string
 }
@@ -87,7 +87,6 @@ export default function Riwayat() {
         type: 'withdrawal',
         amount: w.amount,
         wallet_address: w.wallet_address,
-        network: w.network,
         status: w.status === 'pending' ? 'processing' : w.status === 'approved' ? 'completed' : w.status === 'rejected' ? 'failed' : w.status,
         created_at: w.created_at
       }))
@@ -105,8 +104,9 @@ export default function Riwayat() {
   if (error) return <ErrorState message={error} />
 
   return (
-    <div className="min-h-[calc(100vh-64px)] px-4 py-8 bg-black">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen flex flex-col bg-black">
+      <div className="flex-1 px-4 py-8">
+        <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <button
@@ -194,21 +194,19 @@ export default function Riwayat() {
                 )}
 
                 {/* Transaction Details - Very Compact */}
-                <div className="grid grid-cols-2 gap-2 bg-gray-900/30 rounded p-2 border border-gray-800">
-                  <div>
-                    <p className="text-gray-500 text-[9px] mb-0.5 font-medium">Network</p>
-                    <p className="text-white font-medium text-[10px]">{tx.network}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-[9px] mb-0.5 font-medium">Destination Address</p>
-                    <p className="text-white font-mono text-[9px] break-all">{tx.wallet_address}</p>
-                  </div>
+                {/* Transaction Details - Only Destination Address */}
+                <div className="bg-gray-900/30 rounded p-2 border border-gray-800">
+                  <p className="text-gray-500 text-[9px] mb-0.5 font-medium">Destination Address</p>
+                  <p className="text-white font-mono text-[9px] break-all">{tx.wallet_address}</p>
                 </div>
               </div>
             ))}
           </div>
         )}
+        </div>
       </div>
+      
+      <Footer />
     </div>
   )
 }

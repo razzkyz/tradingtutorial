@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { Key, Save, Trash2, AlertCircle } from 'lucide-react'
 import Toast from '../components/Toast'
+import Footer from '../components/Footer'
 
 export default function Settings() {
   const { user } = useAuth()
@@ -123,23 +124,27 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+      <div className="min-h-screen flex flex-col bg-black">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+        </div>
+        <Footer />
       </div>
     )
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] px-4 py-6 bg-black">
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+    <div className="min-h-screen flex flex-col bg-black">
+      <div className="flex-1 px-4 py-6">
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
 
-      <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
         <p className="text-cyan-200 mb-8">Manage your Binance API keys for live trading</p>
 
@@ -275,7 +280,10 @@ export default function Settings() {
             </div>
           </div>
         </div>
+        </div>
       </div>
+      
+      <Footer />
     </div>
   )
 }

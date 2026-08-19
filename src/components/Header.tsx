@@ -89,14 +89,13 @@ export default function Header() {
     <>
       <header className="bg-gradient-to-r from-black via-gray-900 to-black backdrop-blur-xl border-b-2 border-emerald-500/20 shadow-[0_4px_30px_rgba(16,185,129,0.2)] sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 sm:h-18">
-            {/* Logo - Icon + Text "TRADING TUTORIALS" in Box Layout */}
-            <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="flex items-center gap-2 sm:gap-3 hover:scale-105 transition-transform duration-300 group">
-              {/* Logo Icon */}
+          <div className="flex justify-between items-center h-20 sm:h-22">
+            {/* Logo - Single Image (banner.jpeg contains logo + text) */}
+            <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="flex items-center hover:scale-105 transition-transform duration-300">
               <img 
-                src="/images/logo.png" 
-                alt="Trading Tutorials" 
-                className="h-8 sm:h-10 md:h-11 w-auto object-contain"
+                src="/images/banner.png" 
+                alt="Strategic Crypto Investment" 
+                className="h-12 sm:h-14 md:h-16 lg:h-18 w-auto object-contain"
                 loading="eager"
                 decoding="async"
                 onError={(e) => {
@@ -107,19 +106,16 @@ export default function Header() {
                   }
                 }}
               />
-              {/* Text "TRADING TUTORIALS" - Vertical Box Layout */}
-              <div className="flex flex-col leading-none">
-                <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-white tracking-wide uppercase">TRADING</span>
-                <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-emerald-400 tracking-wide uppercase -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
-              </div>
-              {/* Fallback: Icon + Text */}
-              <div className="hidden items-center gap-2" id="logo-fallback" style={{ display: 'none' }}>
+              {/* Fallback: Icon + Text (if header.png not found) */}
+              <div className="hidden items-center gap-3" id="logo-fallback" style={{ display: 'none' }}>
                 <div className="bg-gradient-to-br from-emerald-600 to-green-600 p-2.5 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.6)]">
-                  <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                  <TrendingUp className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <div className="flex flex-col leading-none">
-                  <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-white tracking-wide uppercase">TRADING</span>
-                  <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-emerald-400 tracking-wide uppercase -mt-0.5" style={{ color: '#10b981' }}>TUTORIALS</span>
+                <div className="flex flex-col leading-tight">
+                  <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white tracking-wide">
+                    Strategic <span className="uppercase">CRYPTO</span>
+                  </div>
+                  <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-emerald-400 tracking-wide uppercase -mt-1" style={{ color: '#10b981' }}>INVESTMENT</div>
                 </div>
               </div>
             </Link>
@@ -171,7 +167,7 @@ export default function Header() {
 
       {/* Mobile Sidebar - Navbar tetap visible */}
       <div
-        className={`lg:hidden fixed top-16 right-0 bottom-0 w-72 bg-gradient-to-b from-black via-gray-900 to-black backdrop-blur-xl border-l-2 border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.3)] z-40 transform transition-transform duration-300 ease-out ${
+        className={`lg:hidden fixed top-20 right-0 bottom-0 w-72 bg-gradient-to-b from-black via-gray-900 to-black backdrop-blur-xl border-l-2 border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.3)] z-40 transform transition-transform duration-300 ease-out ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -213,7 +209,7 @@ export default function Header() {
       {isMenuOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
-          style={{ top: '64px' }} // Start below navbar
+          style={{ top: '80px' }} // Start below navbar
           onClick={() => setIsMenuOpen(false)}
         />
       )}
