@@ -38,6 +38,7 @@ export default function TradingAccess() {
   const [selectedCoin, setSelectedCoin] = useState('BTCUSDT')
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
+  const [showAccessModal, setShowAccessModal] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(288)
@@ -374,6 +375,7 @@ export default function TradingAccess() {
 
           {/* Trading Access Button */}
           <button
+            onClick={() => setShowAccessModal(true)}
             disabled={loading}
             className="w-full bg-gradient-to-r from-cyan-600 via-teal-600 to-cyan-600 hover:from-cyan-500 hover:via-teal-500 hover:to-cyan-500 text-white font-bold text-lg py-4 px-6 rounded-lg transition-all shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
           >
@@ -691,6 +693,40 @@ export default function TradingAccess() {
           </div>
         )}
       </div>
+
+      {/* Trading Access Info Modal */}
+      {showAccessModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-black/95 border-2 border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.6)] rounded-2xl max-w-md w-full p-6 animate-scale-in">
+            {/* Icon */}
+            <div className="flex justify-center mb-4">
+              <div className="bg-gradient-to-br from-cyan-600 to-teal-600 p-4 rounded-full">
+                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-2xl font-bold text-white text-center mb-3">
+              Trading Access
+            </h3>
+
+            {/* Message */}
+            <p className="text-cyan-100 text-center text-lg mb-6">
+              This access is intended for our <span className="font-bold text-cyan-400">Trader Team</span>.
+            </p>
+
+            {/* OK Button */}
+            <button
+              onClick={() => setShowAccessModal(false)}
+              className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold text-lg py-3 px-6 rounded-lg transition-all shadow-[0_0_25px_rgba(239,68,68,0.5)] hover:shadow-[0_0_40px_rgba(239,68,68,0.7)] uppercase"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
