@@ -483,8 +483,8 @@ export default function Dashboard() {
           {/* Right Column - Trading Status with Elegant Glow */}
           <div className={`flex-1 border-2 rounded-lg px-4 flex flex-col items-center justify-center backdrop-blur-sm transition-all duration-300 ${
             isActive 
-              ? 'border-emerald-400/70 bg-black/95 shadow-[0_0_35px_rgba(16,185,129,0.5)] hover:shadow-[0_0_50px_rgba(16,185,129,0.7)]' 
-              : 'border-white/70 bg-black/95 shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:shadow-[0_0_35px_rgba(255,255,255,0.4)]'
+              ? 'border-emerald-500/70 bg-black/95 shadow-[0_0_35px_rgba(16,185,129,0.5)] hover:shadow-[0_0_50px_rgba(16,185,129,0.7)]' 
+              : 'border-red-500/70 bg-black/95 shadow-[0_0_35px_rgba(239,68,68,0.3)] hover:shadow-[0_0_50px_rgba(239,68,68,0.5)]'
           }`}>
             {loading ? (
               <>
@@ -492,16 +492,18 @@ export default function Dashboard() {
                 <div className="h-8 w-32 bg-gray-700/50 rounded animate-pulse"></div>
               </>
             ) : (
-              <>
-                <p className={`text-base sm:text-xl font-semibold mb-2 animate-text-blink ${
-                  isActive ? 'text-emerald-400' : 'text-red-500'
+              <div className="flex flex-col items-center">
+                <p className={`text-base sm:text-xl font-bold tracking-widest mb-1 ${
+                  isActive 
+                    ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,1)]' 
+                    : 'text-red-500 drop-shadow-[0_0_8px_rgba(248,113,113,1)]'
                 }`}>
-                  {isActive ? 'Active' : 'Inactive'}
+                  {isActive ? 'ACTIVE' : 'INACTIVE'}
                 </p>
-                <p className="text-xl sm:text-3xl font-bold uppercase text-white">
+                <p className="text-xl sm:text-3xl font-black uppercase tracking-widest text-white">
                   TRADING
                 </p>
-              </>
+              </div>
             )}
           </div>
         </div>
