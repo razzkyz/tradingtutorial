@@ -95,7 +95,7 @@ export default function Deposit() {
 
             {/* Header */}
             <div className="bg-gray-900/50 p-6 md:p-8 border-b border-gray-800 flex items-center gap-4 relative z-10">
-              <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/50">
+              <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/50 flex-shrink-0">
                 <Wallet className="w-6 h-6 text-cyan-400" />
               </div>
               <div>
