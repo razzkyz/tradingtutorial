@@ -111,16 +111,16 @@ export default function Login() {
         <div className="bg-gradient-to-b from-green-900/40 to-green-950/60 backdrop-blur-xl rounded-3xl border border-green-500/30 shadow-[0_0_80px_rgba(34,197,94,0.3)] overflow-hidden">
           
           {/* Header with Title and Logo */}
-          <div className="p-8 pb-6 text-center">
-            <p className="text-gray-300 text-base font-semibold tracking-widest uppercase mb-3">
+          <div className="p-4 pb-1 text-center">
+            <p className="text-gray-300 text-base font-semibold tracking-widest uppercase mb-1">
               WELCOME TO THE DASHBOARD
             </p>
-            <h1 className="text-white text-3xl font-bold tracking-wide mb-8">
+            <h1 className="text-white text-3xl font-bold tracking-wide mb-2">
               STRATEGIC CRYPTO INVESTMENT
             </h1>
             
             {/* Bull Logo with Arrow - Larger Size */}
-            <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center justify-center mb-1">
               <img 
                 src="/images/loginlogo.png" 
                 alt="Bull" 
@@ -152,7 +152,7 @@ export default function Login() {
           </div>
 
           {/* Form Section */}
-          <div className="px-8 pb-8 pt-2">
+          <div className="px-8 pb-8 pt-0">
             {error && (
               <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center space-x-2">
                 <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
