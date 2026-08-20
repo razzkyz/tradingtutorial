@@ -306,10 +306,10 @@ export default function AdminWithdrawals() {
           </span>
         </div>
 
-        {/* Table */}
-        <div className="bg-black/80 border border-gray-800 rounded-2xl overflow-hidden">
-          {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-900/60 border-b border-gray-800">
+        {/* Withdrawal List */}
+        <div className="space-y-3">
+          {/* Desktop Table Header - hidden on mobile */}
+          <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-900/60 border border-gray-800 rounded-xl">
             <div className="col-span-2 text-gray-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
               <User className="w-3.5 h-3.5" /> User
             </div>
@@ -333,9 +333,8 @@ export default function AdminWithdrawals() {
             </div>
           </div>
 
-          {/* Rows */}
           {filtered.length === 0 ? (
-            <div className="py-16 text-center">
+            <div className="py-16 text-center bg-black/80 border border-gray-800 rounded-2xl">
               <Wallet className="w-12 h-12 text-gray-700 mx-auto mb-4" />
               <p className="text-gray-500">No withdrawal transactions found</p>
             </div>
@@ -346,126 +345,179 @@ export default function AdminWithdrawals() {
               return (
                 <div
                   key={w.id}
-                  className={`grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-900 hover:bg-gray-900/30 transition-colors ${i % 2 === 0 ? '' : 'bg-gray-900/10'}`}
+                  className={`border border-gray-800 rounded-2xl overflow-hidden ${i % 2 === 0 ? 'bg-black/80' : 'bg-gray-900/20'}`}
                 >
-                  {/* User */}
-                  <div className="col-span-2 flex flex-col justify-center min-w-0">
-                    <p className="text-white font-semibold text-sm truncate">
-                      {w.profiles?.full_name || 'Unknown User'}
-                    </p>
-                    <p className="text-gray-500 text-xs truncate">{w.profiles?.email || w.user_id}</p>
-                  </div>
-
-                  {/* Amount */}
-                  <div className="col-span-1 flex flex-col justify-center">
-                    <p className="text-white font-bold text-base">
-                      {w.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-gray-500 text-xs">USDT</p>
-                  </div>
-
-                  {/* Wallet Address */}
-                  <div className="col-span-2 flex items-center min-w-0">
-                    <span className="text-gray-300 font-mono text-xs truncate bg-gray-900 px-2 py-1 rounded-md border border-gray-800 block w-full">
-                      {w.wallet_address}
-                    </span>
-                  </div>
-
-                  {/* Network */}
-                  <div className="col-span-1 flex items-center">
-                    <span className="text-xs font-semibold text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-md border border-cyan-400/20 uppercase">
-                      {w.network || 'N/A'}
-                    </span>
-                  </div>
-
-                  {/* Date */}
-                  <div className="col-span-1 flex flex-col justify-center">
-                    <p className="text-gray-400 text-xs">
-                      {new Date(w.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: '2-digit' })}
-                    </p>
-                    <p className="text-gray-600 text-xs">
-                      {new Date(w.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-
-                  {/* Admin Message */}
-                  <div className="col-span-3 flex flex-col justify-center min-w-0">
-                    {editingMessageId === w.id ? (
-                      <div className="flex flex-col gap-1">
-                        <textarea
-                          value={editMessageText}
-                          onChange={(e) => setEditMessageText(e.target.value)}
-                          className="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-white text-xs resize-none focus:outline-none focus:border-cyan-500"
-                          rows={2}
-                          placeholder="Enter admin message..."
-                        />
+                  {/* Desktop Row */}
+                  <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-900/30 transition-colors">
+                    {/* User */}
+                    <div className="col-span-2 flex flex-col justify-center min-w-0">
+                      <p className="text-white font-semibold text-sm truncate">
+                        {w.profiles?.full_name || 'Unknown User'}
+                      </p>
+                      <p className="text-gray-500 text-xs truncate">{w.profiles?.email || w.user_id}</p>
+                    </div>
+                    {/* Amount */}
+                    <div className="col-span-1 flex flex-col justify-center">
+                      <p className="text-white font-bold text-base">
+                        {w.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-gray-500 text-xs">USDT</p>
+                    </div>
+                    {/* Wallet */}
+                    <div className="col-span-2 flex items-center min-w-0">
+                      <span className="text-gray-300 font-mono text-xs truncate bg-gray-900 px-2 py-1 rounded-md border border-gray-800 block w-full">
+                        {w.wallet_address}
+                      </span>
+                    </div>
+                    {/* Network */}
+                    <div className="col-span-1 flex items-center">
+                      <span className="text-xs font-semibold text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-md border border-cyan-400/20 uppercase">
+                        {w.network || 'N/A'}
+                      </span>
+                    </div>
+                    {/* Date */}
+                    <div className="col-span-1 flex flex-col justify-center">
+                      <p className="text-gray-400 text-xs">
+                        {new Date(w.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: '2-digit' })}
+                      </p>
+                      <p className="text-gray-600 text-xs">
+                        {new Date(w.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    {/* Admin Message */}
+                    <div className="col-span-3 flex flex-col justify-center min-w-0">
+                      {editingMessageId === w.id ? (
+                        <div className="flex flex-col gap-1">
+                          <textarea
+                            value={editMessageText}
+                            onChange={(e) => setEditMessageText(e.target.value)}
+                            className="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-white text-xs resize-none focus:outline-none focus:border-cyan-500"
+                            rows={2}
+                            placeholder="Enter admin message..."
+                          />
+                          <div className="flex gap-1">
+                            <button onClick={() => handleSaveMessage(w.id)} disabled={savingMessageId === w.id} className="flex items-center gap-1 px-2 py-1 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs rounded transition-all disabled:opacity-40">
+                              {savingMessageId === w.id ? <div className="w-3 h-3 border border-cyan-400/40 border-t-cyan-400 rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
+                              Save
+                            </button>
+                            <button onClick={handleCancelEdit} className="flex items-center gap-1 px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded transition-all">
+                              <X className="w-3 h-3" />Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div onClick={() => handleEditMessage(w.id, w.admin_message)} className="cursor-pointer group">
+                          <p className="text-gray-300 text-xs leading-tight line-clamp-2 group-hover:text-cyan-400 transition-colors">
+                            {w.admin_message || 'Your transaction is being processed. Please wait for 5 minutes.'}
+                          </p>
+                          <p className="text-gray-600 text-xs mt-0.5 group-hover:text-cyan-500 transition-colors">Click to edit</p>
+                        </div>
+                      )}
+                    </div>
+                    {/* Status & Actions */}
+                    <div className="col-span-2 flex items-center justify-end gap-2">
+                      {w.status === 'pending' ? (
                         <div className="flex gap-1">
-                          <button
-                            onClick={() => handleSaveMessage(w.id)}
-                            disabled={savingMessageId === w.id}
-                            className="flex items-center gap-1 px-2 py-1 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs rounded transition-all disabled:opacity-40"
-                          >
-                            {savingMessageId === w.id ? (
-                              <div className="w-3 h-3 border border-cyan-400/40 border-t-cyan-400 rounded-full animate-spin" />
-                            ) : (
-                              <Save className="w-3 h-3" />
-                            )}
-                            Save
+                          <button onClick={() => handleStatusUpdate(w.id, 'approved')} disabled={updatingId === w.id} className="px-2 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-lg transition-all disabled:opacity-40 flex items-center gap-1">
+                            {updatingId === w.id ? <div className="w-3 h-3 border border-emerald-400/40 border-t-emerald-400 rounded-full animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                            Approve
                           </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="flex items-center gap-1 px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded transition-all"
-                          >
-                            <X className="w-3 h-3" />
-                            Cancel
+                          <button onClick={() => handleStatusUpdate(w.id, 'rejected')} disabled={updatingId === w.id} className="px-2 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold rounded-lg transition-all disabled:opacity-40 flex items-center gap-1">
+                            <XCircle className="w-3 h-3" />Reject
                           </button>
                         </div>
-                      </div>
-                    ) : (
-                      <div
-                        onClick={() => handleEditMessage(w.id, w.admin_message)}
-                        className="cursor-pointer group"
-                      >
-                        <p className="text-gray-300 text-xs leading-tight line-clamp-2 group-hover:text-cyan-400 transition-colors">
-                          {w.admin_message || 'Your transaction is being processed. Please wait for 5 minutes.'}
-                        </p>
-                        <p className="text-gray-600 text-xs mt-0.5 group-hover:text-cyan-500 transition-colors">
-                          Click to edit
-                        </p>
-                      </div>
-                    )}
+                      ) : (
+                        <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${cfg.bg} ${cfg.color} ${cfg.border}`}>
+                          <Icon className="w-3.5 h-3.5" />{cfg.label}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Status & Actions */}
-                  <div className="col-span-2 flex items-center justify-end gap-2">
-                    {w.status === 'pending' ? (
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleStatusUpdate(w.id, 'approved')}
-                          disabled={updatingId === w.id}
-                          className="px-2 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-lg transition-all disabled:opacity-40 flex items-center gap-1"
-                        >
-                          {updatingId === w.id ? (
-                            <div className="w-3 h-3 border border-emerald-400/40 border-t-emerald-400 rounded-full animate-spin" />
-                          ) : (
-                            <CheckCircle2 className="w-3 h-3" />
-                          )}
+                  {/* Mobile Card */}
+                  <div className="lg:hidden p-4 space-y-3">
+                    {/* Top: User + Status */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-white font-bold text-sm truncate">{w.profiles?.full_name || 'Unknown User'}</p>
+                        <p className="text-gray-500 text-xs truncate">{w.profiles?.email || w.user_id}</p>
+                      </div>
+                      <span className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${cfg.bg} ${cfg.color} ${cfg.border}`}>
+                        <Icon className="w-3 h-3" />{cfg.label}
+                      </span>
+                    </div>
+
+                    {/* Amount + Date */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-cyan-400 font-black text-xl">{w.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} <span className="text-sm font-semibold text-gray-400">USDT</span></p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-gray-400 text-xs">{new Date(w.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: '2-digit' })}</p>
+                        <p className="text-gray-600 text-xs">{new Date(w.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p>
+                      </div>
+                    </div>
+
+                    {/* Wallet Address */}
+                    <div className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2">
+                      <p className="text-gray-500 text-xs mb-1">Wallet Address</p>
+                      <p className="text-gray-300 font-mono text-xs break-all">{w.wallet_address}</p>
+                    </div>
+
+                    {/* Network */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 text-xs">Network:</span>
+                      <span className="text-xs font-semibold text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded border border-cyan-400/20 uppercase">
+                        {w.network || 'N/A'}
+                      </span>
+                    </div>
+
+                    {/* Admin Message */}
+                    <div className="bg-gray-900/50 border border-gray-800 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-1 mb-1">
+                        <MessageSquare className="w-3 h-3 text-gray-500" />
+                        <p className="text-gray-500 text-xs">Admin Message</p>
+                      </div>
+                      {editingMessageId === w.id ? (
+                        <div className="space-y-2">
+                          <textarea
+                            value={editMessageText}
+                            onChange={(e) => setEditMessageText(e.target.value)}
+                            className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-white text-xs resize-none focus:outline-none focus:border-cyan-500"
+                            rows={3}
+                            placeholder="Enter admin message..."
+                          />
+                          <div className="flex gap-2">
+                            <button onClick={() => handleSaveMessage(w.id)} disabled={savingMessageId === w.id} className="flex-1 flex items-center justify-center gap-1 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-bold rounded-lg transition-all disabled:opacity-40">
+                              {savingMessageId === w.id ? <div className="w-3 h-3 border border-cyan-400/40 border-t-cyan-400 rounded-full animate-spin" /> : <Save className="w-3 h-3" />}
+                              Save
+                            </button>
+                            <button onClick={handleCancelEdit} className="flex-1 flex items-center justify-center gap-1 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded-lg transition-all">
+                              <X className="w-3 h-3" />Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div onClick={() => handleEditMessage(w.id, w.admin_message)} className="cursor-pointer group">
+                          <p className="text-gray-300 text-xs leading-relaxed group-hover:text-cyan-400 transition-colors">
+                            {w.admin_message || 'Your transaction is being processed. Please wait for 5 minutes.'}
+                          </p>
+                          <p className="text-gray-600 text-xs mt-1 group-hover:text-cyan-500 transition-colors">Tap to edit</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    {w.status === 'pending' && (
+                      <div className="flex gap-2 pt-1">
+                        <button onClick={() => handleStatusUpdate(w.id, 'approved')} disabled={updatingId === w.id} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-bold rounded-xl transition-all disabled:opacity-40">
+                          {updatingId === w.id ? <div className="w-4 h-4 border border-emerald-400/40 border-t-emerald-400 rounded-full animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                           Approve
                         </button>
-                        <button
-                          onClick={() => handleStatusUpdate(w.id, 'rejected')}
-                          disabled={updatingId === w.id}
-                          className="px-2 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold rounded-lg transition-all disabled:opacity-40 flex items-center gap-1"
-                        >
-                          <XCircle className="w-3 h-3" />
-                          Reject
+                        <button onClick={() => handleStatusUpdate(w.id, 'rejected')} disabled={updatingId === w.id} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-bold rounded-xl transition-all disabled:opacity-40">
+                          <XCircle className="w-4 h-4" />Reject
                         </button>
                       </div>
-                    ) : (
-                      <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${cfg.bg} ${cfg.color} ${cfg.border}`}>
-                        <Icon className="w-3.5 h-3.5" />
-                        {cfg.label}
-                      </span>
                     )}
                   </div>
                 </div>
