@@ -95,7 +95,7 @@ export default function Header() {
               <img 
                 src="/images/fixs.png" 
                 alt="Strategic Crypto Investment" 
-                className="h-12 sm:h-14 md:h-16 lg:h-18 w-auto object-contain"
+                className="h-16 sm:h-18 md:h-20 lg:h-21 w-auto object-contain"
                 loading="eager"
                 decoding="async"
                 onError={(e) => {
