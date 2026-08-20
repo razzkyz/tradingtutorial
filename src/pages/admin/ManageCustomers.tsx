@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
-import { ArrowLeft, Search, CheckCircle, XCircle, DollarSign, Edit, Trash2, Power, Lock, Unlock } from 'lucide-react'
+import { ArrowLeft, Search, CheckCircle, XCircle, DollarSign, Edit, Trash2, Power, Lock, Unlock, Wallet, X } from 'lucide-react'
 import LoadingState from '../../components/LoadingState'
 import Toast from '../../components/Toast'
 
@@ -18,6 +18,8 @@ interface Customer {
   created_at: string
   avatar_url: string | null
   withdrawal_access: boolean
+  deposit_wallet: string | null
+  deposit_network: string | null
 }
 
 export default function ManageCustomers() {
@@ -30,6 +32,8 @@ export default function ManageCustomers() {
   const [showBalanceModal, setShowBalanceModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showDepositModal, setShowDepositModal] = useState(false)
+  const [depositForm, setDepositForm] = useState({ wallet: '', network: '' })
   const [balanceAmounts, setBalanceAmounts] = useState({
     balance_1: '',
     balance_2: '',
@@ -139,6 +143,8 @@ export default function ManageCustomers() {
             created_at: profile.created_at,
             avatar_url: profile.avatar_url,
             withdrawal_access: profile.withdrawal_access ?? false,
+            deposit_wallet: profile.deposit_wallet ?? null,
+            deposit_network: profile.deposit_network ?? null,
           }
         })
       )
@@ -246,6 +252,40 @@ export default function ManageCustomers() {
   const openDeleteModal = (customer: Customer) => {
     setSelectedCustomer(customer)
     setShowDeleteModal(true)
+  }
+
+  const openDepositModal = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setDepositForm({
+      wallet: customer.deposit_wallet || '',
+      network: customer.deposit_network || '',
+    })
+    setShowDepositModal(true)
+  }
+
+  const handleSaveDeposit = async () => {
+    if (!selectedCustomer) return
+    setUpdating(true)
+    try {
+      const result = await (supabase
+        .from('profiles') as any)
+        .update({
+          deposit_wallet: depositForm.wallet.trim() || null,
+          deposit_network: depositForm.network.trim() || null,
+        })
+        .eq('user_id', selectedCustomer.user_id)
+
+      if (result.error) throw result.error
+
+      setShowDepositModal(false)
+      await loadCustomers()
+      setToast({ message: `Deposit address saved for ${selectedCustomer.full_name}`, type: 'success' })
+    } catch (error) {
+      console.error('Error saving deposit address:', error)
+      setToast({ message: 'Failed to save deposit address', type: 'error' })
+    } finally {
+      setUpdating(false)
+    }
   }
 
   const handleAddBalance = async () => {
@@ -575,6 +615,19 @@ export default function ManageCustomers() {
                           >
                             <DollarSign className="w-4 h-4" />
                           </button>
+                          {/* Deposit Address button */}
+                          <button
+                            onClick={() => openDepositModal(customer)}
+                            disabled={updating}
+                            className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${
+                              customer.deposit_wallet
+                                ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30'
+                                : 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 border border-yellow-500/30'
+                            }`}
+                            title={customer.deposit_wallet ? 'Edit Deposit Address' : 'Set Deposit Address'}
+                          >
+                            <Wallet className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => openEditModal(customer)}
                             disabled={updating}
@@ -849,6 +902,70 @@ export default function ManageCustomers() {
                 >
                   {updating ? 'Deleting...' : 'Yes, Delete'}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Deposit Address Modal */}
+        {showDepositModal && selectedCustomer && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+            <div className="bg-gray-950 border-2 border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.4)] rounded-2xl max-w-md w-full p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/50">
+                    <Wallet className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white">Set Deposit Address</h3>
+                    <p className="text-cyan-400 text-xs font-medium">{selectedCustomer.full_name}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowDepositModal(false)} className="text-gray-500 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Destination / Wallet Address</label>
+                  <input
+                    type="text"
+                    value={depositForm.wallet}
+                    onChange={e => setDepositForm({ ...depositForm, wallet: e.target.value })}
+                    placeholder="e.g. TXyGJKp8mN9fRqH5vLwZbE3xC2dY7sA4uP"
+                    className="w-full px-4 py-3 bg-black/60 border border-gray-700 rounded-xl text-white font-mono text-sm placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
+                    disabled={updating}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Network Address</label>
+                  <input
+                    type="text"
+                    value={depositForm.network}
+                    onChange={e => setDepositForm({ ...depositForm, network: e.target.value })}
+                    placeholder="e.g. TRC20"
+                    className="w-full px-4 py-3 bg-black/60 border border-gray-700 rounded-xl text-white font-semibold text-sm uppercase placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
+                    disabled={updating}
+                  />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setShowDepositModal(false)}
+                    disabled={updating}
+                    className="flex-1 py-3 bg-transparent border border-gray-700 hover:border-gray-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveDeposit}
+                    disabled={updating}
+                    className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {updating ? 'Saving...' : 'Save & Assign'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

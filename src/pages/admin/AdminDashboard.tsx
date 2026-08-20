@@ -154,6 +154,7 @@ export default function AdminDashboard() {
             <h3 className="text-xl font-bold text-white mb-2">Withdrawal Transactions</h3>
             <p className="text-cyan-200 text-sm">View all user withdrawal history</p>
           </button>
+
         </div>
       </div>
     </div>

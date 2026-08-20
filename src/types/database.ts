@@ -20,6 +20,8 @@ export interface Database {
           country: string | null
           avatar_url: string | null
           investment_amount: number
+          deposit_wallet: string | null
+          deposit_network: string | null
           role: string
           created_at: string
           updated_at: string
@@ -34,6 +36,8 @@ export interface Database {
           country?: string | null
           avatar_url?: string | null
           investment_amount?: number
+          deposit_wallet?: string | null
+          deposit_network?: string | null
           role?: string
           created_at?: string
           updated_at?: string
@@ -48,6 +52,8 @@ export interface Database {
           country?: string | null
           avatar_url?: string | null
           investment_amount?: number
+          deposit_wallet?: string | null
+          deposit_network?: string | null
           role?: string
           created_at?: string
           updated_at?: string
@@ -131,6 +137,26 @@ export interface Database {
           network?: string
           status?: string
           created_at?: string
+          updated_at?: string
+        }
+      }
+      admin_settings: {
+        Row: {
+          id: string
+          key: string
+          value: Json
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          value: Json
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          value?: Json
           updated_at?: string
         }
       }

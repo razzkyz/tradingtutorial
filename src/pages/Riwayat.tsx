@@ -14,6 +14,7 @@ interface Transaction {
   wallet_address: string
   status: 'processing' | 'completed' | 'failed'
   created_at: string
+  admin_message?: string
 }
 
 export default function Riwayat() {
@@ -88,7 +89,8 @@ export default function Riwayat() {
         amount: w.amount,
         wallet_address: w.wallet_address,
         status: w.status === 'pending' ? 'processing' : w.status === 'approved' ? 'completed' : w.status === 'rejected' ? 'failed' : w.status,
-        created_at: w.created_at
+        created_at: w.created_at,
+        admin_message: w.admin_message || 'Your transaction is being processed. Please wait for 5 minutes.'
       }))
 
       setTransactions(formattedTransactions)
@@ -185,10 +187,8 @@ export default function Riwayat() {
                 {tx.status === 'processing' && (
                   <div className="bg-gray-900/50 border border-gray-700 rounded p-2 mb-1.5">
                     <h4 className="text-white font-medium text-[10px] text-center mb-0.5">NOTIFICATIONS</h4>
-                    <p className="text-gray-300 text-center text-[9px] leading-tight">
-                      Your transaction is being processed.
-                      <br />
-                      Please wait for 5 minutes.
+                    <p className="text-gray-300 text-center text-[9px] leading-tight whitespace-pre-line">
+                      {tx.admin_message}
                     </p>
                   </div>
                 )}

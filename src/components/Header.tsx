@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { Home, User, Globe, Briefcase, Wallet, LogOut, TrendingUp, Menu, X, Users, UserPlus, ArrowDownToLine } from 'lucide-react'
+import { Home, User, Globe, Briefcase, Wallet, LogOut, TrendingUp, Menu, X, Users, UserPlus, ArrowDownToLine, ArrowUpToLine } from 'lucide-react'
 import LogoutModal from './LogoutModal'
 
 export default function Header() {
@@ -80,6 +80,7 @@ export default function Header() {
         { label: 'My Profile', path: '/profile', icon: User },
         { label: 'Market Global', path: '/market-global', icon: Globe },
         { label: 'Trading Access', path: '/trading-access', icon: Briefcase },
+        { label: 'Deposit', path: '/deposit', icon: ArrowUpToLine },
         { label: 'Withdrawal', path: '/withdrawal', icon: Wallet },
       ]
 

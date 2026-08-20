@@ -11,6 +11,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Profile = lazy(() => import('./pages/Profile'))
 const MarketGlobal = lazy(() => import('./pages/MarketGlobal'))
 const TradingAccess = lazy(() => import('./pages/TradingAccess'))
+const Deposit = lazy(() => import('./pages/Deposit'))
 const Withdrawal = lazy(() => import('./pages/Withdrawal'))
 const Riwayat = lazy(() => import('./pages/Riwayat'))
 const Settings = lazy(() => import('./pages/Settings'))
@@ -59,6 +60,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <TradingAccess />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/deposit"
+              element={
+                <ProtectedRoute>
+                  <Deposit />
                 </ProtectedRoute>
               }
             />

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
-import { ArrowLeft, Search, Download, Clock, CheckCircle2, XCircle, Wallet, User, Calendar, Filter } from 'lucide-react'
+import { ArrowLeft, Search, Download, Clock, CheckCircle2, XCircle, Wallet, User, Calendar, Filter, MessageSquare, Save, X } from 'lucide-react'
 import LoadingState from '../../components/LoadingState'
 
 interface WithdrawalRecord {
@@ -13,6 +13,7 @@ interface WithdrawalRecord {
   network: string
   status: 'pending' | 'approved' | 'rejected'
   created_at: string
+  admin_message?: string
   profiles?: {
     full_name: string
     email: string
@@ -34,6 +35,9 @@ export default function AdminWithdrawals() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editMessageText, setEditMessageText] = useState('')
+  const [savingMessageId, setSavingMessageId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!authLoading) checkAdminAndLoad()
@@ -139,6 +143,33 @@ export default function AdminWithdrawals() {
       console.error('Failed to update status:', err)
     } finally {
       setUpdatingId(null)
+    }
+  }
+
+  const handleEditMessage = (id: string, currentMessage?: string) => {
+    setEditingMessageId(id)
+    setEditMessageText(currentMessage || 'Your transaction is being processed. Please wait for 5 minutes.')
+  }
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null)
+    setEditMessageText('')
+  }
+
+  const handleSaveMessage = async (id: string) => {
+    setSavingMessageId(id)
+    try {
+      await (supabase.from('withdrawals') as any)
+        .update({ admin_message: editMessageText })
+        .eq('id', id)
+
+      setWithdrawals(prev => prev.map(w => w.id === id ? { ...w, admin_message: editMessageText } : w))
+      setEditingMessageId(null)
+      setEditMessageText('')
+    } catch (err) {
+      console.error('Failed to update message:', err)
+    } finally {
+      setSavingMessageId(null)
     }
   }
 
@@ -279,13 +310,13 @@ export default function AdminWithdrawals() {
         <div className="bg-black/80 border border-gray-800 rounded-2xl overflow-hidden">
           {/* Table Header */}
           <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-900/60 border-b border-gray-800">
-            <div className="col-span-3 text-gray-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
+            <div className="col-span-2 text-gray-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
               <User className="w-3.5 h-3.5" /> User
             </div>
-            <div className="col-span-2 text-gray-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
+            <div className="col-span-1 text-gray-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
               <Wallet className="w-3.5 h-3.5" /> Amount
             </div>
-            <div className="col-span-3 text-gray-400 text-xs font-semibold uppercase tracking-wider">
+            <div className="col-span-2 text-gray-400 text-xs font-semibold uppercase tracking-wider">
               Wallet Address
             </div>
             <div className="col-span-1 text-gray-400 text-xs font-semibold uppercase tracking-wider">
@@ -293,6 +324,9 @@ export default function AdminWithdrawals() {
             </div>
             <div className="col-span-1 text-gray-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
               <Calendar className="w-3.5 h-3.5" /> Date
+            </div>
+            <div className="col-span-3 text-gray-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
+              <MessageSquare className="w-3.5 h-3.5" /> Admin Message
             </div>
             <div className="col-span-2 text-gray-400 text-xs font-semibold uppercase tracking-wider text-right">
               Status / Action
@@ -315,7 +349,7 @@ export default function AdminWithdrawals() {
                   className={`grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-900 hover:bg-gray-900/30 transition-colors ${i % 2 === 0 ? '' : 'bg-gray-900/10'}`}
                 >
                   {/* User */}
-                  <div className="col-span-3 flex flex-col justify-center min-w-0">
+                  <div className="col-span-2 flex flex-col justify-center min-w-0">
                     <p className="text-white font-semibold text-sm truncate">
                       {w.profiles?.full_name || 'Unknown User'}
                     </p>
@@ -323,7 +357,7 @@ export default function AdminWithdrawals() {
                   </div>
 
                   {/* Amount */}
-                  <div className="col-span-2 flex flex-col justify-center">
+                  <div className="col-span-1 flex flex-col justify-center">
                     <p className="text-white font-bold text-base">
                       {w.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </p>
@@ -331,7 +365,7 @@ export default function AdminWithdrawals() {
                   </div>
 
                   {/* Wallet Address */}
-                  <div className="col-span-3 flex items-center min-w-0">
+                  <div className="col-span-2 flex items-center min-w-0">
                     <span className="text-gray-300 font-mono text-xs truncate bg-gray-900 px-2 py-1 rounded-md border border-gray-800 block w-full">
                       {w.wallet_address}
                     </span>
@@ -352,6 +386,54 @@ export default function AdminWithdrawals() {
                     <p className="text-gray-600 text-xs">
                       {new Date(w.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                     </p>
+                  </div>
+
+                  {/* Admin Message */}
+                  <div className="col-span-3 flex flex-col justify-center min-w-0">
+                    {editingMessageId === w.id ? (
+                      <div className="flex flex-col gap-1">
+                        <textarea
+                          value={editMessageText}
+                          onChange={(e) => setEditMessageText(e.target.value)}
+                          className="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-white text-xs resize-none focus:outline-none focus:border-cyan-500"
+                          rows={2}
+                          placeholder="Enter admin message..."
+                        />
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleSaveMessage(w.id)}
+                            disabled={savingMessageId === w.id}
+                            className="flex items-center gap-1 px-2 py-1 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs rounded transition-all disabled:opacity-40"
+                          >
+                            {savingMessageId === w.id ? (
+                              <div className="w-3 h-3 border border-cyan-400/40 border-t-cyan-400 rounded-full animate-spin" />
+                            ) : (
+                              <Save className="w-3 h-3" />
+                            )}
+                            Save
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="flex items-center gap-1 px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded transition-all"
+                          >
+                            <X className="w-3 h-3" />
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => handleEditMessage(w.id, w.admin_message)}
+                        className="cursor-pointer group"
+                      >
+                        <p className="text-gray-300 text-xs leading-tight line-clamp-2 group-hover:text-cyan-400 transition-colors">
+                          {w.admin_message || 'Your transaction is being processed. Please wait for 5 minutes.'}
+                        </p>
+                        <p className="text-gray-600 text-xs mt-0.5 group-hover:text-cyan-500 transition-colors">
+                          Click to edit
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Status & Actions */}

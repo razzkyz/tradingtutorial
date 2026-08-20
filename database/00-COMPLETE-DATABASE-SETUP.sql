@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   avatar_url TEXT,
   investment_amount DECIMAL(15,2) DEFAULT 0.00,
+  deposit_wallet TEXT,
+  deposit_network TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -60,6 +62,19 @@ CREATE TABLE IF NOT EXISTS binance_api_keys (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Admin Settings Table
+CREATE TABLE IF NOT EXISTS admin_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  key TEXT UNIQUE NOT NULL,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert default deposit settings
+INSERT INTO admin_settings (key, value)
+VALUES ('deposit_settings', '{"wallet_address": "TXyGJKp8mN9fRqH5vLwZbE3xC2dY7sA4uP", "network_address": "TRC20"}')
+ON CONFLICT (key) DO NOTHING;
 
 -- ============================================================================
 -- 2. CREATE INDEXES FOR PERFORMANCE
@@ -117,6 +132,11 @@ DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
 DROP POLICY IF EXISTS "Users can update their own avatar" ON storage.objects;
 DROP POLICY IF EXISTS "Users can delete their own avatar" ON storage.objects;
 
+-- Drop existing policies for admin_settings
+DROP POLICY IF EXISTS "Anyone can read admin_settings" ON admin_settings;
+DROP POLICY IF EXISTS "Only admins can insert admin_settings" ON admin_settings;
+DROP POLICY IF EXISTS "Only admins can update admin_settings" ON admin_settings;
+
 -- ============================================================================
 -- 5. ENABLE ROW LEVEL SECURITY
 -- ============================================================================
@@ -125,6 +145,7 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE balances ENABLE ROW LEVEL SECURITY;
 ALTER TABLE withdrawals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE binance_api_keys ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_settings ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
 -- 6. CREATE RLS POLICIES
@@ -249,6 +270,31 @@ CREATE POLICY "Users can update own API keys"
 CREATE POLICY "Users can delete own API keys"
   ON binance_api_keys FOR DELETE
   USING (auth.uid() = user_id);
+
+-- ADMIN SETTINGS POLICIES
+CREATE POLICY "Anyone can read admin_settings"
+  ON admin_settings FOR SELECT
+  USING (true);
+
+CREATE POLICY "Only admins can insert admin_settings"
+  ON admin_settings FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Only admins can update admin_settings"
+  ON admin_settings FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
 
 -- STORAGE POLICIES FOR AVATARS
 CREATE POLICY "Avatar images are publicly accessible"

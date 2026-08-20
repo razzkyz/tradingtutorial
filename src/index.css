@@ -33,6 +33,20 @@
     scroll-behavior: smooth;
     background-color: #000000;
   }
+
+  /* Text Blink Animation */
+  @keyframes text-blink {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  .animate-text-blink {
+    animation: text-blink 2s ease-in-out infinite;
+  }
   
   /* Reduce animations on mobile for performance (except marquee) */
   @media (max-width: 768px) {

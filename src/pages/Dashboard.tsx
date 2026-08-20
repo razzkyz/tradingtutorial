@@ -493,14 +493,12 @@ export default function Dashboard() {
               </>
             ) : (
               <>
-                <p className={`text-base sm:text-xl font-semibold mb-2 ${
-                  isActive ? 'text-emerald-400' : 'text-white'
+                <p className={`text-base sm:text-xl font-semibold mb-2 animate-text-blink ${
+                  isActive ? 'text-emerald-400' : 'text-red-500'
                 }`}>
                   {isActive ? 'Active' : 'Inactive'}
                 </p>
-                <p className={`text-xl sm:text-3xl font-bold uppercase ${
-                  isActive ? 'text-emerald-400' : 'text-white'
-                }`}>
+                <p className="text-xl sm:text-3xl font-bold uppercase text-white">
                   TRADING
                 </p>
               </>
